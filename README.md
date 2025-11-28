@@ -1,2 +1,2 @@
-# UBC---TSD
+# UBC-TSD
 TSD documentation 
