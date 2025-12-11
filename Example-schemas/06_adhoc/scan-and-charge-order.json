@@ -1,0 +1,85 @@
+{
+    "context": {
+        "domain": "ONDC:RET10",
+        "location": {
+            "city": {
+                "code": "std:080"
+            },
+            "country": {
+                "code": "IND"
+            }
+        },
+        "action": "confirm",
+        "version": "2.0.0",
+        "bap_id": "bap.example.com",
+        "bap_uri": "https://bap.example.com/beckn",
+        "bpp_id": "bpp.example.com",
+        "bpp_uri": "https://bpp.example.com/beckn",
+        "transaction_id": "txn-scan-001",
+        "message_id": "msg-confirm-001",
+        "timestamp": "2025-01-27T10:00:05Z",
+        "ttl": "PT30S"
+    },
+    "message": {
+        "order": {
+            "id": "order-scan-123",
+            "state": "CREATED",
+            "provider": {
+                "id": "ecopower-charging",
+                "locations": [
+                    {
+                        "id": "loc-001"
+                    }
+                ]
+            },
+            "items": [
+                {
+                    "id": "ev-charger-ccs2-001",
+                    "quantity": {
+                        "count": 1
+                    }
+                }
+            ],
+            "billing": {
+                "name": "John Doe",
+                "address": {
+                    "name": "John Doe",
+                    "building": "No. 123",
+                    "locality": "MG Road",
+                    "city": "Bengaluru",
+                    "state": "Karnataka",
+                    "country": "IND",
+                    "area_code": "560001"
+                },
+                "email": "john.doe@example.com",
+                "phone": "9876543210"
+            },
+            "fulfillments": [
+                {
+                    "id": "fulfillment-scan-1",
+                    "type": "RESERVATION",
+                    "tracking": false,
+                    "deliveryAttributes": {
+                        "sessionStatus": "PENDING",
+                        "authorizationMode": "APP_QR",
+                        "connectorType": "CCS2",
+                        "maxPowerKW": 60,
+                        "gracePeriodMinutes": 5,
+                        "vehicleType": "4W"
+                    }
+                }
+            ],
+            "payment": {
+                "uri": "https://payments.bpp.com/pay?amt=500",
+                "tl_method": "http/get",
+                "params": {
+                    "amount": "500",
+                    "currency": "INR",
+                    "transaction_id": "txn-scan-001"
+                },
+                "status": "PAID",
+                "type": "ON-ORDER"
+            }
+        }
+    }
+}
