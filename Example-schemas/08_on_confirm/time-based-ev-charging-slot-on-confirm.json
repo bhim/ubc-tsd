@@ -1,5 +1,5 @@
-{
-  "context": {
+{ //ideally since orderid is already generated and the fullfilment details are part of the init call we can use the confirm and on_confirm call to check the status of the gun itself
+  "context": { // can this call me unsolicitated where multiple on_confirms can be sent through.
     "version": "2.0.0",
     "action": "on_confirm",
     "domain": "beckn.one:deg:ev-charging:*",

@@ -87,7 +87,7 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 128.64,
+        "value": 138.64,
         "components": [
           {
             "type": "UNIT",
@@ -118,6 +118,12 @@
             "value": 13.64,
             "currency": "INR",
             "description": "Overcharge estimation"
+          },
+          {
+            "type": "FEE",
+            "value": 10,
+            "currency": "INR",
+            "description": "buyer finder fee"
           }
         ]
       },
@@ -126,7 +132,7 @@
         "@type": "beckn:Payment",
         "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000",
         "beckn:amount": {
-          "currency": "INR",
+          "currency": "INR", // how to handle partial payments and map it. addtional payments handling
           "value": 138.64
         },
         "beckn:txnRef": "TXN-123456789",
@@ -137,8 +143,8 @@
           "beneficiaryDetails": [
             {
               "beneficiaryType": "BAP",
-              "name": "Ravi Kumar",
-              "vpa": "user@upi",
+              "name": "bhim",
+              "vpa": "bhimbap@upi",
               "accountNumber": "9876543210",
               "ifscCode": "ICIC0001234",
               "bankName": "ICICI Bank"
@@ -164,6 +170,11 @@
       "beckn:orderAttributes": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/EvChargingSession/v1/context.jsonld",
         "@type": "ChargingSession",
+        "vehicleType": "4W",
+        "buyerFinderFee": {
+          "feeType": "PERCENTAGE",
+          "feeValue": 2.5
+        },
         "sessionPreferences": {
           "preferredStartTime": "2025-01-27T10:00:00Z",
           "preferredEndTime": "2025-01-27T11:30:00Z",
