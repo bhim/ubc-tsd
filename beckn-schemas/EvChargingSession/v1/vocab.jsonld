@@ -438,6 +438,68 @@
       "schema:name": "4W",
       "schema:identifier": "4W",
       "schema:alternateName": "4-wheeler"
+    },
+    {
+      "@id": "beckn:PaymentDetails",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Payment Details",
+      "rdfs:comment": "Details for settlement, including beneficiary information."
+    },
+    {
+      "@id": "beckn:beneficiaryDetails",
+      "@type": "rdf:Property",
+      "rdfs:label": "Beneficiary details",
+      "rdfs:comment": "List of settlement details (Bank, VPA, etc.) for the entity.",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:ItemList"
+    },
+    {
+      "@id": "beckn:beneficiaryType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Beneficiary type",
+      "rdfs:comment": "Role of the beneficiary entity (e.g., BPP, BAP).",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "beckn:accountNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "Account number",
+      "rdfs:comment": "Bank account number.",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "beckn:ifscCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "IFSC code",
+      "rdfs:comment": "Bank IFSC code.",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "beckn:bankName",
+      "@type": "rdf:Property",
+      "rdfs:label": "Bank name",
+      "rdfs:comment": "Name of the bank.",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "beckn:vpa",
+      "@type": "rdf:Property",
+      "rdfs:label": "VPA",
+      "rdfs:comment": "Virtual Payment Address (UPI ID).",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "beckn:phone",
+      "@type": "rdf:Property",
+      "rdfs:label": "Phone",
+      "rdfs:comment": "Phone number associated with the payment identifier.",
+      "rdfs:domain": "beckn:PaymentDetails",
+      "schema:rangeIncludes": "schema:Text"
     }
   ]
 }

@@ -75,6 +75,9 @@
     "PaymentDetails": "beckn:PaymentDetails",
     "beneficiaryDetails": "beckn:beneficiaryDetails",
     "beneficiaryType": "beckn:beneficiaryType",
+    "accountNumber": "beckn:accountNumber",
+    "ifscCode": "beckn:ifscCode",
+    "bankName": "beckn:bankName",
     "vpa": "beckn:vpa",
     "phone": "beckn:phone"
   },
