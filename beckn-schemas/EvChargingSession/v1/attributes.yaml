@@ -194,8 +194,4 @@ components:
               vpa: 
                 type: string
                 description: Virtual Payment Address (UPI ID)
-              phone:
-                type: string
-                description: Mobile number for payments
-          x-jsonld: { "@id": beneficiaryDetails }
 

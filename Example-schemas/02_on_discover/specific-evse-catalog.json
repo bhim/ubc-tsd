@@ -37,11 +37,13 @@
               "schema:codeValue": "ev-charging",
               "schema:name": "EV Charging"
             },
-            "beckn:availabilityWindow": { // should be an array the available times for a perticular day
-              "@type": "beckn:TimePeriod",
-              "schema:startTime": "06:00:00",
-              "schema:endTime": "22:00:00"
-            },
+            "beckn:availabilityWindow": [
+              {
+                "@type": "beckn:TimePeriod",
+                "schema:startTime": "06:00:00",
+                "schema:endTime": "22:00:00"
+              }
+            ],
             "beckn:rateable": true,
             "beckn:rating": {
               "@type": "beckn:Rating",

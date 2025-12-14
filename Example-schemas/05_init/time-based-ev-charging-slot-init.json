@@ -28,10 +28,13 @@
             "name": "GreenCharge Pvt Ltd"
           }
         },
-        "beckn:address": "Apartment 123, MG Road, Bengaluru, Karnataka, 560001, India",
-        "beckn:email": "ravi.kumar@greencharge.com",
-        "beckn:phone": "+918765432100", // mandatory field 
-        "beckn:taxId": "GSTIN29ABCDE1234F1Z5"
+        "beckn:buyerAttributes": {
+          "@type": "beckn:BuyerAttributes",
+          "beckn:address": "Apartment 123, MG Road, Bengaluru, Karnataka, 560001, India",
+          "beckn:email": "ravi.kumar@greencharge.com",
+          "beckn:phone": "+918765432100",
+          "beckn:taxId": "GSTIN29ABCDE1234F1Z5"
+        }
       },
       "beckn:orderItems": [
         {

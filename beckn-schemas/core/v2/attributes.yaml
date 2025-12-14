@@ -943,13 +943,38 @@ components:
           description: Tax identifier for the buyer.
           x-jsonld: { "@id": "schema:taxID" }
         beckn:buyerAttributes:
-          $ref: "#/components/schemas/Attributes"
+          $ref: "#/components/schemas/BuyerAttributes"
           description: > 
             Attribute Pack reference for richer identity:
             # buyer/identity.v1 (contact details: email, phone, address)
             # buyer/org-ids.v1 (LEI, GSTIN, ISIN, CUSIP…)
             # buyer/kyc.v1 (jurisdictional compliance fields)
             # buyer/preferences.v1 (delivery preferences, accessibility needs, etc.)
+
+    BuyerAttributes:
+      type: object
+      description: Standard attributes for buyer contact and identity details.
+      properties:
+        beckn:phone:
+          type: string
+          description: Buyer's phone number
+          x-jsonld: { "@id": "schema:telephone" }
+        beckn:email:
+          type: string
+          format: email
+          description: Buyer's email address
+          x-jsonld: { "@id": "schema:email" }
+        beckn:address:
+          $ref: '#/components/schemas/Address'
+          description: Buyer's physical address
+          x-jsonld: { "@id": "schema:address" }
+        beckn:taxId:
+          type: string
+          description: Buyer's tax identifier (e.g., GSTIN)
+          x-jsonld: { "@id": "schema:taxID" }
+      x-jsonld:
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld"
+        "@type": "beckn:BuyerAttributes"
 
     SupportInfo:
       type: object
