@@ -131,8 +131,7 @@
             },
             "beckn:acceptedPaymentMethod": [
               "UPI",
-              "CREDIT_CARD",
-              "WALLET"
+              "CREDIT_CARD"
             ],
             "beckn:offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld",
@@ -159,7 +158,7 @@
               "schema:name": "Per-kWh Tariff - CCS2 60kW"
             },
             "beckn:items": [
-              "IND*GoGreen-charging*cs-02*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+              "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
             ],
             "beckn:price": {
               "currency": "INR",
