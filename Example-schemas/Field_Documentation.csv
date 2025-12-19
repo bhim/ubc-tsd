@@ -59,7 +59,6 @@ beckn:items[].beckn:rating,Rating,Object,No,Rating information,{beckn:ratingValu
 beckn:items[].beckn:rating.beckn:ratingValue,Rating Value,Number,Yes,Average rating score,4.5,on_discover,Usually 0-5 scale
 beckn:items[].beckn:rating.beckn:ratingCount,Rating Count,Integer,Yes,Number of ratings,128,on_discover,Total ratings received
 beckn:items[].beckn:isActive,Is Active,Boolean,Yes,Whether item is currently active,true,on_discover,Active status
-beckn:items[].beckn:networkId,Network IDs,Array[String],No,Network identifiers,[bap.net/ev-charging],on_discover,Roaming network membership
 beckn:items[].beckn:provider,Provider,Object,Yes,Provider information,{beckn:id beckn:descriptor},on_discover,Charging station operator
 beckn:items[].beckn:provider.beckn:id,Provider ID,String,Yes,Provider identifier,ecopower-charging,on_discover,Unique provider ID
 beckn:items[].beckn:provider.beckn:descriptor,Descriptor,Object,Yes,Provider details,{schema:name: EcoPower Charging Pvt Ltd},on_discover,Provider name and info
@@ -73,7 +72,7 @@ beckn:itemAttributes.socketCount,Socket Count,Integer,Yes,Number of sockets,2,on
 beckn:itemAttributes.reservationSupported,Reservation Supported,Boolean,Yes,Whether reservations allowed,true,on_discover,Advance booking capability
 beckn:itemAttributes.acceptedPaymentMethod,Accepted Payment Methods,Array[String],Yes,"Payment types accepted","[schema:UPI, schema:CreditCard, schema:Wallet]",on_discover,Supported payment methods
 beckn:itemAttributes.serviceLocation,Service Location,Object,Yes,Location details,{geo address},on_discover,Where service is provided
-beckn:itemAttributes.amenityFeature,Amenity Features,Array[String],No,Available amenities,"[Restaurant, Restroom, Wi-Fi]",on_discover,Facilities at location
+beckn:itemAttributes.amenityFeature,Amenity Features,Array[String],No,Available amenities,"[RESTAURANT, RESTROOM, WI-FI]",on_discover,Facilities at location
 beckn:itemAttributes.ocppId,OCPP ID,String,No,Open Charge Point Protocol ID,IN-ECO-BTM-01,on_discover,OCPP station identifier
 beckn:itemAttributes.evseId,EVSE ID,String,No,Electric Vehicle Supply Equipment ID,IN*ECO*BTM*01*CCS2*A,on_discover,ISO 15118 format
 beckn:itemAttributes.roamingNetwork,Roaming Network,String,No,Roaming network name,GreenRoam,on_discover,Interoperability network

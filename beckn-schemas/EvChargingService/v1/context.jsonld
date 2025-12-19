@@ -6,9 +6,8 @@
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "./vocab.jsonld#",
-    
     "ChargingService": "beckn:ChargingService",
-
+    "ChargingStation": "beckn:ChargingStation",
     "name": "schema:name",
     "description": "schema:description",
     "price": "schema:price",
@@ -27,8 +26,7 @@
     "identifier": "schema:identifier",
     "areaServed": "schema:areaServed",
     "category": "schema:category",
-
-    "connectorId": "beckn:connectorId",
+    "chargingStation": "beckn:chargingStation",
     "amenityFeature": {
       "@id": "beckn:amenityFeature",
       "@type": "@id"
@@ -49,15 +47,14 @@
       "@id": "beckn:chargingSpeed",
       "@type": "@id"
     },
-    "stationStatus": {
-      "@id": "beckn:stationStatus",
+    "vehicleType": {
+      "@id": "beckn:vehicleType",
       "@type": "@id"
     },
     "parkingType": {
       "@id": "beckn:parkingType",
       "@type": "@id"
     },
-
     "RESTAURANT": "beckn:AmenityRestaurant",
     "Restaurant": "beckn:AmenityRestaurant",
     "RESTROOM": "beckn:AmenityRestroom",
@@ -67,27 +64,22 @@
     "WiFi": "beckn:AmenityWiFi",
     "PARKING": "beckn:AmenityParking",
     "Parking": "beckn:AmenityParking",
-
     "CCS2": "beckn:ConnectorTypeCCS2",
     "Type2": "beckn:ConnectorTypeType2",
     "CHAdeMO": "beckn:ConnectorTypeCHAdeMO",
     "GB_T": "beckn:ConnectorTypeGBT",
     "GB/T": "beckn:ConnectorTypeGBT",
     "GB-T": "beckn:ConnectorTypeGBT",
-
     "AC_SINGLE_PHASE": "beckn:PowerTypeACSinglePhase",
     "AC_3_PHASE": "beckn:PowerTypeAC3Phase",
     "AC_THREE_PHASE": "beckn:PowerTypeAC3Phase",
     "DC": "beckn:PowerTypeDC",
-
     "SOCKET": "beckn:ConnectorFormatSocket",
     "CABLE": "beckn:ConnectorFormatCable",
-
     "SLOW": "beckn:ChargingSpeedSlow",
     "NORMAL": "beckn:ChargingSpeedNormal",
     "FAST": "beckn:ChargingSpeedFast",
     "ULTRAFAST": "beckn:ChargingSpeedUltraFast",
-
     "OnStreet": "beckn:ParkingTypeOnStreet",
     "OffStreet": "beckn:ParkingTypeOffStreet",
     "Basement": "beckn:ParkingTypeBasement",
@@ -96,13 +88,9 @@
     "Fuel Station": "beckn:ParkingTypeFuelStation",
     "Office": "beckn:ParkingTypeOffice",
     "Hotel": "beckn:ParkingTypeHotel",
-
-    "Available": "beckn:StationStatusAvailable",
-    "Occupied": "beckn:StationStatusOccupied",
-    "OutOfService": "beckn:StationStatusOutOfService",
-    "Out Of Service": "beckn:StationStatusOutOfService"
+    "2-WHEELER": "beckn:VehicleType2Wheeler",
+    "3-WHEELER": "beckn:VehicleType3Wheeler",
+    "4-WHEELER": "beckn:VehicleType4Wheeler"
   },
-
   "@graph": []
 }
-

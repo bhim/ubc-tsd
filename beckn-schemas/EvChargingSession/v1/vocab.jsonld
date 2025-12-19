@@ -24,20 +24,20 @@
       "owl:equivalentProperty": "beckn:fulfillmentStatus"
     },
     {
-      "@id": "beckn:authorizationMode",
+      "@id": "beckn:connectorStatus",
       "@type": "rdf:Property",
-      "rdfs:label": "Authorization mode",
-      "rdfs:comment": "Mode used to authorize/start the session (APP_QR, RFID, OTP).",
+      "rdfs:label": "Connector status",
+      "rdfs:comment": "Charging connector status (from OCPP status codes).",
       "rdfs:domain": "beckn:ChargingSession",
-      "schema:rangeIncludes": "beckn:AuthorizationMode"
+      "schema:rangeIncludes": "beckn:ConnectorStatus"
     },
     {
-      "@id": "beckn:authorizationOtpHint",
+      "@id": "beckn:buyerFinderFee",
       "@type": "rdf:Property",
-      "rdfs:label": "Authorization OTP hint",
-      "rdfs:comment": "Optional OTP or hint presented to user for kiosk entry.",
+      "rdfs:label": "Buyer finder fee",
+      "rdfs:comment": "Commission payable by provider to the BAP for this offer.",
       "rdfs:domain": "beckn:ChargingSession",
-      "schema:rangeIncludes": "schema:Text"
+      "schema:rangeIncludes": "schema:PriceSpecification"
     },
     {
       "@id": "beckn:connectorType",
@@ -158,12 +158,12 @@
       "schema:rangeIncludes": "schema:Text"
     },
     {
-      "@id": "beckn:vehicleType",
+      "@id": "beckn:preferences",
       "@type": "rdf:Property",
-      "rdfs:label": "Vehicle type",
-      "rdfs:comment": "Type of vehicle (2W, 3W, 4W).",
+      "rdfs:label": "Preferences",
+      "rdfs:comment": "Charging session preferences including time windows.",
       "rdfs:domain": "beckn:ChargingSession",
-      "schema:rangeIncludes": "beckn:VehicleType"
+      "schema:rangeIncludes": "schema:Thing"
     },
     {
       "@id": "beckn:SessionStatus",
@@ -222,49 +222,48 @@
       "schema:identifier": "INTERRUPTED"
     },
     {
-      "@id": "beckn:AuthorizationMode",
+      "@id": "beckn:ConnectorStatus",
       "@type": "schema:Enumeration",
-      "schema:name": "Authorization Mode",
-      "rdfs:comment": "Enumeration of user authorization modes for initiating a charging session.",
+      "schema:name": "Connector Status",
+      "rdfs:comment": "Enumeration of charging connector statuses (from OCPP status codes).",
       "schema:hasEnumerationMember": [
         {
-          "@id": "beckn:AuthorizationModeAppQr"
+          "@id": "beckn:ConnectorStatusAvailable"
         },
         {
-          "@id": "beckn:AuthorizationModeRfid"
+          "@id": "beckn:ConnectorStatusPreparing"
         },
         {
-          "@id": "beckn:AuthorizationModeOtp"
+          "@id": "beckn:ConnectorStatusUnavailable"
         }
       ]
     },
     {
-      "@id": "beckn:AuthorizationModeAppQr",
+      "@id": "beckn:ConnectorStatusAvailable",
       "@type": [
-        "beckn:AuthorizationMode",
+        "beckn:ConnectorStatus",
         "schema:Enumeration"
       ],
-      "schema:name": "APP_QR",
-      "schema:identifier": "APP_QR",
-      "schema:alternateName": "APP-QR"
+      "schema:name": "AVAILABLE",
+      "schema:identifier": "AVAILABLE"
     },
     {
-      "@id": "beckn:AuthorizationModeRfid",
+      "@id": "beckn:ConnectorStatusPreparing",
       "@type": [
-        "beckn:AuthorizationMode",
+        "beckn:ConnectorStatus",
         "schema:Enumeration"
       ],
-      "schema:name": "RFID",
-      "schema:identifier": "RFID"
+      "schema:name": "PREPARING",
+      "schema:identifier": "PREPARING"
     },
     {
-      "@id": "beckn:AuthorizationModeOtp",
+      "@id": "beckn:ConnectorStatusUnavailable",
       "@type": [
-        "beckn:AuthorizationMode",
+        "beckn:ConnectorStatus",
         "schema:Enumeration"
       ],
-      "schema:name": "OTP",
-      "schema:identifier": "OTP"
+      "schema:name": "UNAVAILABLE",
+      "schema:identifier": "UNAVAILABLE"
     },
     {
       "@id": "beckn:ConnectorType",
@@ -391,115 +390,6 @@
       "schema:name": "STATE_OF_CHARGE",
       "schema:identifier": "STATE_OF_CHARGE",
       "schema:alternateName": "SOC"
-    },
-    {
-      "@id": "beckn:VehicleType",
-      "@type": "schema:Enumeration",
-      "schema:name": "Vehicle Type",
-      "rdfs:comment": "Enumeration of vehicle types.",
-      "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:VehicleType2W"
-        },
-        {
-          "@id": "beckn:VehicleType3W"
-        },
-        {
-          "@id": "beckn:VehicleType4W"
-        }
-      ]
-    },
-    {
-      "@id": "beckn:VehicleType2W",
-      "@type": [
-        "beckn:VehicleType",
-        "schema:Enumeration"
-      ],
-      "schema:name": "2W",
-      "schema:identifier": "2W",
-      "schema:alternateName": "2-wheeler"
-    },
-    {
-      "@id": "beckn:VehicleType3W",
-      "@type": [
-        "beckn:VehicleType",
-        "schema:Enumeration"
-      ],
-      "schema:name": "3W",
-      "schema:identifier": "3W",
-      "schema:alternateName": "3-wheeler"
-    },
-    {
-      "@id": "beckn:VehicleType4W",
-      "@type": [
-        "beckn:VehicleType",
-        "schema:Enumeration"
-      ],
-      "schema:name": "4W",
-      "schema:identifier": "4W",
-      "schema:alternateName": "4-wheeler"
-    },
-    {
-      "@id": "beckn:PaymentDetails",
-      "@type": "rdfs:Class",
-      "rdfs:label": "Payment Details",
-      "rdfs:comment": "Details for settlement, including beneficiary information."
-    },
-    {
-      "@id": "beckn:beneficiaryDetails",
-      "@type": "rdf:Property",
-      "rdfs:label": "Beneficiary details",
-      "rdfs:comment": "List of settlement details (Bank, VPA, etc.) for the entity.",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:ItemList"
-    },
-    {
-      "@id": "beckn:beneficiaryType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Beneficiary type",
-      "rdfs:comment": "Role of the beneficiary entity (e.g., BPP, BAP).",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
-      "@id": "beckn:accountNumber",
-      "@type": "rdf:Property",
-      "rdfs:label": "Account number",
-      "rdfs:comment": "Bank account number.",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
-      "@id": "beckn:ifscCode",
-      "@type": "rdf:Property",
-      "rdfs:label": "IFSC code",
-      "rdfs:comment": "Bank IFSC code.",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
-      "@id": "beckn:bankName",
-      "@type": "rdf:Property",
-      "rdfs:label": "Bank name",
-      "rdfs:comment": "Name of the bank.",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
-      "@id": "beckn:vpa",
-      "@type": "rdf:Property",
-      "rdfs:label": "VPA",
-      "rdfs:comment": "Virtual Payment Address (UPI ID).",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
-      "@id": "beckn:phone",
-      "@type": "rdf:Property",
-      "rdfs:label": "Phone",
-      "rdfs:comment": "Phone number associated with the payment identifier.",
-      "rdfs:domain": "beckn:PaymentDetails",
-      "schema:rangeIncludes": "schema:Text"
     }
   ]
 }

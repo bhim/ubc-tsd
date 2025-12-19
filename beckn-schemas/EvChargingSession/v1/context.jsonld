@@ -19,11 +19,11 @@
       "@id": "beckn:sessionStatus",
       "@type": "@id"
     },
-    "authorizationMode": {
-      "@id": "beckn:authorizationMode",
+    "connectorStatus": {
+      "@id": "beckn:connectorStatus",
       "@type": "@id"
     },
-    "authorizationOtpHint": "beckn:authorizationOtpHint",
+    "buyerFinderFee": "beckn:buyerFinderFee",
     "connectorType": {
       "@id": "beckn:connectorType",
       "@type": "@id"
@@ -39,6 +39,7 @@
     "gracePeriodMinutes": "beckn:gracePeriodMinutes",
     "vehicleMake": "beckn:vehicleMake",
     "vehicleModel": "beckn:vehicleModel",
+    "preferences": "beckn:preferences",
     "trackingId": "beckn:trackingId",
     "trackingUrl": "beckn:trackingUrl",
     "trackingStatus": "beckn:trackingStatus",
@@ -46,10 +47,9 @@
     "ACTIVE": "beckn:SessionStatusActive",
     "COMPLETED": "beckn:SessionStatusCompleted",
     "INTERRUPTED": "beckn:SessionStatusInterrupted",
-    "APP_QR": "beckn:AuthorizationModeAppQr",
-    "APP-QR": "beckn:AuthorizationModeAppQr",
-    "RFID": "beckn:AuthorizationModeRfid",
-    "OTP": "beckn:AuthorizationModeOtp",
+    "AVAILABLE": "beckn:ConnectorStatusAvailable",
+    "PREPARING": "beckn:ConnectorStatusPreparing",
+    "UNAVAILABLE": "beckn:ConnectorStatusUnavailable",
     "CCS2": "beckn:ConnectorTypeCCS2",
     "Type2": "beckn:ConnectorTypeType2",
     "CHAdeMO": "beckn:ConnectorTypeCHAdeMO",
@@ -61,25 +61,7 @@
     "CURRENT": "beckn:TelemetryMetricCurrent",
     "VOLTAGE": "beckn:TelemetryMetricVoltage",
     "STATE_OF_CHARGE": "beckn:TelemetryMetricStateOfCharge",
-    "SOC": "beckn:TelemetryMetricStateOfCharge",
-    "vehicleType": {
-      "@id": "beckn:vehicleType",
-      "@type": "@id"
-    },
-    "2W": "beckn:VehicleType2W",
-    "2-wheeler": "beckn:VehicleType2W",
-    "3W": "beckn:VehicleType3W",
-    "3-wheeler": "beckn:VehicleType3W",
-    "4W": "beckn:VehicleType4W",
-    "4-wheeler": "beckn:VehicleType4W",
-    "PaymentDetails": "beckn:PaymentDetails",
-    "beneficiaryDetails": "beckn:beneficiaryDetails",
-    "beneficiaryType": "beckn:beneficiaryType",
-    "accountNumber": "beckn:accountNumber",
-    "ifscCode": "beckn:ifscCode",
-    "bankName": "beckn:bankName",
-    "vpa": "beckn:vpa",
-    "phone": "beckn:phone"
+    "SOC": "beckn:TelemetryMetricStateOfCharge"
   },
   "@graph": []
 }
