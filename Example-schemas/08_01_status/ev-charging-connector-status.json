@@ -31,21 +31,7 @@
             },
             "beckn:orderItems": [
                 {
-                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
-                    "beckn:quantity": {
-                        "unitText": "Kilowatt Hour",
-                        "unitCode": "KWH",
-                        "unitQuantity": 2.5
-                    },
-                    "beckn:price": {
-                        "currency": "INR",
-                        "value": 45.0,
-                        "applicableQuantity": {
-                            "unitText": "Kilowatt Hour",
-                            "unitCode": "KWH",
-                            "unitQuantity": 1
-                        }
-                    }
+                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
                 }
             ],
             "beckn:orderValue": {

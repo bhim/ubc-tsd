@@ -92,7 +92,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 The section defines the reference ecosystem architecture that is used for building this implementation guide.
 
 ### 8.1. Architecture Diagram
-<img width="2818" height="1200" alt="image" src="https://github.com/user-attachments/assets/6aecfdc2-3d80-4ce1-ad95-1346e4096200" />
+<img width="2818" height="1200" alt="image" src="https://github.com/user-attachments/assets/83e81534-7f01-4ba1-aeed-167a915b86cb" />
 
 
 ### 8.2. Actors
@@ -550,7 +550,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
 ```
 </details>
 
-* **Successful Catalog Upload** 
+* **Successful on_catalog_publish** 
 <details>
 <summary><a href="../Example-schemas/21_publish/ev-charging-catalog-on_publish.json">Example json :rocket:</a></summary>
   
@@ -595,6 +595,9 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
 </details>
 
 > **Note:** It is imperative to understand the structural composition of the catalog, which is architected as an aggregation of `items` and `offers`. Within this framework, the `item` serves as the fundamental, root-level entity. In the specific context of the EV charging ecosystem, an `item` maps directly to an individual charging connector. Consequently, catalog implementation must treat every `item` entry as a distinct connector instance. Furthermore, the `item:id` attribute must be populated in strict adherence to the recommended nomenclature to ensure the unique and standardized identification of each connector within the network.
+
+* **Recommendation:**
+To maintain the operational integrity and synchronization of the network, it is strongly recommended that the `availabilityWindow` of an item cached within the Catalog Discovery Service (CDS) be updated during the `init` stage. At this juncture, as the provider designates the specific item (connector) as 'reserved' or 'in-use' within their internal inventory management systems, a corresponding update must be executed within the CDS. This ensures that the availability status of the connector is accurately reflected across the network, thereby mitigating the risk of double-booking and ensuring catalog currency.
 
 ## 9. Creating an Open Network for EV Charging
 The open network for EV charging requires all the EV charging BAPs, BPPs, to be able to discover each other and become part of a common network. This network is manifested in the form of a Distributed Registry maintained by NBSL (the Network Operator).
@@ -1912,21 +1915,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             },
             "beckn:orderItems": [
                 {
-                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
-                    "beckn:quantity": {
-                        "unitText": "Kilowatt Hour",
-                        "unitCode": "KWH",
-                        "unitQuantity": 2.5
-                    },
-                    "beckn:price": {
-                        "currency": "INR",
-                        "value": 45.0,
-                        "applicableQuantity": {
-                            "unitText": "Kilowatt Hour",
-                            "unitCode": "KWH",
-                            "unitQuantity": 1
-                        }
-                    }
+                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
                 }
             ],
             "beckn:orderValue": {
@@ -4231,21 +4220,7 @@ Satisfied, Aisha resumes her trip with time to spare.
             },
             "beckn:orderItems": [
                 {
-                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
-                    "beckn:quantity": {
-                        "unitText": "Kilowatt Hour",
-                        "unitCode": "KWH",
-                        "unitQuantity": 2.5
-                    },
-                    "beckn:price": {
-                        "currency": "INR",
-                        "value": 45.0,
-                        "applicableQuantity": {
-                            "unitText": "Kilowatt Hour",
-                            "unitCode": "KWH",
-                            "unitQuantity": 1
-                        }
-                    }
+                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
                 }
             ],
             "beckn:orderValue": {
@@ -5408,7 +5383,7 @@ Cancellation scenarios represent critical edge cases within the fulfillment life
 
 #### 12.1.1. User-Initiated Cancellation
 
-In instances where the User initiates the cancellation of an existing reservation or confirmed order, the BAP initiates the workflow by transmitting the `cancel` API request. This signals to the BPP that the User no longer requires the service, allowing the CPO to release the reserved inventory.
+In instances where the User initiates the cancellation of an existing reservation or confirmed order, the BAP initiates the workflow by transmitting the `cancel` API request. This signals to the BPP that the User no longer requires the service, allowing the CPO to release the reserved inventory. To this call an `on_cancel` response is sent to the BAP. 
 
 **12.1.1.1. action: cancel**
 * **Method:** POST
@@ -5586,7 +5561,7 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
 
 ### 12.2 Interruption in Charging Process:
 
-Operational anomalies or technical faults at the charging station may occasionally result in the premature termination or interruption of an active charging session. To maintain state synchronization, such events trigger an immediate, unsolicited `on_status` callback from the Provider (BPP). This communication ensures the BAP is promptly notified of the service interruption, allowing for appropriate user notification and subsequent remediation steps.
+Operational anomalies or technical faults at the charging station may occasionally result in the premature termination or interruption of an active charging session. To maintain state synchronization, such events trigger an immediate, unsolicited `on_status` callback from the Provider (BPP). This communication ensures the BAP is promptly notified of the service interruption, allowing for appropriate user notification and subsequent remediation steps. Subsequently, the BPP can invoke the `on_update` response to update the order status and the order value.
 
 **12.2.1. action: on_status**
 * **Method:** POST
