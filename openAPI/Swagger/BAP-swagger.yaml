@@ -1,0 +1,785 @@
+openapi: 3.0.3
+info:
+  title: BAP - EV Charging Network API
+  description: |
+    Beckn Application Platform (BAP) API for EV Charging Network.
+    
+    **Communication Pattern:**
+    - BAP sends requests to BPP (or Gateway) to discover and transact with EV Charging Stations.
+    - BAP expects an immediate ACK (200 OK) or NAK (error response).
+    - BAP subsequently receives asynchronous callbacks (e.g., /on_discover, /on_select) on its receiver endpoints.
+    
+    **Request Flow:**
+    - BAP initiates actions: discover, select, init, confirm, update, status, track, cancel, rating, support.
+    - These requests are sent to the BPP's (or Gateway's) interface.
+    
+  version: 1.0.0
+  contact:
+    name: EV Charging Network API Support
+    email: support@evcharging.network
+
+servers:
+  - url: http://localhost:8081/bap/client
+    description: Local BAP Client (Development)
+  - url: http://onix-bap:8081/bap/client
+    description: BAP Client (Docker)
+
+tags:
+  - name: Discovery
+    description: Search and Discovery endpoints
+  - name: Order Management
+    description: Order lifecycle management endpoints
+  - name: Tracking
+    description: Order tracking endpoints
+  - name: Support
+    description: Support and Rating endpoints
+
+paths:
+  /discover:
+    post:
+      tags:
+        - Discovery
+      summary: Discover EV Charging Stations
+      description: |
+        BAP sends a search request to discover available EV charging stations based on criteria (location, etc.).
+        BAP expects an asynchronous /on_discover callback in return.
+      operationId: discover
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscoverRequest'
+            examples:
+              discoveryByQR:
+                summary: Discovery by QR Code
+                externalValue: ../../Example-schemas/01_discover/discovery-by-QR.json
+              discoveryByLocation:
+                summary: Discovery within circular boundary
+                externalValue: ../../Example-schemas/01_discover/discovery-within-a-circular-boundary.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /select:
+    post:
+      tags:
+        - Order Management
+      summary: Select items and get quote
+      description: |
+        BAP selects an item (EVSE) and requests a quote from the BPP.
+        BAP expects an asynchronous /on_select callback.
+      operationId: select
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectRequest'
+            examples:
+              sample:
+                summary: Select EVSE request
+                externalValue: ../../Example-schemas/03_select/ev-charging-select.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /init:
+    post:
+      tags:
+        - Order Management
+      summary: Initialize Order
+      description: |
+        BAP initializes the order by providing billing and fulfillment details to get a final quote and payment terms.
+        BAP expects an asynchronous /on_init callback.
+      operationId: init
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitRequest'
+            examples:
+              sample:
+                summary: Initialize Order Request
+                externalValue: ../../Example-schemas/05_init/ev-charging-init-bap.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /confirm:
+    post:
+      tags:
+        - Order Management
+      summary: Confirm Order
+      description: |
+        BAP confirms the order, usually after payment.
+        BAP expects an asynchronous /on_confirm callback.
+      operationId: confirm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+            examples:
+              sample:
+                summary: Confirm Order Request
+                externalValue: ../../Example-schemas/07_confirm/ev-charging-confirm.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /update:
+    post:
+      tags:
+        - Order Management
+      summary: Update Order
+      description: |
+        BAP requests an update to the order (e.g., Start Charging, Stop Charging).
+        BAP expects an asynchronous /on_update callback.
+      operationId: update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+            examples:
+              startCharging:
+                summary: Update - Start Charging
+                externalValue: ../../Example-schemas/09_update/ev-charging-start-update.json
+              stopCharging:
+                summary: Update - Stop Charging
+                externalValue: ../../Example-schemas/14_01_update/ev-charging-stop-update.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /status:
+    post:
+      tags:
+        - Tracking
+      summary: Get Order Status
+      description: |
+        BAP requests the current status of an order.
+        BAP expects an asynchronous /on_status callback.
+      operationId: status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+            examples:
+              sample:
+                summary: Get Status Request
+                externalValue: ../../Example-schemas/08_01_status/ev-charging-connector-status.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /track:
+    post:
+      tags:
+        - Tracking
+      summary: Track Order
+      description: |
+        BAP requests to track the order.
+        BAP expects an asynchronous /on_track callback.
+      operationId: track
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackRequest'
+            examples:
+              sample:
+                summary: Track Order Request
+                externalValue: ../../Example-schemas/11_track/ev-charging-track.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cancel:
+    post:
+      tags:
+        - Order Management
+      summary: Cancel Order
+      description: |
+        BAP requests to cancel an order.
+        BAP expects an asynchronous /on_cancel callback.
+      operationId: cancel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+            examples:
+              sample:
+                summary: Cancel Order Request
+                externalValue: ../../Example-schemas/19_cancel/cancel-a-reserved-slot.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rating:
+    post:
+      tags:
+        - Support
+      summary: Submit Rating
+      description: |
+        BAP submits a rating for an order.
+        BAP expects an asynchronous /on_rating callback.
+      operationId: rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+            examples:
+              sample:
+                summary: Submit Rating Request
+                externalValue: ../../Example-schemas/15_rating/ev-charging-rating.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /support:
+    post:
+      tags:
+        - Support
+      summary: Request Support
+      description: |
+        BAP requests support contact details.
+        BAP expects an asynchronous /on_support callback.
+      operationId: support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequest'
+            examples:
+              sample:
+                summary: Request Support Request
+                externalValue: ../../Example-schemas/17_support/ev-charging-support.json
+      responses:
+        '200':
+          description: ACK - Request received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AckResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: ["ACK"]
+                  description: Acknowledgment status
+          required:
+            - ack
+      required:
+        - message
+      example:
+        message:
+          ack:
+            status: "ACK"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              description: Error type
+            code:
+              type: string
+              description: Error code
+            path:
+              type: string
+              description: Path to the error location
+            message:
+              type: string
+              description: Error message
+          required:
+            - type
+            - code
+            - message
+
+    Context:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Version of the Beckn protocol
+          example: "2.0.0"
+        action:
+          type: string
+          description: API endpoint action
+        domain:
+          type: string
+          description: Identifier of the domain
+          example: "beckn.one:deg:ev-charging"
+        location:
+          $ref: '#/components/schemas/Location'
+        bap_id:
+          type: string
+          description: Identification of the BAP
+        bap_uri:
+          type: string
+          format: uri
+          description: BAP endpoint
+        bpp_id:
+          type: string
+          description: Identification of the BPP
+        bpp_uri:
+          type: string
+          format: uri
+          description: BPP endpoint
+        transaction_id:
+          type: string
+          description: Transaction identifier
+        message_id:
+          type: string
+          description: Message identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: Time at which the request was generated
+        ttl:
+          type: string
+          description: Time to live (ISO 8601 duration format)
+          example: "PT30S"
+      required:
+        - version
+        - action
+        - domain
+        - bap_id
+        - bap_uri
+        - transaction_id
+        - message_id
+        - timestamp
+
+    Location:
+      type: object
+      properties:
+        country:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Country code as per ISO 3166-1 alpha-3 standard
+              example: "IND"
+          required:
+            - code
+        city:
+          type: object
+          properties:
+            code:
+              type: string
+              description: City code
+              example: "std:080"
+          required:
+            - code
+      required:
+        - country
+        - city
+
+    DiscoverRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            filters:
+              type: object
+            intent:
+              type: object
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    SelectRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    InitRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    ConfirmRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    UpdateRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            update_target:
+              type: string
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    StatusRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Order ID to check status for
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    TrackRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+               type: object
+               properties:
+                 id:
+                   type: string
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    CancelRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order_id:
+               type: string
+            cancellation_reason_id:
+               type: string
+            order:
+               type: array
+               items:
+                 type: object
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    RatingRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            ratings:
+              type: array
+              items:
+                type: object
+          required:
+            - ratings
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    SupportRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            refId:
+              type: string
+            refType:
+              type: string
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    Order:
+      type: object
+      properties:
+        "@context":
+          type: string
+          format: uri
+        "@type":
+          type: string
+          enum: ["beckn:Order"]
+        "beckn:id":
+          type: string
+        "beckn:orderItems":
+          type: array
+          items:
+             type: object
+        "beckn:billing":
+          type: object
+        "beckn:fulfillment":
+          type: object
+        "beckn:payment":
+          type: object
+
+    ErrorDetail:
+      type: object
+      properties:
+        type:
+          type: string
+        code:
+          type: string
+        path:
+          type: string
+        message:
+          type: string

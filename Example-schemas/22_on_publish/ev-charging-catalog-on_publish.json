@@ -1,36 +1,37 @@
 {
-    "context": {
-        "version": "2.0.0",
-        "action": "on_catalog_publish",
-        "timestamp": "2025-10-14T07:32:05Z",
-        "message_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-        "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-        "bpp_id": "discovery-indexer.example.com",
-        "bpp_uri": "https://discovery-indexer.example.com",
-        "ttl": "PT30S"
-    },
-    "message": {
-        "results": [
-            {
-                "catalog_id": "catalog-ev-charging-001",
-                "status": "ACCEPTED",
-                "item_count": 42,
-                "warnings": [
-                    {
-                        "code": "NON_NORMALIZED_BRAND",
-                        "message": "Some brand values were normalized"
-                    }
-                ]
-            },
-            {
-                "catalog_id": "catalog-ev-charging-002",
-                "status": "REJECTED",
-                "error": {
-                    "code": "INVALID_ITEM",
-                    "message": "Invalid item payload at index 3",
-                    "paths": "catalogs[1].items[3]"
-                }
-            }
+  "context": {
+    "version": "2.0.0",
+    "action": "on_catalog_publish",
+    "timestamp": "2025-10-14T07:32:05Z",
+    "message_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "bpp_id": "discovery-indexer.example.com",
+    "bpp_uri": "https://discovery-indexer.example.com",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "results": [
+      {
+        "catalog_id": "catalog-ev-charging-001",
+        "status": "ACCEPTED",
+        "item_count": 42,
+        "warnings": [
+          {
+            "code": "NON_NORMALIZED_BRAND",
+            "message": "Some brand values were normalized"
+          }
         ]
-    }
+      },
+      {
+        "catalog_id": "catalog-ev-charging-002",
+        "status": "REJECTED",
+        "error": {
+          "code": "INVALID_ITEM",
+          "message": "Invalid item payload at index 3",
+          "paths": "catalogs[1].items[3]"
+        }
+      }
+    ]
+  },
+  "error": {}
 }

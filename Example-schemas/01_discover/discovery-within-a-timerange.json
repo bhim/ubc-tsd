@@ -32,5 +32,6 @@
         "distanceMeters": 10000
       }
     ]
-  }
+  },
+  "error": {}
 }

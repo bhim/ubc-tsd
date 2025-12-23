@@ -18,5 +18,6 @@
       "type": "jsonpath",
       "expression": "$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]"
     }
-  }
+  },
+  "error": {}
 }
