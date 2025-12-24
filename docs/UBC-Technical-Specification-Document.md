@@ -18,7 +18,8 @@
 * [Implementing EV Charging Semantics on Beckn Protocol](#10-implementing-ev-charging-semantics-on-beckn-protocol)
 * [User Stories](#11-user-stories)
 * [Special Corner Cases](#12-special-corner-cases)
-* [Conclusion](#13-conclusion)
+* [Error Codes](#13-error-codes)
+* [Conclusion](#14-conclusion)
 
 ---
 
@@ -545,7 +546,8 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
                 ]
             }
         ]
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -589,7 +591,8 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             }
         }
     ]
-}
+},
+    "error": {}
 }
 ```
 </details>
@@ -635,7 +638,7 @@ In the registry that is created, NPs MUST publish their subscription details inc
 Detailed steps to create namespaces and registries in publish.dedi.global can be found here.
 
 **9.1.1.4. Step 4: Share details of the registry created with the NBSL team**
-Once the registry is created and details are published, the namespace and the registry name of the newly created registry should be shared with the beckn one team.
+Once the registry is created and details are published, the namespace and the registry name of the newly created registry should be shared with the NBSL Team. 
 
 ### 9.2. Setting up the Protocol Endpoints
 This section contains instructions to set up and test the protocol stack for EV charging transactions.
@@ -774,21 +777,22 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
     "action": "discover",
     "domain": "beckn.one:deg:ev-charging:*",
     "bap_id": "app.example.com",
-    "bap_uri": "[https://app.example.com/bap](https://app.example.com/bap)",
+    "bap_uri": "https://app.example.com/bap",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "message_id": "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02",
     "timestamp": "2025-10-14T07:31:00Z",
     "ttl": "PT30S",
     "schema_context": [
-      "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld)"
+      "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
     ]
   },
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:id == 'IND*CP01*cs-01*evse-01*connectorid-01')]"
+      "expression": "$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]"
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -809,15 +813,15 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "message_id": "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02",
     "bap_id": "app.example.com",
-    "bap_uri": "[https://app.example.com/bap](https://app.example.com/bap)",
+    "bap_uri": "https://app.example.com/bap",
     "ttl": "PT30S",
     "bpp_id": "example-cds.com",
-    "bpp_uri": "[https://example-cds.com/pilot/cds/energy/v2](https://example-cds.com/pilot/cds/energy/v2)"
+    "bpp_uri": "https://example-cds.com/pilot/cds/energy/v2"
   },
   "message": {
     "catalogs": [
       {
-        "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld)",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld",
         "@type": "beckn:Catalog",
         "beckn:id": "catalog-ev-charging-001",
         "beckn:descriptor": {
@@ -826,10 +830,10 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
           "beckn:shortDesc": "Comprehensive network of fast charging stations across Bengaluru"
         },
         "beckn:bppId": "bpp.ev-network.example.com",
-        "beckn:bppUri": "[https://bpp.ev-network.example.com/bpp](https://bpp.ev-network.example.com/bpp)",
+        "beckn:bppUri": "https://bpp.ev-network.example.com/bpp",
         "beckn:items": [
           {
-            "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld)",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
             "beckn:descriptor": {
@@ -865,7 +869,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
               }
             },
             "beckn:itemAttributes": {
-              "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld)",
+              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld",
               "@type": "ChargingService",
               "connectorType": "CCS2",
               "maxPowerKW": 60,
@@ -907,7 +911,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         ],
         "beckn:offers": [
           {
-            "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "eco-charge-offer-ccs2-60kw-kwh",
             "beckn:descriptor": {
@@ -933,11 +937,10 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             },
             "beckn:acceptedPaymentMethod": [
               "UPI",
-              "CREDIT_CARD",
-              "WALLET"
+              "CREDIT_CARD"
             ],
             "beckn:offerAttributes": {
-              "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld)",
+              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld",
               "@type": "ChargingOffer",
               "tariffModel": "PER_KWH",
               "idleFeePolicy": {
@@ -953,7 +956,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             "beckn:provider": "GoGreen-charging"
           },
           {
-            "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "go-green-offer-ccs2-60kw-kwh",
             "beckn:descriptor": {
@@ -982,7 +985,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
               "CREDIT_CARD"
             ],
             "beckn:offerAttributes": {
-              "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld)",
+              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld",
               "@type": "ChargingOffer",
               "tariffModel": "PER_KWH",
               "idleFeePolicy": {
@@ -1000,7 +1003,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         ]
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -1013,81 +1017,82 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 ```json
 {
-    "context": {
-        "version": "2.0.0",
-        "action": "select",
-        "domain": "beckn.one:deg:ev-charging:*",
-        "timestamp": "2024-01-15T10:30:00Z",
-        "message_id": "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901",
-        "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-        "bap_id": "example-bap.com",
-        "bap_uri": "[https://api.example-bap.com/pilot/bap/energy/v2](https://api.example-bap.com/pilot/bap/energy/v2)",
-        "bpp_id": "example-bpp.com",
-        "bpp_uri": "[https://example-bpp.com/pilot/bap/energy/v2](https://example-bpp.com/pilot/bap/energy/v2)",
-        "ttl": "PT30S"
-    },
-    "message": {
-        "order": {
-            "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
-            "@type": "beckn:Order",
-            "beckn:orderStatus": "CREATED",
-            "beckn:seller": "ecopower-charging",
-            "beckn:buyer": {
-                "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld)",
-                "@type": "beckn:Buyer",
-                "beckn:id": "user-123",
-                "beckn:role": "BUYER",
-                "beckn:displayName": "Ravi Kumar",
-                "beckn:telephone": "+91-9876543210",
-                "beckn:email": "ravi.kumar@example.com",
-                "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+  "context": {
+    "version": "2.0.0",
+    "action": "select",
+    "domain": "beckn.one:deg:ev-charging:*",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "message_id": "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order": {
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+      "@type": "beckn:Order",
+      "beckn:orderStatus": "CREATED",
+      "beckn:seller": "ecopower-charging",
+      "beckn:buyer": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld",
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123",
+        "beckn:role": "BUYER",
+        "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
+        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+          "beckn:quantity": {
+            "unitText": "Kilowatt Hour",
+            "unitCode": "KWH",
+            "unitQuantity": 2.5
+          },
+          "beckn:acceptedOffer": {
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+            "@type": "beckn:Offer",
+            "beckn:id": "offer-ccs2-60kw-kwh",
+            "beckn:descriptor": {
+              "@type": "beckn:Descriptor",
+              "schema:name": "Per-kWh Tariff - CCS2 60kW"
             },
-            "beckn:orderItems": [
-                {
-                    "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
-                    "beckn:quantity": {
-                        "unitText": "Kilowatt Hour",
-                        "unitCode": "KWH",
-                        "unitQuantity": 2.5
-                    },
-                    "beckn:acceptedOffer": {
-                        "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
-                        "@type": "beckn:Offer",
-                        "beckn:id": "offer-ccs2-60kw-kwh",
-                        "beckn:descriptor": {
-                            "@type": "beckn:Descriptor",
-                            "schema:name": "Per-kWh Tariff - CCS2 60kW"
-                        },
-                        "beckn:items": [
-                            "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
-                        ],
-                        "beckn:provider": "ecopower-charging",
-                        "beckn:price": {
-                            "currency": "INR",
-                            "value": 45.0,
-                            "applicableQuantity": {
-                                "unitText": "Kilowatt Hour",
-                                "unitCode": "KWH",
-                                "unitQuantity": 1
-                            }
-                        }
-                    }
-                }
+            "beckn:items": [
+              "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
             ],
-            "beckn:orderAttributes": {
-                "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld)",
-                "@type": "ChargingSession",
-                "buyerFinderFee": {
-                    "feeType": "PERCENTAGE",
-                    "feeValue": 2.5
-                },
-                "preferences": {
-                    "startTime": "2025-12-20T10:00:00Z",
-                    "endTime": "2025-12-20T11:30:00Z"
-                }
+            "beckn:provider": "ecopower-charging",
+            "beckn:price": {
+              "currency": "INR",
+              "value": 45.0,
+              "applicableQuantity": {
+                "unitText": "Kilowatt Hour",
+                "unitCode": "KWH",
+                "unitQuantity": 1
+              }
             }
+          }
         }
+      ],
+      "beckn:orderAttributes": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld",
+        "@type": "ChargingSession",
+        "buyerFinderFee": {
+          "feeType": "PERCENTAGE",
+          "feeValue": 2.5
+        },
+        "preferences": {
+          "startTime": "2025-12-20T10:00:00Z",
+          "endTime": "2025-12-20T11:30:00Z"
+        }
+      }
     }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -1108,19 +1113,19 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
     "message_id": "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "bap_id": "example-bap.com",
-    "bap_uri": "[https://example-bap.com/pilot/bap/energy/v2](https://example-bap.com/pilot/bap/energy/v2)",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
-    "bpp_uri": "[https://example-bpp.com/pilot/bpp/energy/v2](https://example-bpp.com/pilot/bpp/energy/v2)"
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
   },
   "message": {
     "order": {
-      "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
       "beckn:orderStatus": "CREATED",
       "beckn:seller": "ecopower-charging",
       "beckn:buyer": {
-        "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld)",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld",
         "@type": "beckn:Buyer",
         "beckn:id": "user-123",
         "beckn:role": "BUYER",
@@ -1138,7 +1143,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             "unitQuantity": 2.5
           },
           "beckn:acceptedOffer": {
-            "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld)",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-ccs2-60kw-kwh",
             "beckn:descriptor": {
@@ -1178,7 +1183,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",
@@ -1213,7 +1218,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         ]
       },
       "beckn:orderAttributes": {
-        "@context": "[https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld](https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld)",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld",
         "@type": "ChargingSession",
         "buyerFinderFee": {
           "feeType": "PERCENTAGE",
@@ -1225,11 +1230,11 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
-
 
 **11.1.2.5. action: init**
 * **Method:** POST
@@ -1354,7 +1359,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 }
             }
         }
-    }
+    },
+    "error": {}
 }
 
 ```
@@ -1500,7 +1506,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 }
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -1619,7 +1626,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -1870,13 +1878,14 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
 
 **11.1.2.8.1 action: status**
-* **Method:** GET
+* **Method:** POST
 * **Use Cases:** Raghav is asked to plug in the charger by the application.
 <details>
 <summary><a href="../Example-schemas/08_01_status/ev-charging-connector-status.json">Example json :rocket:</a></summary>
@@ -1988,7 +1997,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+  "error": {}
 }
 ```
 </details>
@@ -2107,7 +2117,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+  "error": {}
 }
 ```
 </details>
@@ -2225,7 +2236,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2343,7 +2355,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2387,7 +2400,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         }
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2511,7 +2525,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2627,7 +2642,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -2675,7 +2691,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         }
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2708,7 +2725,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
       "mime_type": "application/xml",
       "submission_id": "feedback-123e4567-e89b-12d3-a456-426614174000"
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2749,7 +2767,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "WHATSAPP"
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2789,7 +2808,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
         "CHAT"
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -2892,7 +2912,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "distanceMeters": 10000
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -3306,7 +3327,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         ]
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -3393,7 +3415,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 }
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -3531,7 +3554,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -3659,7 +3683,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 }
             }
         }
-    }
+    },
+    "error": {}
 }
 
 ```
@@ -3805,7 +3830,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 }
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -3924,7 +3950,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4043,7 +4070,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4175,7 +4203,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4293,7 +4322,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -4412,7 +4442,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -4530,7 +4561,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4648,7 +4680,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4692,7 +4725,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         }
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4816,7 +4850,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -4932,7 +4967,8 @@ Satisfied, Aisha resumes her trip with time to spare.
                 "beckn:paymentStatus": "COMPLETED"
             }
         }
-    }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -4980,7 +5016,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         }
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5013,7 +5050,8 @@ Satisfied, Aisha resumes her trip with time to spare.
       "mime_type": "application/xml",
       "submission_id": "feedback-123e4567-e89b-12d3-a456-426614174000"
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5054,7 +5092,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "WHATSAPP"
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5094,7 +5133,8 @@ Satisfied, Aisha resumes her trip with time to spare.
         "CHAT"
       ]
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5233,7 +5273,8 @@ The network architecture empowers all Network Participants (NPs) to function as 
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5370,7 +5411,8 @@ The network architecture empowers all Network Participants (NPs) to function as 
         }
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5431,7 +5473,8 @@ In instances where the User initiates the cancellation of an existing reservatio
         ]
       }
     ]
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5552,7 +5595,8 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
         "beckn:paymentStatus": "REFUNDED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5669,7 +5713,8 @@ Operational anomalies or technical faults at the charging station may occasional
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
@@ -5788,12 +5833,20 @@ During an active charging session, the user may elect to voluntarily terminate t
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
 ```
 </details>
 
-## 13. Conclusion
+## 13. Error Codes
+The error codes for the core specification can be found [here](https://github.com/beckn/protocol-specifications/blob/master/docs/BECKN-005-Error-Codes-Draft-01.md).
+
+Error codes are communicated as follows:
+* **Schema Level Errors:** If the error is due to a schema validation failure, the error code is returned within the `NACK` acknowledgement.
+* **Value/Logic Errors:** If the error is related to invalid values within the payload or specific business logic, the error code is returned within the corresponding callback API.
+
+## 14. Conclusion
 
 This Technical Specification Document serves as the foundational blueprint for a unified, interoperable electric vehicle charging ecosystem. By leveraging the decentralized nature of the Beckn Protocol, we are moving beyond fragmented, siloed networks toward a user-centric model where discovery, booking, and payment are seamless across all service providers.
 

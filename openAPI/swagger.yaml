@@ -1,0 +1,637 @@
+openapi: 3.0.0
+info:
+  title: Beckn Protocol API - UBC TSD
+  description: OpenAPI specification for the Beckn Protocol APIs (Client and Provider reference implementation) with EV Charging specific attribute definitions.
+  version: 1.0.0
+  contact:
+    name: UBC TSD
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Discovery
+    description: APIs for searching and discovering services
+  - name: Order
+    description: APIs for order management
+  - name: Fulfillment
+    description: APIs for tracking and fulfillment
+  - name: Support
+    description: APIs for ratings and support
+  - name: Catalog
+    description: APIs for catalog management
+
+paths:
+  /discover:
+    post:
+      tags:
+        - Discovery
+      summary: Search for services
+      description: Search for services by intent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_discover:
+    post:
+      tags:
+        - Discovery
+      summary: Callback for search
+      description: Returns catalog of services matching the search intent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /catalog_publish:
+    post:
+      tags:
+        - Catalog
+      summary: Publish catalog
+      description: Publish the catalog of services to a network registry or aggregation service (CDS).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_catalog_publish:
+    post:
+      tags:
+        - Catalog
+      summary: Callback for catalog publish
+      description: Returns the status of the catalog publication (Accepted/Rejected).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /select:
+    post:
+      tags:
+        - Order
+      summary: Select items
+      description: Select items from the catalog.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_select:
+    post:
+      tags:
+        - Order
+      summary: Callback for select
+      description: Returns quote for the selected items.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /init:
+    post:
+      tags:
+        - Order
+      summary: Initialize order
+      description: Initialize the order by providing billing/shipping details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_init:
+    post:
+      tags:
+        - Order
+      summary: Callback for init
+      description: Returns initialized order with payment details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /confirm:
+    post:
+      tags:
+        - Order
+      summary: Confirm order
+      description: Confirm the order and proceed with payment/fulfillment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_confirm:
+    post:
+      tags:
+        - Order
+      summary: Callback for confirm
+      description: Returns confirmed order details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /status:
+    post:
+      tags:
+        - Order
+      summary: Get order status
+      description: Fetch the current status of an order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_status:
+    post:
+      tags:
+        - Order
+      summary: Callback for status
+      description: Returns the current status of the order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /track:
+    post:
+      tags:
+        - Fulfillment
+      summary: Track order
+      description: Track the active enrollment/delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_track:
+    post:
+      tags:
+        - Fulfillment
+      summary: Callback for track
+      description: Returns tracking details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /cancel:
+    post:
+      tags:
+        - Order
+      summary: Cancel order
+      description: Cancel an active order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_cancel:
+    post:
+      tags:
+        - Order
+      summary: Callback for cancel
+      description: Returns cancellation result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /update:
+    post:
+      tags:
+        - Order
+      summary: Update order
+      description: Update an active order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_update:
+    post:
+      tags:
+        - Order
+      summary: Callback for update
+      description: Returns update result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /rating:
+    post:
+      tags:
+        - Support
+      summary: Rate service
+      description: Submit a rating for a service or provider.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_rating:
+    post:
+      tags:
+        - Support
+      summary: Callback for rating
+      description: Acknowledgement for rating submission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /support:
+    post:
+      tags:
+        - Support
+      summary: Get support
+      description: Request support for an order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_support:
+    post:
+      tags:
+        - Support
+      summary: Callback for support
+      description: Returns support contact details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+components:
+  schemas:
+    BecknRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          description: The payload containing the business object (Intent, Catalog, Order, etc.)
+          additionalProperties: true
+        error: {}
+      required:
+        - context
+        - message
+
+    BecknAck:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACK
+                    - NACK
+              required:
+                - status
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            error: {}
+      required:
+        - message
+
+    Context:
+      type: object
+      properties:
+        domain:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        action:
+          type: string
+        core_version:
+          type: string
+        bap_id:
+          type: string
+        bap_uri:
+          type: string
+        bpp_id:
+          type: string
+        bpp_uri:
+          type: string
+        transaction_id:
+          type: string
+        message_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        key:
+          type: string
+        ttl:
+          type: string
+      required:
+        - domain
+        - country
+        - city
+        - action
+        - core_version
+        - bap_id
+        - bap_uri
+        - transaction_id
+        - message_id
+        - timestamp
+
+    ChargingService:
+      type: object
+      additionalProperties: false
+      required:
+        - connectorType
+        - maxPowerKW
+        - socketCount
+      properties:
+        evseId:
+          type: string
+          example: "IN*ECO*01*CCS2*A"
+        connectorType:
+          type: string
+          enum: [CCS2, Type2, CHAdeMO, GB_T]
+          example: CCS2
+        maxPowerKW:
+          type: number
+          minimum: 1
+          maximum: 500
+          example: 60
+        minPowerKW:
+          type: number
+          minimum: 0
+          maximum: 500
+          example: 5
+        reservationSupported:
+          type: boolean
+          default: true
+        chargingStation:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "IN-ECO-MDY-STATION-01"
+            serviceLocation:
+              allOf:
+                - $ref: '#/components/schemas/Location'
+        amenityFeature:
+          type: array
+          items:
+            type: string
+            enum: ["RESTAURANT", "RESTROOM", "WI-FI", "PARKING"]
+        roamingNetwork:
+          type: string
+          example: "GreenRoam"
+        parkingType:
+          type: string
+          enum: [OnStreet, OffStreet, Basement, Mall, FuelStation, Office, Hotel]
+        powerType:
+          type: string
+          enum: [AC_SINGLE_PHASE, AC_3_PHASE, DC]
+        connectorFormat:
+          type: string
+          enum: [SOCKET, CABLE]
+        chargingSpeed:
+          type: string
+          enum: [SLOW, NORMAL, FAST, ULTRAFAST]
+        vehicleType:
+          type: string
+          enum: ["2-WHEELER", "3-WHEELER", "4-WHEELER"]
+
+    ChargingOffer:
+      type: object
+      additionalProperties: false
+      properties:
+        tariffModel:
+          type: string
+          enum: [PER_KWH, PER_MINUTE, SUBSCRIPTION, TIME_OF_DAY]
+        idleFeePolicy:
+          allOf:
+             - $ref: '#/components/schemas/PriceSpecification'
+
+    Location:
+      type: object
+      properties:
+        geo:
+          type: object
+        address:
+          type: object
+
+    PriceSpecification:
+      type: object
+      properties:
+        currency:
+          type: string
+        value:
+          type: number

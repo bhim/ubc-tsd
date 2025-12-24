@@ -1,0 +1,1304 @@
+openapi: 3.0.3
+info:
+  title: BPP - EV Charging Network API
+  description: |
+    Beckn Provider Platform (BPP) API for EV Charging Network.
+    
+    **Asynchronous Communication Pattern:**
+    - BPP receives requests from BAP and processes them asynchronously
+    - BPP immediately returns an ACK (200 OK) or NAK (error response) to acknowledge receipt
+    - ACK indicates the request was received and will be processed asynchronously
+    - NAK indicates the request was rejected due to validation errors or other issues
+    - Actual response data is sent asynchronously via callback endpoints to BAP's receiver
+    
+    **Callback Flow:**
+    - BAP sends requests to BPP (via adapter/caller endpoints)
+    - BPP immediately responds with ACK/NAK
+    - BPP processes the request asynchronously
+    - BPP sends callback responses to BAP receiver (e.g., on_discover, on_select, on_init)
+    
+    **Response Flow:**
+    - On success: Returns 200 OK with an acknowledgment
+    - On error: Returns appropriate HTTP error status (400, 500, etc.) with error details
+    - Async responses: Actual business responses are delivered via callback endpoints to BAP receiver
+  version: 1.0.0
+  contact:
+    name: EV Charging Network API Support
+    email: support@evcharging.network
+
+servers:
+  - url: http://localhost:8082/bpp/receiver
+    description: Local BPP Receiver (Development)
+  - url: http://onix-bpp:8082/bpp/receiver
+    description: BPP Receiver (Docker)
+  - url: http://localhost:8082/bpp/caller
+    description: Local BPP Caller (Development)
+  - url: http://onix-bpp:8082/bpp/caller
+    description: BPP Caller (Docker)
+
+tags:
+  - name: Discovery Callbacks
+    description: Callback endpoints for discovery responses
+  - name: Order Management Callbacks
+    description: Callback endpoints for order lifecycle responses
+  - name: Tracking Callbacks
+    description: Callback endpoints for tracking responses
+  - name: Support Callbacks
+    description: Callback endpoints for support and rating responses
+  - name: Catalog Publish
+    description: Catalog publish and callback endpoints for catalog ingestion
+
+paths:
+  /on_discover:
+    post:
+      tags:
+        - Discovery Callbacks
+      summary: On Discover callback
+      description: |
+        Callback endpoint that sends catalog of available EV charging stations in response to a discover request.
+        This is sent asynchronously by BPP to BAP receiver after processing the discover request.
+        The BAP should acknowledge receipt with ACK/NAK.
+      operationId: onDiscover
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnDiscoverRequest'
+            examples:
+              catalogResponse:
+                summary: Catalog response with charging stations
+                externalValue: ../tmp/v2/02_on_discover/time-based-ev-charging-slot-catalog.json
+      responses:
+        '200':
+          description: ACK - Callback received and acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_select:
+    post:
+      tags:
+        - Order Management Callbacks
+      summary: On Select callback
+      description: |
+        Callback endpoint that sends order details with quote in response to a select request.
+        This is sent asynchronously by BPP to BAP receiver after processing the select request.
+      operationId: onSelect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnSelectRequest'
+            examples:
+              sample:
+                summary: On select response payload
+                externalValue: ../tmp/v2/04_on_select/time-based-ev-charging-slot-on-select.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_init:
+    post:
+      tags:
+        - Order Management Callbacks
+      summary: On Init callback
+      description: |
+        Callback endpoint that sends initialized order with quote and payment details in response to an init request.
+        This is sent asynchronously by BPP to BAP receiver after processing the init request.
+      operationId: onInit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnInitRequest'
+            examples:
+              sample:
+                summary: On init response payload
+                externalValue: ../tmp/v2/06_on_init/time-based-ev-charging-slot-on-init.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_confirm:
+    post:
+      tags:
+        - Order Management Callbacks
+      summary: On Confirm callback
+      description: |
+        Callback endpoint that sends confirmed order details in response to a confirm request.
+        This is sent asynchronously by BPP to BAP receiver after processing the confirm request.
+      operationId: onConfirm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnConfirmRequest'
+            examples:
+              sample:
+                summary: On confirm response payload
+                externalValue: ../tmp/v2/08_on_confirm/time-based-ev-charging-slot-on-confirm.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_update:
+    post:
+      tags:
+        - Order Management Callbacks
+      summary: On Update callback
+      description: |
+        Callback endpoint that sends updated order details in response to an update request.
+        This is sent asynchronously by BPP to BAP receiver after processing the update request.
+      operationId: onUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnUpdateRequest'
+            examples:
+              activeCharging:
+                summary: On update response while charging
+                externalValue: ../tmp/v2/10_on_update/time-based-ev-charging-slot-on-update.json
+              completeCharging:
+                summary: On update response after charging ends
+                externalValue: ../tmp/v2/14_on_update/time-based-ev-charging-slot-on-update.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_track:
+    post:
+      tags:
+        - Tracking Callbacks
+      summary: On Track callback
+      description: |
+        Callback endpoint that sends order tracking information in response to a track request.
+        This is sent asynchronously by BPP to BAP receiver after processing the track request.
+      operationId: onTrack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnTrackRequest'
+            examples:
+              sample:
+                summary: On track response payload
+                externalValue: ../tmp/v2/12_on_track/time-based-ev-charging-slot-on-track.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_status:
+    post:
+      tags:
+        - Tracking Callbacks
+      summary: On Status callback
+      description: |
+        Callback endpoint that sends order status updates.
+        This is sent asynchronously by BPP to BAP receiver for status notifications.
+      operationId: onStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnStatusRequest'
+            examples:
+              sample:
+                summary: On status callback (charging error)
+                externalValue: ../tmp/v2/13_on_status/time-based-ev-charging-slot-on-status.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_cancel:
+    post:
+      tags:
+        - Order Management Callbacks
+      summary: On Cancel callback
+      description: |
+        Callback endpoint that sends cancellation confirmation in response to a cancel request.
+        This is sent asynchronously by BPP to BAP receiver after processing the cancel request.
+      operationId: onCancel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnCancelRequest'
+            examples:
+              sample:
+                summary: On cancel response payload
+                externalValue: ../tmp/v2/20_on_cancel/cpo-cancels-reservation.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_rating:
+    post:
+      tags:
+        - Support Callbacks
+      summary: On Rating callback
+      description: |
+        Callback endpoint that sends rating confirmation in response to a rating request.
+        This is sent asynchronously by BPP to BAP receiver after processing the rating request.
+      operationId: onRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnRatingRequest'
+            examples:
+              sample:
+                summary: On rating callback payload
+                externalValue: ../tmp/v2/16_on_rating/time-based-ev-charging-slot-on-rating.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /on_support:
+    post:
+      tags:
+        - Support Callbacks
+      summary: On Support callback
+      description: |
+        Callback endpoint that sends support contact information in response to a support request.
+        This is sent asynchronously by BPP to BAP receiver after processing the support request.
+      operationId: onSupport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnSupportRequest'
+            examples:
+              sample:
+                summary: On support callback payload
+                externalValue: ../tmp/v2/18_on_support/time-based-ev-charging-slot-on-support.json
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /beckn/v2/catalog/publish:
+    post:
+      tags:
+        - Catalog Publish
+      summary: Publish one or more catalogs for indexing
+      description: |
+        BPP submits catalogs to be indexed. Returns **ACK** immediately if accepted for processing.
+        The detailed per-catalog processing result arrives later via **/on_catalog_publish**.
+      operationId: publishCatalogs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogPublishRequest'
+            examples:
+              publish_basic:
+                summary: Minimal publish
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "catalog_publish"
+                    timestamp: "2025-09-01T10:30:00+05:30"
+                    message_id: "u-req-123"
+                    transaction_id: "u-txn-123"
+                    bpp_id: "bpp.example.com"
+                    bpp_uri: "https://bpp.example.com/callbacks"
+                    ttl: "PT30S"
+                  catalogs:
+                    - "@context": "https://becknprotocol.io/schemas/core/v1/Catalog/schema-context.jsonld"
+                      "@type": "beckn:Catalog"
+                      "beckn:id": "catalog-001"
+                      "beckn:descriptor":
+                        "@type": "beckn:Descriptor"
+                        "schema:name": "BPP Test Catalog"
+                      "beckn:items": []
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /beckn/v2/catalog/on_publish:
+    post:
+      tags:
+        - Catalog Publish
+      summary: Callback with catalog publish processing results
+      description: |
+        Discovery Service calls back with per-catalog processing results (accepted/rejected, errors, derived stats).
+        The receiver should respond with an **AckResponse**.
+      operationId: onCatalogPublish
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogPublishResponse'
+            examples:
+              results_basic:
+                summary: Example processing results
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_catalog_publish"
+                    timestamp: "2025-09-01T10:31:05+05:30"
+                    message_id: "u-resp-123"
+                    transaction_id: "u-txn-123"
+                    bpp_id: "discovery-indexer.example.com"
+                    bpp_uri: "https://discovery-indexer.example.com"
+                    ttl: "PT30S"
+                  message:
+                    results:
+                      - catalog_id: "catalog-001"
+                        status: "ACCEPTED"
+                        item_count: 42
+                        warnings:
+                          - code: "NON_NORMALIZED_BRAND"
+                            message: "Some brand values were normalized"
+                      - catalog_id: "catalog-002"
+                        status: "REJECTED"
+                        error:
+                          code: "INVALID_ITEM"
+                          message: "Invalid item payload at index 3"
+                          paths: "catalogs[1].items[3]"
+      responses:
+        '200':
+          description: ACK - Callback received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckResponse'
+        '400':
+          description: NAK - Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: NAK - Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AckResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: ["ACK"]
+                  description: Acknowledgment status
+          required:
+            - ack
+      required:
+        - message
+      example:
+        message:
+          ack:
+            status: "ACK"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              description: Error type
+            code:
+              type: string
+              description: Error code
+            path:
+              type: string
+              description: Path to the error location
+            message:
+              type: string
+              description: Error message
+          required:
+            - type
+            - code
+            - message
+
+    Context:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Version of the Beckn protocol
+          example: "2.0.0"
+        action:
+          type: string
+          description: API endpoint callback
+        domain:
+          type: string
+          description: Identifier of the domain
+          example: "beckn.one:deg:ev-charging"
+        location:
+          $ref: '#/components/schemas/Location'
+        bap_id:
+          type: string
+          description: Identification of the BAP
+        bap_uri:
+          type: string
+          format: uri
+          description: BAP endpoint
+        bpp_id:
+          type: string
+          description: Identification of the BPP
+        bpp_uri:
+          type: string
+          format: uri
+          description: BPP endpoint
+        transaction_id:
+          type: string
+          description: Transaction identifier
+        message_id:
+          type: string
+          description: Message identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: Time at which the response was generated
+        ttl:
+          type: string
+          description: Time to live (ISO 8601 duration format)
+          example: "PT30S"
+        schema_context:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Schema context URLs
+      required:
+        - version
+        - action
+        - domain
+        - location
+        - bap_id
+        - bap_uri
+        - bpp_id
+        - bpp_uri
+        - transaction_id
+        - message_id
+        - timestamp
+
+    Location:
+      type: object
+      properties:
+        country:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Country code as per ISO 3166-1 alpha-3 standard
+              example: "IND"
+          required:
+            - code
+        city:
+          type: object
+          properties:
+            code:
+              type: string
+              description: City code
+              example: "std:080"
+          required:
+            - code
+      required:
+        - country
+        - city
+
+    OnDiscoverRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            catalogs:
+              type: array
+              items:
+                type: object
+                description: Catalog object containing provider and items information
+              minItems: 1
+          required:
+            - catalogs
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnSelectRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/SelectOrder'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnInitRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnConfirmRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnUpdateRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnTrackRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            tracking:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                status:
+                  type: string
+            order:
+              $ref: '#/components/schemas/Order'
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnStatusRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              $ref: '#/components/schemas/Order'
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnCancelRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            order:
+              type: object
+              properties:
+                "@context":
+                  type: string
+                  format: uri
+                "@type":
+                  type: string
+                  enum: ["beckn:Order"]
+                "beckn:id":
+                  type: string
+                "beckn:orderStatus":
+                  type: string
+                "beckn:cancellation":
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: ["FULL", "PARTIAL"]
+                    refund_amount:
+                      type: object
+                      properties:
+                        currency:
+                          type: string
+                        value:
+                          type: string
+                    cancelled_by:
+                      type: string
+                      enum: ["BUYER", "SELLER", "SYSTEM"]
+                    cancellation_reason_id:
+                      type: string
+                    description:
+                      type: string
+              required:
+                - "@type"
+                - "beckn:id"
+          required:
+            - order
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnRatingRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            feedback:
+              type: object
+              properties:
+                id:
+                  type: string
+                feedback_form:
+                  type: object
+            rating:
+              type: object
+              properties:
+                id:
+                  type: string
+                value:
+                  type: number
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    OnSupportRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          properties:
+            phone:
+              type: string
+              description: Support phone number
+            email:
+              type: string
+              format: email
+              description: Support email address
+            uri:
+              type: string
+              format: uri
+              description: Support URI
+            ref_id:
+              type: string
+              description: Reference ID for the support request
+            ref_type:
+              type: string
+              enum: ["order", "fulfillment", "item", "payment"]
+              description: Type of reference
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - context
+        - message
+
+    CatalogPublishRequest:
+      type: object
+      required: [context, catalogs]
+      properties:
+        context:
+          type: object
+          required: [version, action, timestamp, message_id, transaction_id, bpp_id, bpp_uri, ttl]
+          properties:
+            version:
+              type: string
+              description: Version of the Beckn protocol
+              example: "2.0.0"
+            action:
+              type: string
+              enum: [catalog_publish]
+              description: API endpoint action
+            timestamp:
+              type: string
+              format: date-time
+              description: Time at which the request was generated
+            message_id:
+              type: string
+              description: Message identifier
+            transaction_id:
+              type: string
+              description: Transaction identifier
+            bpp_id:
+              type: string
+              description: Identification of the BPP
+            bpp_uri:
+              type: string
+              format: uri
+              description: BPP endpoint (where /on_catalog_publish callback is exposed)
+            ttl:
+              type: string
+              description: Time to live (ISO 8601 duration format)
+              example: "PT30S"
+        catalogs:
+          type: array
+          description: Array of catalogs containing items
+          items:
+            type: object
+            description: Catalog object containing provider and items information
+          minItems: 1
+      description: |
+        Catalog Publish request envelope.
+        *context.version* MUST indicate the supported protocol version (e.g., "2.0.0").
+
+    CatalogPublishResponse:
+      type: object
+      required: [context, message]
+      properties:
+        context:
+          allOf:
+            - $ref: '#/components/schemas/Context'
+            - type: object
+              properties:
+                action:
+                  type: string
+                  enum: [on_catalog_publish]
+        message:
+          type: object
+          properties:
+            results:
+              type: array
+              description: Per-catalog processing results
+              items:
+                $ref: '#/components/schemas/CatalogProcessingResult'
+
+    CatalogProcessingResult:
+      type: object
+      required: [catalog_id, status]
+      properties:
+        catalog_id:
+          type: string
+          description: The "beckn:id" of the submitted catalog
+        status:
+          type: string
+          enum: [ACCEPTED, REJECTED, PARTIAL]
+          description: Final processing outcome for this catalog
+        item_count:
+          type: integer
+          minimum: 0
+          description: Number of items indexed (when accepted/partial)
+        warnings:
+          type: array
+          description: Non-fatal issues encountered
+          items:
+            $ref: '#/components/schemas/ProcessingNotice'
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+    ProcessingNotice:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    Order:
+      type: object
+      description: Order object with varying structure based on callback endpoint
+      properties:
+        "@context":
+          type: string
+          format: uri
+        "@type":
+          type: string
+          enum: ["beckn:Order"]
+        "beckn:id":
+          type: string
+        "beckn:orderStatus":
+          type: string
+        "beckn:orderNumber":
+          type: string
+        "beckn:seller":
+          type: string
+        "beckn:buyer":
+          oneOf:
+            - type: string
+            - type: object
+        "beckn:orderItems":
+          type: array
+          items:
+            type: object
+        "beckn:orderValue":
+          type: object
+          properties:
+            currency:
+              type: string
+            value:
+              type: number
+            components:
+              type: array
+              items:
+                type: object
+        "beckn:fulfillment":
+          type: object
+          properties:
+            "@context":
+              type: string
+              format: uri
+            "@type":
+              type: string
+              enum: ["beckn:Fulfillment"]
+            "beckn:id":
+              type: string
+            "beckn:status":
+              type: string
+            "beckn:deliveryAttributes":
+              type: object
+            "beckn:tracking":
+              type: boolean
+        "beckn:payment":
+          type: object
+          properties:
+            "@context":
+              type: string
+              format: uri
+            "@type":
+              type: string
+              enum: ["beckn:Payment"]
+            "beckn:id":
+              type: string
+            "beckn:status":
+              type: string
+            "beckn:amount":
+              type: object
+              properties:
+                currency:
+                  type: string
+                value:
+                  type: number
+            "beckn:paymentURL":
+              type: string
+              format: uri
+            "beckn:txnRef":
+              type: string
+            "beckn:acceptedPaymentMethods":
+              type: array
+              items:
+                type: string
+            "beckn:beneficiary":
+              type: string
+            "beckn:paidAt":
+              type: string
+              format: date-time
+        "beckn:orderAttributes":
+          type: object
+        quote:
+          type: object
+          properties:
+            price:
+              type: object
+              properties:
+                currency:
+                  type: string
+                value:
+                  type: string
+              required:
+                - currency
+                - value
+            breakup:
+              type: array
+              items:
+                type: object
+              required:
+                - price
+
+    SelectOrder:
+      type: object
+      description: Order object specific to on_select callback
+      properties:
+        provider:
+          type: object
+          properties:
+            id:
+              type: string
+            descriptor:
+              type: object
+              properties:
+                name:
+                  type: string
+                short_desc:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+          required:
+            - id
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              descriptor:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  name:
+                    type: string
+              price:
+                type: object
+                properties:
+                  value:
+                    type: string
+                  currency:
+                    type: string
+                required:
+                  - value
+                  - currency
+              quantity:
+                type: object
+                properties:
+                  available:
+                    type: object
+                  selected:
+                    type: object
+            required:
+              - id
+          minItems: 1
+        fulfillments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: ["CHARGING", "BATTERY-SWAP", "MOBILE-BATTERY-SWAP"]
+              stops:
+                type: array
+                items:
+                  type: object
+              tags:
+                type: array
+                items:
+                  type: object
+            required:
+              - id
+              - type
+          minItems: 1
+        quote:
+          type: object
+          properties:
+            price:
+              type: object
+              properties:
+                value:
+                  type: string
+                currency:
+                  type: string
+              required:
+                - value
+                - currency
+            breakup:
+              type: array
+              items:
+                type: object
+                properties:
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      descriptor:
+                        type: object
+                      quantity:
+                        type: object
+                      add_ons:
+                        type: array
+                        items:
+                          type: object
+                  price:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                      currency:
+                        type: string
+                    required:
+                      - value
+                      - currency
+                required:
+                  - price
+          required:
+            - price
+            - breakup
+      required:
+        - provider
+        - items
+        - quote
+
+    ErrorDetail:
+      type: object
+      properties:
+        type:
+          type: string
+        code:
+          type: string
+        path:
+          type: string
+        message:
+          type: string

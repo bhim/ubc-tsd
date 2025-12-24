@@ -56,7 +56,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",
@@ -105,5 +105,6 @@
         "beckn:paymentStatus": "COMPLETED"
       }
     }
-  }
+  },
+  "error": {}
 }
