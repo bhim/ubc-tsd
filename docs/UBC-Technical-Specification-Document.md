@@ -5721,7 +5721,7 @@ Operational anomalies or technical faults at the charging station may occasional
 
 ### 12.3 User-Initiated Session Termination:
 
-During an active charging session, the user may elect to voluntarily terminate the service prior to the completion of the charge or the scheduled time. To facilitate this request, the application (BAP) triggers an `update` API call. Within this request, the `fulfillment` object must explicitly specify the `sessionStatus` as "STOP" within the delivery attributes. This signal instructs the Provider to cease the energy flow immediately. Subsequently, the Provider (BPP) will transmit an `on_update` callback containing the finalized Call Detail Record (CDR) reflecting the actual energy consumed up to the point of termination.
+During an active charging session, the user may elect to voluntarily terminate the service prior to the completion of the charge or the scheduled time. To facilitate this request, the application (BAP) triggers an `update` API call. Within this request, the `fulfillment` object must explicitly specify the `sessionStatus` as "STOP" within the delivery attributes. This signal instructs the Provider to cease the energy flow immediately. Subsequently, the Provider (BPP) will transmit an `on_update` callback containing the finalized Charge Detail Record (CDR) reflecting the actual energy consumed up to the point of termination.
 
 **12.3.1. action: update**
 * **Method:** POST
