@@ -2,6 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "on_catalog_publish",
+    "domain": "beckn.one:deg:ev-charging",
     "timestamp": "2025-10-14T07:32:05Z",
     "message_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",

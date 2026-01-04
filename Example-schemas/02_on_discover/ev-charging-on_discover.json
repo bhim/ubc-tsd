@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "on_discover",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "timestamp": "2024-01-15T10:30:05Z",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "message_id": "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02",
@@ -44,8 +44,8 @@
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "06:00:00",
-                "schema:endTime": "22:00:00"
+                "schema:startTime": "1780273800",
+                "schema:endTime": "1780331400"
               }
             ],
             "beckn:rateable": true,
@@ -120,8 +120,8 @@
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "00:00:00",
-                "schema:endTime": "23:59:59"
+                "schema:startTime": "1780252200",
+                "schema:endTime": "1780338599"
               }
             ],
             "beckn:rateable": true,
@@ -197,8 +197,8 @@
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "08:00:00",
-                "schema:endTime": "20:00:00"
+                "schema:startTime": "1780281000",
+                "schema:endTime": "1780324200"
               }
             ],
             "beckn:rateable": true,
