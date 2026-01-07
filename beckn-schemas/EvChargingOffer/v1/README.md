@@ -48,6 +48,3 @@ This supports both local development and public hosting.
 
 ## 🏷️ Tags
 `ev-charging, charging-offer, tariffs, pricing, idle-fee, beckn, json-ld, schema.org, openapi`
-
-
-

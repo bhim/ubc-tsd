@@ -27,7 +27,6 @@ components:
       required:
         - connectorType
         - maxPowerKW
-        - socketCount
       x-jsonld:
         "@context": ./context.jsonld
         "@type": ChargingService
@@ -160,4 +159,3 @@ components:
           description: Type of vehicle that can use this charging service.
           example: "4-WHEELER"
           x-jsonld: { "@id": vehicleType }
-

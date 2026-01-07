@@ -20,9 +20,8 @@
       "$ref": "../../EvChargingPointOperator/v1/attributes.yaml#/components/schemas/ChargingPointOperator"
     }
   },
-  "required": [
-    "ChargingService"
-  ],
+  "required": ["ChargingService"],
+
   "operational_hints": {
     "indexHints": [
       "beckn:id",
@@ -51,6 +50,7 @@
       "beckn:orderAttributes.totalCost.inclVat",
       "beckn:providerAttributes.operatorName"
     ],
+
     "piiHints": {
       "fields": [
         "message.order.billing.name",
@@ -68,6 +68,7 @@
       "treatment": "Do not index; redact in logs; encrypt at rest where stored.",
       "notes": "EV Charging PII includes authorization hints, vehicle information, and provider contact details. Discovery and catalog payloads generally contain no PII; PII appears post-transaction (confirm/status)."
     },
+
     "api_response_config": {
       "description": "Configuration for API response field sets - defines what fields to return for different use cases",
       "max_items_per_page": 1000,
@@ -101,6 +102,7 @@
       },
       "notes": "Minimal fields are returned for list/search APIs; full attributes are included only on detail views or when explicitly requested via query parameters."
     },
+
     "discover": {
       "supported_filters": [
         "text_search",
@@ -112,5 +114,6 @@
         "beckn:itemAttributes.maxPowerKW.desc"
       ]
     }
+
   }
 }

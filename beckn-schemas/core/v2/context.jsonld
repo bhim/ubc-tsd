@@ -221,7 +221,6 @@
     "tracking": "beckn:tracking",
     "trackingAction": "beckn:trackingAction",
     "txnRef": "beckn:txnRef",
-    "upiTransactionId": "beckn:upiTransactionId",
     "unitCode": "beckn:unitCode",
     "unitQuantity": "beckn:unitQuantity",
     "unitText": "beckn:unitText",
