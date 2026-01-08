@@ -1,0 +1,110 @@
+openapi: 3.1.1
+info:
+  title: UBC Network Extensions (v1)
+  version: 1.0.0
+  x-profile-id: profiles/ubc-extensions/v1/ubc-network
+  description: >
+    UBC Network-specific schema extensions for India. These attributes extend
+    the core Beckn Protocol schemas with India-specific constructs like UPI
+    transaction IDs, buyer VPAs, and other network-specific features.
+    
+    This schema is hosted at:
+    https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/
+  contact:
+    name: UBC Network
+    url: https://github.com/bhim/ubc-tsd
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+components:
+  schemas:
+    ########################################################################
+    # BUYER.ATTRIBUTES — BuyerUPI
+    ########################################################################
+    BuyerUPI:
+      type: object
+      required: ["@context", "@type", "vpa"]
+      additionalProperties: false
+      description: >
+        India-specific buyer payment information for UBC network.
+        Attached to Buyer.buyerAttributes to provide UPI/VPA details
+        for refunds and buyer identification.
+      properties:
+        "@context":
+          type: string
+          format: uri
+          description: JSON-LD context URI for the BuyerUPI schema
+          enum: ["https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"]
+        "@type":
+          type: string
+          description: Type of the buyer attributes
+          enum: ["BuyerUPI"]
+        vpa:
+          type: string
+          description: Virtual Payment Address (UPI ID) of the buyer for refunds.
+          example: "ravikumar@upi"
+
+    ########################################################################
+    # PAYMENT.ATTRIBUTES — UBCPaymentAttributes
+    ########################################################################
+    UBCPaymentAttributes:
+      type: object
+      required: ["@context", "@type"]
+      additionalProperties: false
+      description: >
+        UBC Network-specific payment attributes. Extends PaymentSettlement
+        with India-specific fields like UPI transaction IDs. Attached to
+        Payment.paymentAttributes alongside settlementAccounts.
+      properties:
+        "@context":
+          type: string
+          format: uri
+          description: JSON-LD context URI for the UBCPaymentAttributes schema
+          enum: ["https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"]
+        "@type":
+          type: string
+          description: Type of the payment attributes
+          enum: ["UBCPaymentAttributes"]
+        upiTransactionId:
+          type: string
+          description: UPI transaction reference ID returned by the payment gateway.
+          example: "UPI123456789012"
+        settlementAccounts:
+          type: array
+          description: List of settlement details (Bank, VPA, etc.) for beneficiaries.
+          items:
+            $ref: '#/components/schemas/SettlementAccount'
+
+    ########################################################################
+    # SETTLEMENT ACCOUNT
+    ########################################################################
+    SettlementAccount:
+      type: object
+      additionalProperties: false
+      description: Bank or UPI account details for settlement.
+      properties:
+        beneficiaryId:
+          type: string
+          description: Identifier for the beneficiary (BAP/BPP domain).
+          example: "example-bap.com"
+        accountHolderName:
+          type: string
+          description: Account holder name.
+          example: "Example BAP Solutions Pvt Ltd"
+        accountNumber:
+          type: string
+          description: Bank account number.
+          example: "9876543210123"
+        ifscCode:
+          type: string
+          description: Bank IFSC code.
+          example: "HDFC0009876"
+        bankName:
+          type: string
+          description: Name of the bank.
+          example: "HDFC Bank"
+        vpa:
+          type: string
+          description: Virtual Payment Address (UPI ID) for settlement.
+          example: "example-bap@paytm"

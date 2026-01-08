@@ -48,6 +48,3 @@ This supports both local development and public hosting.
 
 ## 🏷️ Tags
 `ev-charging, charging-point-operator, provider, operator, roaming, registry, beckn, json-ld, schema.org, openapi`
-
-
-

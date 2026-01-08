@@ -7,7 +7,7 @@ info:
     Attribute schemas for payment settlement (Provider/Payment attributes).
     These attributes are attached to Provider.attributes or Payment.attributes to provide
     settlement account details including bank accounts, IFSC codes, and UPI addresses
-    for different beneficiary types (BPP, BAP).
+    for network participants identified by their subscriber ID.
 
 components:
   schemas:
@@ -30,12 +30,11 @@ components:
             type: object
             additionalProperties: false
             properties:
-              beneficiaryType:
+              beneficiaryId:
                 type: string
-                enum: [BPP, BAP]
-                description: Role of the entity (BPP for Provider, BAP for User/App).
-                example: "BPP"
-                x-jsonld: { "@id": beneficiaryType }
+                description: Subscriber ID of the network participant (BPP or BAP).
+                example: "example-bpp.com"
+                x-jsonld: { "@id": beneficiaryId }
               accountHolderName:
                 type: string
                 description: Account holder name.
@@ -67,23 +66,4 @@ components:
                 description: URL for payment processing/redirection.
                 example: "https://payments.example.com/pay?transaction_id=123&amount=100"
                 x-jsonld: { "@id": "schema:url" }
-
-    ########################################################################
-    # BUYER.ATTRIBUTES — BuyerPaymentInfo
-    ########################################################################
-    BuyerPaymentInfo:
-      type: object
-      additionalProperties: false
-      description: >
-        Payment-related information for the buyer. Attached to Buyer.buyerAttributes
-        to provide UPI/payment details without modifying the core Buyer schema.
-      x-jsonld:
-        "@context": ./context.jsonld
-        "@type": BuyerPaymentInfo
-      properties:
-        vpa:
-          type: string
-          description: Virtual Payment Address (UPI ID) of the buyer.
-          example: "ravikumar@upi"
-          x-jsonld: { "@id": vpa }
 

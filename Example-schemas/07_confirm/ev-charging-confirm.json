@@ -29,8 +29,8 @@
         "beckn:email": "ravi.kumar@example.com",
         "beckn:taxID": "GSTIN29ABCDE1234F1Z5",
         "beckn:buyerAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/PaymentSettlement/v1/context.jsonld",
-          "@type": "BuyerPaymentInfo",
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
           "vpa": "ravikumar@upi"
         }
       },
@@ -108,7 +108,11 @@
         "beckn:paidAt": "2025-12-19T10:05:00Z",
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "COMPLETED",
-        "beckn:upiTransactionId": "UPI123456789012"
+        "beckn:paymentAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
+          "upiTransactionId": "UPI123456789012"
+        }
       }
     }
   },

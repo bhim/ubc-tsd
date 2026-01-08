@@ -24,8 +24,8 @@
         "@type": "beckn:Buyer",
         "beckn:id": "user-123",
         "beckn:buyerAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/PaymentSettlement/v1/context.jsonld",
-          "@type": "BuyerPaymentInfo",
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
           "vpa": "ravikumar@upi"
         }
       },
@@ -46,10 +46,10 @@
             "url": "https://track.bluechargenet-aggregator.io/session/SESSION-9876543210"
           }
         },
-        "sessionStatus": "ACTIVE",
         "beckn:deliveryAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld",
+          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
+          "sessionStatus": "ACTIVE",
           "chargingTelemetry": [
             {
               "eventTime": "2025-01-27T17:00:00Z",

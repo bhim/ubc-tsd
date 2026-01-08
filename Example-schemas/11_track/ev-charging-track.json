@@ -24,8 +24,8 @@
         "@type": "beckn:Buyer",
         "beckn:id": "user-123",
         "beckn:buyerAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/PaymentSettlement/v1/context.jsonld",
-          "@type": "BuyerPaymentInfo",
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
           "vpa": "ravikumar@upi"
         }
       },

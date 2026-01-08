@@ -101,11 +101,11 @@
         "beckn:beneficiary": "BAP",
         "beckn:paymentStatus": "INITIATED",
         "beckn:paymentAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/PaymentSettlement/v1/context.jsonld",
-          "@type": "PaymentSettlement",
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
           "settlementAccounts": [
             {
-              "beneficiaryType": "BAP",
+              "beneficiaryId": "example-bap.com",
               "accountHolderName": "Example BAP Solutions Pvt Ltd",
               "accountNumber": "9876543210123",
               "ifscCode": "HDFC0009876",

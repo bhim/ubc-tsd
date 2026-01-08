@@ -194,4 +194,53 @@ message.cancellationTerms,Cancellation Terms,Object,Yes,Cancellation policy,{bec
 message.cancellationTerms.beckn:refundAmount,Refund Amount,Number,No,Amount to refund,45.00,on_cancel,Refundable amount
 message.cancellationTerms.beckn:cancellationFee,Cancellation Fee,Number,No,Fee charged,10.00,on_cancel,Cancellation penalty
 message.cancellationTerms.beckn:refundPolicy,Refund Policy,String,No,Refund policy details,Full refund if cancelled 1hr before,on_cancel,Policy explanation
+beckn:buyerAttributes,Buyer Attributes,Object,No,Buyer payment-specific attributes,{@type: BuyerPaymentInfo vpa: user@upi},"select, on_select, init, on_init, confirm, on_confirm, track, on_track, cancel, on_cancel",Contains buyer payment info like VPA
+beckn:buyerAttributes.@context,Context,URL,Yes,BuyerPaymentInfo context,https://raw.githubusercontent.com/.../PaymentSettlement/v1/context.jsonld,"init, confirm",Schema reference for buyer payment info
+beckn:buyerAttributes.@type,Type,String,Yes,Type identifier,BuyerPaymentInfo,"init, confirm",Always BuyerPaymentInfo
+beckn:buyerAttributes.vpa,VPA,String,Yes,Virtual Payment Address,ravikumar@upi,"init, confirm, on_confirm",UPI Virtual Payment Address for refunds
+beckn:deliveryAttributes.chargingTelemetry,Charging Telemetry,Array[Object],No,Real-time charging session metrics,[{eventTime metrics: [...]}],"on_track, on_status",Time-series telemetry data during charging
+chargingTelemetry[].eventTime,Event Time,DateTime,Yes,Timestamp of telemetry reading,2025-01-27T17:00:00Z,"on_track, on_status",ISO 8601 format
+chargingTelemetry[].metrics,Metrics,Array[Object],Yes,Array of metric readings,[{name value unitCode}],"on_track, on_status",Charging session measurements
+chargingTelemetry[].metrics[].name,Metric Name,String,Yes,Type of measurement,"STATE_OF_CHARGE, POWER, ENERGY, VOLTAGE, CURRENT","on_track, on_status",Telemetry metric identifier
+chargingTelemetry[].metrics[].value,Metric Value,Number,Yes,Measured value,62.5,"on_track, on_status",Numeric measurement
+chargingTelemetry[].metrics[].unitCode,Unit Code,String,Yes,Unit of measurement,"PERCENTAGE, KWH, KW, VLT, AMP","on_track, on_status",UN/CEFACT unit codes
+beckn:itemAttributes.chargingStation,Charging Station,Object,No,Physical charging station details,{id serviceLocation},"on_discover, catalog_publish",Station metadata
+beckn:itemAttributes.chargingStation.id,Station ID,String,Yes,Unique station identifier,IN-ECO-BTM-STATION-01,"on_discover, catalog_publish",Physical station reference
+beckn:itemAttributes.chargingStation.serviceLocation,Service Location,Object,Yes,Station location details,{@type: beckn:Location geo address},"on_discover, catalog_publish",Where station is located
+beckn:itemAttributes.vehicleType,Vehicle Type,String,No,Supported vehicle type,"2-WHEELER, 3-WHEELER, 4-WHEELER","on_discover, catalog_publish",Vehicle compatibility
+message.ratings,Ratings,Array[Object],Yes,Array of rating inputs,[{@type: beckn:RatingInput...}],rating,User rating submissions
+message.ratings[].@context,Context,URL,Yes,RatingInput context,https://raw.githubusercontent.com/.../context.jsonld,rating,Schema definition reference
+message.ratings[].@type,Type,String,Yes,Type identifier,beckn:RatingInput,rating,Always beckn:RatingInput
+message.ratings[].id,Reference ID,String,Yes,What is being rated,fulfillment-001,rating,Order/fulfillment/item ID
+message.ratings[].ratingValue,Rating Value,Number,Yes,Rating score,4,rating,Usually 1-5 scale
+message.ratings[].bestRating,Best Rating,Number,Yes,Maximum possible rating,5,rating,Highest rating value
+message.ratings[].worstRating,Worst Rating,Number,Yes,Minimum possible rating,1,rating,Lowest rating value
+message.ratings[].category,Rating Category,String,Yes,Category being rated,"FULFILLMENT, PROVIDER, ITEM, ORDER",rating,What aspect to rate
+message.ratings[].feedback,Feedback,Object,No,User feedback details,{comments tags: [...]},rating,Structured feedback
+message.ratings[].feedback.comments,Comments,String,No,User review text,Excellent charging experience!,rating,Free-text feedback
+message.ratings[].feedback.tags,Tags,Array[String],No,Feedback tags,"[fast-charging, clean-station]",rating,Predefined feedback labels
+message.received,Received,Boolean,Yes,Whether rating was received,true,on_rating,Acknowledgement flag
+message.feedbackForm,Feedback Form,Object,No,Additional feedback form details,{url mime_type submission_id},on_rating,Extended feedback collection
+message.feedbackForm.url,Form URL,URL,Yes,Feedback form link,https://example-bpp.com/feedback/portal,on_rating,Where to submit feedback
+message.feedbackForm.mime_type,MIME Type,String,No,Form content type,application/xml,on_rating,Format of feedback form
+message.feedbackForm.submission_id,Submission ID,String,No,Feedback submission reference,feedback-123e4567-e89b-12d3-a456-426614174000,on_rating,Unique submission identifier
+message.results,Publish Results,Array[Object],Yes,Catalog publish results,[{catalog_id status...}],on_catalog_publish,Indexing results
+message.results[].catalog_id,Catalog ID,String,Yes,Published catalog identifier,catalog-ev-charging-001,on_catalog_publish,Reference to catalog
+message.results[].status,Status,String,Yes,Publish status,"ACCEPTED, REJECTED",on_catalog_publish,Indexing outcome
+message.results[].item_count,Item Count,Integer,No,Number of items indexed,42,on_catalog_publish,Total indexed items
+message.results[].warnings,Warnings,Array[Object],No,Non-fatal issues,[{code message}],on_catalog_publish,Indexing warnings
+message.results[].warnings[].code,Warning Code,String,Yes,Warning type,NON_NORMALIZED_BRAND,on_catalog_publish,Standard warning code
+message.results[].warnings[].message,Warning Message,String,Yes,Warning description,Some brand values were normalized,on_catalog_publish,Human-readable warning
+message.results[].error,Error,Object,No,Rejection error details,{code message paths},on_catalog_publish,Why catalog was rejected
+message.results[].error.code,Error Code,String,Yes,Error code,INVALID_ITEM,on_catalog_publish,Standard error code
+message.results[].error.message,Error Message,String,Yes,Error description,Invalid item payload at index 3,on_catalog_publish,Human-readable error
+message.results[].error.paths,Error Paths,String,No,Path to invalid data,catalogs[1].items[3],on_catalog_publish,JSONPath to error location
+beckn:payment.beckn:upiTransactionId,UPI Transaction ID,String,No,UPI payment transaction reference,UPI123456789012,"on_confirm, on_status, on_cancel",UPI payment identifier
+beckn:payment.beckn:beneficiary,Beneficiary,String,No,Payment recipient type,"BAP, BPP, BUYER","on_init, on_confirm, on_cancel",Who receives the payment
+beckn:payment.beckn:paidAt,Paid At,DateTime,No,Payment timestamp,2025-12-19T10:05:00Z,on_confirm,When payment was made
+beckn:orderAttributes,Order Attributes,Object,No,Order-level domain attributes,{@type: EvChargingOrder preferences: {...}},"select, on_select",EV charging order specifics
+beckn:orderAttributes.preferences,Preferences,Object,No,User charging preferences,{startTime endTime},"select, on_select",Preferred charging time window
+beckn:orderAttributes.preferences.startTime,Preferred Start Time,DateTime,No,Preferred session start,2026-01-04T08:00:00+05:30,"select, on_select",ISO 8601 format
+beckn:orderAttributes.preferences.endTime,Preferred End Time,DateTime,No,Preferred session end,2026-01-04T10:00:00+05:30,"select, on_select",ISO 8601 format
+beckn:orderAttributes.buyerFinderFee,Buyer Finder Fee,Object,No,BAP commission,{currency: INR value: 2.5},"select, on_select",Fee for BAP services
 

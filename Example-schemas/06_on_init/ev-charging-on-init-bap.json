@@ -100,13 +100,12 @@
         },
         "beckn:beneficiary": "BAP",
         "beckn:paymentStatus": "INITIATED",
-        "beckn:upiTransactionId": "UPI123456789012",
         "beckn:paymentAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/PaymentSettlement/v1/context.jsonld",
-          "@type": "PaymentSettlement",
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
           "settlementAccounts": [
             {
-              "beneficiaryType": "BAP",
+              "beneficiaryId": "example-bap.com",
               "accountHolderName": "Example BAP Solutions Pvt Ltd",
               "accountNumber": "9876543210123",
               "ifscCode": "HDFC0009876",
@@ -114,7 +113,7 @@
               "vpa": "example-bap@paytm"
             },
             {
-              "beneficiaryType": "BPP",
+              "beneficiaryId": "example-bpp.com",
               "accountHolderName": "EcoPower Charging Solutions Pvt Ltd",
               "accountNumber": "1234567890123",
               "ifscCode": "HDFC0001234",

@@ -326,27 +326,13 @@
       "schema:name": "Accepted Payment Method",
       "rdfs:comment": "Enumeration of payment methods supported across core entities.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:UPI"
-        },
-        {
-          "@id": "beckn:CREDIT_CARD"
-        },
-        {
-          "@id": "beckn:DEBIT_CARD"
-        },
-        {
-          "@id": "beckn:WALLET"
-        },
-        {
-          "@id": "beckn:BANK_TRANSFER"
-        },
-        {
-          "@id": "beckn:CASH"
-        },
-        {
-          "@id": "beckn:APPLE_PAY"
-        }
+        { "@id": "beckn:UPI" },
+        { "@id": "beckn:CREDIT_CARD" },
+        { "@id": "beckn:DEBIT_CARD" },
+        { "@id": "beckn:WALLET" },
+        { "@id": "beckn:BANK_TRANSFER" },
+        { "@id": "beckn:CASH" },
+        { "@id": "beckn:APPLE_PAY" }
       ]
     },
     {
@@ -570,15 +556,9 @@
       "schema:name": "Tracking Status",
       "rdfs:comment": "Enumeration of tracking lifecycle statuses for fulfillment handles.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:TrackingActive"
-        },
-        {
-          "@id": "beckn:TrackingDisabled"
-        },
-        {
-          "@id": "beckn:TrackingCompleted"
-        }
+        { "@id": "beckn:TrackingActive" },
+        { "@id": "beckn:TrackingDisabled" },
+        { "@id": "beckn:TrackingCompleted" }
       ]
     },
     {
@@ -614,57 +594,23 @@
       "schema:name": "Payment Status",
       "rdfs:comment": "Enumeration of payment processing statuses used across the network.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:PaymentInitiated"
-        },
-        {
-          "@id": "beckn:PaymentPending"
-        },
-        {
-          "@id": "beckn:PaymentAuthorized"
-        },
-        {
-          "@id": "beckn:PaymentCaptured"
-        },
-        {
-          "@id": "beckn:PaymentCompleted"
-        },
-        {
-          "@id": "beckn:PaymentFailed"
-        },
-        {
-          "@id": "beckn:PaymentCancelled"
-        },
-        {
-          "@id": "beckn:PaymentRefunded"
-        },
-        {
-          "@id": "beckn:PaymentPartiallyRefunded"
-        },
-        {
-          "@id": "beckn:PaymentChargeback"
-        },
-        {
-          "@id": "beckn:PaymentDisputed"
-        },
-        {
-          "@id": "beckn:PaymentExpired"
-        },
-        {
-          "@id": "beckn:PaymentReversed"
-        },
-        {
-          "@id": "beckn:PaymentVoided"
-        },
-        {
-          "@id": "beckn:PaymentSettled"
-        },
-        {
-          "@id": "beckn:PaymentOnHold"
-        },
-        {
-          "@id": "beckn:PaymentAdjusted"
-        }
+        { "@id": "beckn:PaymentInitiated" },
+        { "@id": "beckn:PaymentPending" },
+        { "@id": "beckn:PaymentAuthorized" },
+        { "@id": "beckn:PaymentCaptured" },
+        { "@id": "beckn:PaymentCompleted" },
+        { "@id": "beckn:PaymentFailed" },
+        { "@id": "beckn:PaymentCancelled" },
+        { "@id": "beckn:PaymentRefunded" },
+        { "@id": "beckn:PaymentPartiallyRefunded" },
+        { "@id": "beckn:PaymentChargeback" },
+        { "@id": "beckn:PaymentDisputed" },
+        { "@id": "beckn:PaymentExpired" },
+        { "@id": "beckn:PaymentReversed" },
+        { "@id": "beckn:PaymentVoided" },
+        { "@id": "beckn:PaymentSettled" },
+        { "@id": "beckn:PaymentOnHold" },
+        { "@id": "beckn:PaymentAdjusted" }
       ]
     },
     {
@@ -978,42 +924,18 @@
       "schema:name": "Order Status",
       "rdfs:comment": "Enumeration of order lifecycle statuses.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:OrderCreated"
-        },
-        {
-          "@id": "beckn:OrderPending"
-        },
-        {
-          "@id": "beckn:OrderConfirmed"
-        },
-        {
-          "@id": "beckn:OrderInProgress"
-        },
-        {
-          "@id": "beckn:OrderPartiallyFulfilled"
-        },
-        {
-          "@id": "beckn:OrderCompleted"
-        },
-        {
-          "@id": "beckn:OrderCancelled"
-        },
-        {
-          "@id": "beckn:OrderRejected"
-        },
-        {
-          "@id": "beckn:OrderFailed"
-        },
-        {
-          "@id": "beckn:OrderReturned"
-        },
-        {
-          "@id": "beckn:OrderRefunded"
-        },
-        {
-          "@id": "beckn:OrderOnHold"
-        }
+        { "@id": "beckn:OrderCreated" },
+        { "@id": "beckn:OrderPending" },
+        { "@id": "beckn:OrderConfirmed" },
+        { "@id": "beckn:OrderInProgress" },
+        { "@id": "beckn:OrderPartiallyFulfilled" },
+        { "@id": "beckn:OrderCompleted" },
+        { "@id": "beckn:OrderCancelled" },
+        { "@id": "beckn:OrderRejected" },
+        { "@id": "beckn:OrderFailed" },
+        { "@id": "beckn:OrderReturned" },
+        { "@id": "beckn:OrderRefunded" },
+        { "@id": "beckn:OrderOnHold" }
       ]
     },
     {
@@ -1533,14 +1455,6 @@
       "schema:rangeIncludes": "schema:Text"
     },
     {
-      "@id": "beckn:upiTransactionId",
-      "@type": "rdf:Property",
-      "rdfs:label": "UPI Transaction ID",
-      "rdfs:comment": "BAP-generated UPI transaction reference ID for payment tracking.",
-      "rdfs:domain": "beckn:Payment",
-      "schema:rangeIncludes": "schema:Text"
-    },
-    {
       "@id": "beckn:paidAt",
       "@type": "rdf:Property",
       "rdfs:label": "Paid at",
@@ -1570,12 +1484,8 @@
       "schema:name": "Beneficiary",
       "rdfs:comment": "Enumeration of parties who can receive a payment in the Beckn network.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:BPP"
-        },
-        {
-          "@id": "beckn:BAP"
-        }
+        { "@id": "beckn:BPP" },
+        { "@id": "beckn:BAP" }
       ]
     },
     {
@@ -1701,27 +1611,13 @@
       "schema:name": "Support Channel",
       "rdfs:comment": "Enumeration of supported customer service channels.",
       "schema:hasEnumerationMember": [
-        {
-          "@id": "beckn:SupportChannelPhone"
-        },
-        {
-          "@id": "beckn:SupportChannelEmail"
-        },
-        {
-          "@id": "beckn:SupportChannelWeb"
-        },
-        {
-          "@id": "beckn:SupportChannelChat"
-        },
-        {
-          "@id": "beckn:SupportChannelWhatsApp"
-        },
-        {
-          "@id": "beckn:SupportChannelInApp"
-        },
-        {
-          "@id": "beckn:SupportChannelOther"
-        }
+        { "@id": "beckn:SupportChannelPhone" },
+        { "@id": "beckn:SupportChannelEmail" },
+        { "@id": "beckn:SupportChannelWeb" },
+        { "@id": "beckn:SupportChannelChat" },
+        { "@id": "beckn:SupportChannelWhatsApp" },
+        { "@id": "beckn:SupportChannelInApp" },
+        { "@id": "beckn:SupportChannelOther" }
       ]
     },
     {

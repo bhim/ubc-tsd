@@ -1,0 +1,30 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "ubc": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/vocab.jsonld#",
+        "schema": "https://schema.org/",
+        "BuyerUPI": {
+            "@id": "ubc:BuyerUPI",
+            "@context": {
+                "vpa": "ubc:vpa"
+            }
+        },
+        "UBCPaymentAttributes": {
+            "@id": "ubc:UBCPaymentAttributes",
+            "@context": {
+                "upiTransactionId": "ubc:upiTransactionId",
+                "settlementAccounts": {
+                    "@id": "ubc:settlementAccounts",
+                    "@container": "@set"
+                },
+                "beneficiaryId": "ubc:beneficiaryId",
+                "accountHolderName": "ubc:accountHolderName",
+                "accountNumber": "ubc:accountNumber",
+                "ifscCode": "ubc:ifscCode",
+                "bankName": "ubc:bankName",
+                "vpa": "ubc:vpa"
+            }
+        }
+    }
+}
