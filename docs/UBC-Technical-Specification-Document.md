@@ -1374,7 +1374,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 The PaymentSettlement schema extends the Payment object with an array of settlement accounts, where each account specifies:
 
-1.Beneficiary type (BAP or BPP) - identifies which party the account belongs to
+1.Beneficiary ID - identifies which party the funds are to be settled to - mention the coorresponding subcriber id name here.
 2.Bank account details - account number, IFSC code, account holder name, bank name
 3.Virtual Payment Address (VPA) - UPI ID for digital payments
 4.Payment URL - URL for payment processing/redirection

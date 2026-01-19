@@ -41,7 +41,7 @@ components:
           description: Type of the buyer attributes
           enum: ["BuyerUPI"]
         vpa:
-          type: string
+          type: [string, "null"]
           description: Virtual Payment Address (UPI ID) of the buyer for refunds.
           example: "ravikumar@upi"
 
@@ -67,7 +67,7 @@ components:
           description: Type of the payment attributes
           enum: ["UBCPaymentAttributes"]
         upiTransactionId:
-          type: string
+          type: [string, "null"]
           description: UPI transaction reference ID returned by the payment gateway.
           example: "UPI123456789012"
         settlementAccounts:
