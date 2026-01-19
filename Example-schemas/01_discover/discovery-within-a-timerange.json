@@ -16,7 +16,7 @@
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00+05:30' && @.schema:endTime >= '2026-01-04T08:00:00+05:30')])]"
+      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00Z' && @.schema:endTime >= '2026-01-04T08:00:00Z')])]"
     },
     "spatial": [
       {

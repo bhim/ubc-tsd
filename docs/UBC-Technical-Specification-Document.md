@@ -191,8 +191,8 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T06:00:00+05:30",
-                "schema:endTime": "2026-01-04T22:00:00+05:30"
+                "schema:startTime": "2026-01-04T06:00:00Z",
+                "schema:endTime": "2026-01-04T22:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -267,8 +267,8 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T00:00:00+05:30",
-                "schema:endTime": "2026-01-04T23:59:59+05:30"
+                "schema:startTime": "2026-01-04T00:00:00Z",
+                "schema:endTime": "2026-01-04T23:59:59Z"
               }
             ],
             "beckn:rateable": true,
@@ -344,8 +344,8 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T08:00:00+05:30",
-                "schema:endTime": "2026-01-04T20:00:00+05:30"
+                "schema:startTime": "2026-01-04T08:00:00Z",
+                "schema:endTime": "2026-01-04T20:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -553,7 +553,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
 ```
 </details>
 
-> **Note:** It is important to highlight that the spatial coordinates placed within the "geo" field, [0] is latitude and [1] is longitude
+> **Note:** It is important to highlight that the spatial coordinates placed within the "geo" field, [0] is longitude and [1] is latitude
 
 * **Successful on_catalog_publish** 
 <details>
@@ -717,6 +717,9 @@ The following section contains example category codes that can be used:
 | **V2G_ENABLED** | Charger/site supports bidirectional power transfer (V2G), e.g., per ISO 15118-20 implementations. |
 | **REMOTE_START_STOP** | Remote start/stop of sessions exposed via roaming interface (OCPI Commands module). |
 
+### 10.4. Field Descriptions: 
+
+**Important**: For a comprehensive reference of all fields, their types, and standardized ISO nomenclature used in these examples, please consult the <summary><a href="../Example-schemas/Field_Documentation.csv">Field Documentation</a></summary>
 
 
 ## 11. User Stories
@@ -770,7 +773,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.1. action: discover**
 * **Method:** POST
-* **Use Cases:** Raghav scans QR code on charger using his BAP user app.
+* **Use Cases:** Arjun scans QR code on charger using his BAP user app.
 <details>
 <summary><a href="../Example-schemas/01_discover/discovery-by-QR.json">Example json :rocket:</a></summary>
 
@@ -854,8 +857,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T08:00:00+05:30",
-                "schema:endTime": "2026-01-04T20:00:00+05:30"
+                "schema:startTime": "2026-01-04T08:00:00Z",
+                "schema:endTime": "2026-01-04T20:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -1015,7 +1018,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.3. action: select**
 * **Method:** POST
-* **Use Cases:** Raghav selects a service offering from the options he gets. He chooses a 100 INR top-up.
+* **Use Cases:** Arjun selects a service offering from the options he gets. He chooses a 100 INR top-up.
 <details>
 <summary><a href="../Example-schemas/03_select/ev-charging-select.json">Example json :rocket:</a></summary>
 
@@ -1099,7 +1102,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.4. action: on_select**
 * **Method:** POST
-* **Use Cases:** Raghav receives estimated quotations for the selected service.
+* **Use Cases:** Arjun receives estimated quotations for the selected service.
 <details>
 <summary><a href="../Example-schemas/04_on_select/ev-charging-on_select.json">Example json :rocket:</a></summary>
 
@@ -1234,7 +1237,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.5. action: init**
 * **Method:** POST
-* **Use Cases:** Raghav provides his billing information.
+* **Use Cases:** Arjun provides his billing information.
 <details>
 <summary><a href="../Example-schemas/05_init/ev-charging-init-bpp.json">Example json :rocket:</a></summary>
 
@@ -1367,9 +1370,18 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 ```
 </details>
 
+> **Note:** In a Beckn payment transaction, users interact with Beckn Application Platform (BAP) to transact with Beckn Provider Platform (BPP). The core Payment object schema captures the primary payment flow, but additional settlement account information is required for secondary fund transfers between parties.
+
+The PaymentSettlement schema extends the Payment object with an array of settlement accounts, where each account specifies:
+
+1.Beneficiary ID - identifies which party the funds are to be settled to - mention the coorresponding subcriber id name here.
+2.Bank account details - account number, IFSC code, account holder name, bank name
+3.Virtual Payment Address (VPA) - UPI ID for digital payments
+4.Payment URL - URL for payment processing/redirection
+
 **11.1.2.6. action: on_init**
 * **Method:** POST
-* **Use Cases:** Raghav receives the charging session terms (rate, idle fee window, cancellation rules, payment terms etc). He reviews the terms. He chooses UPI and authorizes payment.
+* **Use Cases:** Arjun receives the charging session terms (rate, idle fee window, cancellation rules, payment terms etc). He reviews the terms. He chooses UPI and authorizes payment.
 <details>
 <summary><a href="../Example-schemas/06_on_init/ev-charging-on_init-bpp.json">Example json :rocket:</a></summary>
 
@@ -1519,6 +1531,8 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 ```
 </details>
 
+> **Note:** UPI-Native Payment Architecture To ensure seamless user experiences and reduced operational complexity, the Unified Bharat E-Charge (UBC) ecosystem implements a direct, redirection-less UPI payment flow. In this model, when a user initiates a transaction, the BPP retrieves a dynamically generated UPI intent link from the CPO’s payment gateway and relays it to the client application. The user confirms payment via any UPI app, which pushes funds directly to the CPO’s merchant VPA. The payment gateway then verifies the credit in real-time with the UPI network and confirms the success to the BPP, enabling immediate booking authorization and faster, multi-cycle daily settlements without traditional gateway redirections
+
 **11.1.2.6.1. action: on_status**
 * **Method:** POST
 * **Use Cases:** Application then receives a notification on the completed status of the payment for the charging session.
@@ -1651,7 +1665,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.7. action: confirm**
 * **Method:** POST
-* **Use Cases:** Raghav confirms the order.
+* **Use Cases:** Arjun confirms the order.
 <details>
 <summary><a href="../Example-schemas/07_confirm/ev-charging-confirm.json">Example json :rocket:</a></summary>
 
@@ -1924,7 +1938,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.8.1 action: status**
 * **Method:** POST
-* **Use Cases:** Raghav is asked to plug in the charger by the application.
+* **Use Cases:** Arjun is asked to plug in the charger by the application.
 <details>
 <summary><a href="../Example-schemas/08_01_status/ev-charging-connector-status.json">Example json :rocket:</a></summary>
 
@@ -2183,7 +2197,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.9. action: update (start charging)**
 * **Method:** POST
-* **Use Cases:** Raghav plugs in and starts the session from the app.
+* **Use Cases:** Arjun plugs in and starts the session from the app.
 <details>
 <summary><a href="../Example-schemas/09_update/ev-charging-start-update.json">Example json :rocket:</a></summary>
 
@@ -2441,7 +2455,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.11. action: track (charging-session progress)**
 * **Method:** POST
-* **Use Cases:** Raghav requests to track the live status of the charging session. state of charge (how much charging has been done).
+* **Use Cases:** Arjun requests to track the live status of the charging session. state of charge (how much charging has been done).
 <details>
 <summary><a href="../Example-schemas/11_track/ev-charging-track.json">Example json :rocket:</a></summary>
 
@@ -2491,7 +2505,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.12. action: on_track**
 * **Method:** POST
-* **Use Cases:** Raghav receives the state of charge (how much charging has been done) of the vehicle.
+* **Use Cases:** Arjun receives the state of charge (how much charging has been done) of the vehicle.
 <details>
 <summary><a href="../Example-schemas/12_on_track/ev-charging-on_track.json">Example json :rocket:</a></summary>
 
@@ -2748,7 +2762,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.14. action: rating**
 * **Method:** POST
-* **Use Cases:** Raghav provides rating for the charging session.
+* **Use Cases:** Arjun provides rating for the charging session.
 <details>
 <summary><a href="../Example-schemas/15_rating/ev-charging-rating.json">Example json :rocket:</a></summary>
 
@@ -2797,7 +2811,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.15. action: on_rating**
 * **Method:** POST
-* **Use Cases:** Raghav receives an achievement after providing a rating.
+* **Use Cases:** Arjun receives an achievement after providing a rating.
 <details>
 <summary><a href="../Example-schemas/16_on_rating/ev-charging-on_rating.json">Example json :rocket:</a></summary>
 
@@ -2833,7 +2847,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.16. action: support**
 * **Method:** POST
-* **Use Cases:** Raghav reaches out for support.
+* **Use Cases:** Arjun reaches out for support.
 <details>
 <summary><a href="../Example-schemas/17_support/ev-charging-support.json">Example json :rocket:</a></summary>
 
@@ -2875,7 +2889,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
 
 **11.1.2.17. action: on_support**
 * **Method:** POST
-* **Use Cases:** Raghav receives a response to his support request.
+* **Use Cases:** Arjun receives a response to his support request.
 <details>
 <summary><a href="../Example-schemas/18_on_support/ev-charging-on_support.json">Example json :rocket:</a></summary>
 
@@ -2998,7 +3012,7 @@ Satisfied, Aisha resumes her trip with time to spare.
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00+05:30' && @.schema:endTime >= '2026-01-04T08:00:00+05:30')])]"
+      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00Z' && @.schema:endTime >= '2026-01-04T08:00:00Z')])]"
     },
     "spatial": [
       {
@@ -3073,8 +3087,8 @@ Satisfied, Aisha resumes her trip with time to spare.
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T08:00:00+05:30",
-                "schema:endTime": "2026-01-04T20:00:00+05:30"
+                "schema:startTime": "2026-01-04T08:00:00Z",
+                "schema:endTime": "2026-01-04T20:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -3149,8 +3163,8 @@ Satisfied, Aisha resumes her trip with time to spare.
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T07:00:00+05:30",
-                "schema:endTime": "2026-01-04T22:00:00+05:30"
+                "schema:startTime": "2026-01-04T07:00:00Z",
+                "schema:endTime": "2026-01-04T22:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -3226,8 +3240,8 @@ Satisfied, Aisha resumes her trip with time to spare.
             "beckn:availabilityWindow": [
               {
                 "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-01-04T09:00:00+05:30",
-                "schema:endTime": "2026-01-04T18:00:00+05:30"
+                "schema:startTime": "2026-01-04T09:00:00Z",
+                "schema:endTime": "2026-01-04T18:00:00Z"
               }
             ],
             "beckn:rateable": true,
@@ -3512,8 +3526,8 @@ Satisfied, Aisha resumes her trip with time to spare.
           "feeValue": 2.5
         },
         "preferences": {
-          "startTime": "2026-01-04T08:00:00+05:30",
-          "endTime": "2026-01-04T20:00:00+05:30"
+          "startTime": "2026-01-04T08:00:00Z",
+          "endTime": "2026-01-04T20:00:00Z"
         }
       }
     }
@@ -3651,8 +3665,8 @@ Satisfied, Aisha resumes her trip with time to spare.
           "feeValue": 2.5
         },
         "preferences": {
-          "startTime": "2026-01-04T08:00:00+05:30",
-          "endTime": "2026-01-04T20:00:00+05:30"
+          "startTime": "2026-01-04T08:00:00Z",
+          "endTime": "2026-01-04T20:00:00Z"
         }
       }
     }
