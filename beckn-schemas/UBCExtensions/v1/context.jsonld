@@ -1,30 +1,25 @@
 {
     "@context": {
         "@version": 1.1,
-        "@protected": true,
-        "ubc": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/vocab.jsonld#",
         "schema": "https://schema.org/",
-        "BuyerUPI": {
-            "@id": "ubc:BuyerUPI",
-            "@context": {
-                "vpa": "ubc:vpa"
-            }
-        },
-        "UBCPaymentAttributes": {
-            "@id": "ubc:UBCPaymentAttributes",
-            "@context": {
-                "upiTransactionId": "ubc:upiTransactionId",
-                "settlementAccounts": {
-                    "@id": "ubc:settlementAccounts",
-                    "@container": "@set"
-                },
-                "beneficiaryId": "ubc:beneficiaryId",
-                "accountHolderName": "ubc:accountHolderName",
-                "accountNumber": "ubc:accountNumber",
-                "ifscCode": "ubc:ifscCode",
-                "bankName": "ubc:bankName",
-                "vpa": "ubc:vpa"
-            }
-        }
-    }
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "ubc": "./vocab.jsonld#",
+        "BuyerUPI": "ubc:BuyerUPI",
+        "UBCPaymentAttributes": "ubc:UBCPaymentAttributes",
+        "name": "schema:name",
+        "description": "schema:description",
+        "price": "schema:price",
+        "priceCurrency": "schema:priceCurrency",
+        "vpa": "ubc:vpa",
+        "upiTransactionId": "ubc:upiTransactionId",
+        "settlementAccounts": "ubc:settlementAccounts",
+        "beneficiaryId": "ubc:beneficiaryId",
+        "accountHolderName": "ubc:accountHolderName",
+        "accountNumber": "ubc:accountNumber",
+        "ifscCode": "ubc:ifscCode",
+        "bankName": "ubc:bankName"
+    },
+    "@graph": []
 }

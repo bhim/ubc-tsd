@@ -1,109 +1,88 @@
 {
     "@context": {
-        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "@version": 1.1,
+        "ubc": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/#",
         "schema": "https://schema.org/",
-        "ubc": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/vocab.jsonld#"
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
     },
     "@graph": [
         {
             "@id": "ubc:BuyerUPI",
             "@type": "rdfs:Class",
-            "rdfs:label": "BuyerUPI",
+            "rdfs:label": "Buyer UPI",
             "rdfs:comment": "India-specific buyer payment information containing UPI VPA for refunds."
         },
         {
             "@id": "ubc:UBCPaymentAttributes",
             "@type": "rdfs:Class",
-            "rdfs:label": "UBCPaymentAttributes",
+            "rdfs:label": "UBC Payment Attributes",
             "rdfs:comment": "UBC Network-specific payment attributes including UPI transaction ID and settlement accounts."
         },
         {
             "@id": "ubc:vpa",
             "@type": "rdf:Property",
-            "rdfs:label": "vpa",
+            "rdfs:label": "Virtual Payment Address",
             "rdfs:comment": "Virtual Payment Address (UPI ID) - a unique identifier for UPI payments in India.",
-            "rdfs:domain": [
-                {
-                    "@id": "ubc:BuyerUPI"
-                },
-                {
-                    "@id": "ubc:UBCPaymentAttributes"
-                }
-            ],
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:BuyerUPI",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:upiTransactionId",
             "@type": "rdf:Property",
-            "rdfs:label": "upiTransactionId",
+            "rdfs:label": "UPI Transaction ID",
             "rdfs:comment": "UPI transaction reference ID returned by the payment gateway after successful payment.",
-            "rdfs:domain": {
-                "@id": "ubc:UBCPaymentAttributes"
-            },
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:settlementAccounts",
             "@type": "rdf:Property",
-            "rdfs:label": "settlementAccounts",
+            "rdfs:label": "Settlement accounts",
             "rdfs:comment": "List of bank/UPI accounts for settlement to different beneficiaries (BAP, BPP).",
-            "rdfs:domain": {
-                "@id": "ubc:UBCPaymentAttributes"
-            },
-            "rdfs:range": {
-                "@id": "rdf:List"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:ItemList"
         },
         {
             "@id": "ubc:beneficiaryId",
             "@type": "rdf:Property",
-            "rdfs:label": "beneficiaryId",
+            "rdfs:label": "Beneficiary ID",
             "rdfs:comment": "Identifier for the beneficiary, typically the domain name of BAP or BPP.",
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:accountHolderName",
             "@type": "rdf:Property",
-            "rdfs:label": "accountHolderName",
+            "rdfs:label": "Account holder name",
             "rdfs:comment": "Name of the bank account holder.",
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:accountNumber",
             "@type": "rdf:Property",
-            "rdfs:label": "accountNumber",
+            "rdfs:label": "Account number",
             "rdfs:comment": "Bank account number for settlement.",
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:ifscCode",
             "@type": "rdf:Property",
-            "rdfs:label": "ifscCode",
+            "rdfs:label": "IFSC code",
             "rdfs:comment": "Indian Financial System Code (IFSC) for the bank branch.",
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         },
         {
             "@id": "ubc:bankName",
             "@type": "rdf:Property",
-            "rdfs:label": "bankName",
+            "rdfs:label": "Bank name",
             "rdfs:comment": "Name of the bank for settlement.",
-            "rdfs:range": {
-                "@id": "xsd:string"
-            }
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
         }
     ]
 }
