@@ -24,7 +24,7 @@ Buyer payment information for refunds via UPI.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `vpa` | String | Virtual Payment Address (UPI ID) for refunds |
+| `vpa` | String \| null | Virtual Payment Address (UPI ID) for refunds |
 
 ### UBCPaymentAttributes
 
@@ -50,7 +50,7 @@ Payment attributes including UPI transaction details and settlement accounts.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `upiTransactionId` | String | UPI transaction reference ID from payment gateway |
+| `upiTransactionId` | String \| null | UPI transaction reference ID from payment gateway |
 | `settlementAccounts` | Array | List of settlement account details |
 | `settlementAccounts[].beneficiaryId` | String | Beneficiary identifier (BAP/BPP domain) |
 | `settlementAccounts[].accountHolderName` | String | Account holder name |

@@ -24,57 +24,48 @@ components:
     ########################################################################
     BuyerUPI:
       type: object
-      required: ["@context", "@type", "vpa"]
+      required: ["vpa"]
       additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": BuyerUPI
       description: >
         India-specific buyer payment information for UBC network.
         Attached to Buyer.buyerAttributes to provide UPI/VPA details
         for refunds and buyer identification.
       properties:
-        "@context":
-          type: string
-          format: uri
-          description: JSON-LD context URI for the BuyerUPI schema
-          enum: ["https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"]
-        "@type":
-          type: string
-          description: Type of the buyer attributes
-          enum: ["BuyerUPI"]
         vpa:
           type: [string, "null"]
           description: Virtual Payment Address (UPI ID) of the buyer for refunds.
           example: "ravikumar@upi"
+          x-jsonld: { "@id": vpa }
 
     ########################################################################
     # PAYMENT.ATTRIBUTES — UBCPaymentAttributes
     ########################################################################
     UBCPaymentAttributes:
       type: object
-      required: ["@context", "@type"]
+      required: ["upiTransactionId", "settlementAccounts"]
       additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": UBCPaymentAttributes
       description: >
         UBC Network-specific payment attributes. Extends PaymentSettlement
         with India-specific fields like UPI transaction IDs. Attached to
         Payment.paymentAttributes alongside settlementAccounts.
       properties:
-        "@context":
-          type: string
-          format: uri
-          description: JSON-LD context URI for the UBCPaymentAttributes schema
-          enum: ["https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"]
-        "@type":
-          type: string
-          description: Type of the payment attributes
-          enum: ["UBCPaymentAttributes"]
         upiTransactionId:
           type: [string, "null"]
           description: UPI transaction reference ID returned by the payment gateway.
           example: "UPI123456789012"
+          x-jsonld: { "@id": upiTransactionId }
         settlementAccounts:
           type: array
           description: List of settlement details (Bank, VPA, etc.) for beneficiaries.
           items:
             $ref: '#/components/schemas/SettlementAccount'
+          x-jsonld: { "@id": settlementAccounts }
 
     ########################################################################
     # SETTLEMENT ACCOUNT
