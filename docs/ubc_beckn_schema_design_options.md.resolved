@@ -1,0 +1,1051 @@
+# UBC EV Charging — Beckn Schema Design Options
+
+Comprehensive design options document covering all proposed schema and protocol changes for the UBC EV Charging network.
+
+---
+
+## Table of Contents
+
+1. [Cancellation Terms Communication](#1-cancellation-terms-communication)
+2. [Overcharge Payment Collection](#2-overcharge-payment-collection)
+3. [Payment Object as Array](#3-payment-object-as-array)
+4. [New Error Codes](#4-new-error-codes)
+5. [Making Reservation Optional Within Catalog](#5-making-reservation-optional-within-catalog)
+6. [Reconciliation of Funds (Overcharge)](#6-reconciliation-of-funds-for-overcharge)
+7. [Charger Identification for Navigation](#7-charger-identification-fields-for-user-navigation)
+8. [Fee Type Enum Classification](#8-fee-type-enum-classification-in-ordervaluecomponents)
+9. [Unit Enums for orderItems.quantity](#9-enums-for-unittext-and-unitcode-in-orderitemsquantity)
+10. [UBC Extensions & Core Schema Relationship](#10-ubc-extensions--core-schema-relationship)
+11. [Merge Select/On_Select into Init/On_Init](#11-merge-selecton_select-into-initon_init)
+12. [QR String Field for Universal QR Support](#12-qr-string-field-for-universal-qr-code-support)
+13. [CDS Catalog Update/Delete API](#13-cds-catalog-updatedelete-api-structure)
+14. [Network-Specific Mandatory Fields (ONIX)](#14-network-specific-mandatory-field-enforcement-onix-validation-profiles)
+15. [Availability Window & Connector Status](#15-availability-window-structure--connector-status)
+16. [Item & Offer Payload Structure Review](#16-item--offer-payload-structure-review)
+
+---
+
+# 1. Cancellation Terms Communication
+
+## Problem Statement
+Before a user cancels an order (after `confirm` has been called), the BPP needs to communicate cancellation terms to the buyer — cancellation fee/penalty, refund policy, time-based conditions, and non-refundable scenarios.
+
+## Design Options
+
+### Option 1: Add `cancellationTerms` to `Offer.offerAttributes` ⭐ RECOMMENDED
+
+**When:** Communicated during `on_discover` and `on_select` phases
+**Where:** `beckn:offerAttributes` within the Offer object
+
+**Rationale:**
+- Cancellation policy is a commercial term tied to the offer, similar to `idleFeePolicy`
+- Consistent with existing `ChargingOffer` pattern in [EvChargingOffer/v1/attributes.yaml](file:///Users/akarsh/ubc-tsd/beckn-schemas/EvChargingOffer/v1/attributes.yaml)
+- User sees the terms **BEFORE** confirming the order
+
+**Schema Extension:**
+```yaml
+# Add to EvChargingOffer/v1/attributes.yaml
+cancellationTerms:
+  type: object
+  properties:
+    refundEligible:
+      type: boolean
+      description: Whether the order is eligible for refund on cancellation
+    cancellationFee:
+      $ref: "PriceSpecification"
+      description: Fee charged for cancellation
+    freeWindowMinutes:
+      type: integer
+      description: Minutes after confirmation during which cancellation is free
+    conditions:
+      type: array
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [TIME_BASED, STATE_BASED, PERCENTAGE]
+          threshold:
+            type: string
+          refundPercentage:
+            type: number
+          description:
+            type: string
+```
+
+**Example in `on_discover` / `on_select`:**
+```json
+"beckn:offerAttributes": {
+  "@context": ".../EvChargingOffer/v1/context.jsonld",
+  "@type": "ChargingOffer",
+  "tariffModel": "PER_KWH",
+  "cancellationTerms": {
+    "refundEligible": true,
+    "freeWindowMinutes": 30,
+    "conditions": [
+      {
+        "type": "TIME_BASED",
+        "threshold": "PT30M",
+        "refundPercentage": 100,
+        "description": "Full refund if cancelled within 30 minutes of confirmation"
+      },
+      {
+        "type": "TIME_BASED",
+        "threshold": "PT2H",
+        "refundPercentage": 50,
+        "description": "50% refund if cancelled within 2 hours of confirmation"
+      },
+      {
+        "type": "STATE_BASED",
+        "threshold": "SESSION_STARTED",
+        "refundPercentage": 0,
+        "description": "No refund after charging session has started"
+      }
+    ]
+  }
+}
+```
+
+### Option 2: Add `cancellationTerms` to `Order.orderAttributes`
+
+**When:** Communicated in `on_confirm` response
+**Where:** `beckn:orderAttributes` within the Order object
+
+- ✅ Clear association with the specific order; can include order-specific variations
+- ❌ User sees terms **AFTER** confirming (less ideal from UX perspective)
+- ❌ Adds to `EvChargingSession` schema instead of `EvChargingOffer`
+
+### Option 3: Add `cancellationTerms` to `Fulfillment.deliveryAttributes`
+
+**When:** In `on_confirm` under `beckn:fulfillment`
+- ❌ Semantic mismatch — cancellation is a commercial term, not delivery-related
+- ❌ Less intuitive placement
+
+### Option 4: Dedicated `get_cancellation_terms` API
+
+**When:** User explicitly requests before cancelling via a new API
+
+- ✅ Real-time calculation based on current order state; dynamic pricing
+- ❌ Requires new API definition; additional network call
+
+### Implementation Steps
+1. Extend [EvChargingOffer/v1/attributes.yaml](file:///Users/akarsh/ubc-tsd/beckn-schemas/EvChargingOffer/v1/attributes.yaml) — add `cancellationTerms` schema
+2. Update `EvChargingOffer/v1/context.jsonld` — add JSON-LD mapping
+3. Update `EvChargingOffer/v1/vocab.jsonld` — add vocabulary definitions
+4. Update example files (`on_discover`, `on_select`, `on_confirm`)
+5. Update Technical Specification Document
+
+---
+
+# 2. Overcharge Payment Collection
+
+## Problem Statement
+After a charging session completes, actual energy consumed may exceed the estimated/prepaid amount. The BPP needs to collect the additional payment (overcharge) from the buyer.
+
+**Key Scenario:** Buyer prepays ₹150 for estimated 3 kWh → actual session = 4 kWh = ₹180 → BPP must collect ₹30 overcharge.
+
+## Design Options
+
+### Method 1: Collect via New `select` Call
+
+Different Transaction ID, Different Order, Same Transaction Reference.
+
+**Schema Fields Required:**
+```yaml
+# parentTransactionId — links overcharge to original transaction
+parentTransactionId:
+  type: string
+  description: Reference to the original transaction.
+
+# beckn:orderType — distinguishes overcharge from regular orders
+beckn:orderType:
+  type: string
+  enum: ["REGULAR", "OVERCHARGE", "UNDERCHARGE_REFUND", "CANCELLATION", "ADJUSTMENT"]
+  default: "REGULAR"
+
+# beckn:relatedOrder — links to the original order
+beckn:relatedOrder:
+  type: object
+  properties:
+    orderId: { type: string }
+    transactionId: { type: string }
+    relationshipType:
+      type: string
+      enum: ["OVERCHARGE_FOR", "REFUND_FOR", "REPLACEMENT_FOR", "ADJUSTMENT_FOR"]
+```
+
+**Flow:** `on_update (COMPLETED)` → new `select` → `on_select` → `init` → `on_init` → `confirm` → `on_confirm`
+
+- ✅ Clean separation, full audit trail, standard Beckn flow
+- ❌ Additional API round-trips, UX friction (user sees new "order")
+
+### Method 2: Collect via `update` Call ⭐ RECOMMENDED
+
+Same Transaction ID, Payment Adjustment within Update.
+
+**Schema Fields Required:**
+```yaml
+# beckn:paymentType — distinguishes original from adjustments
+beckn:paymentType:
+  type: string
+  enum: ["INITIAL", "ADJUSTMENT", "REFUND", "OVERCHARGE", "PARTIAL"]
+  default: "INITIAL"
+
+# beckn:paymentAdjustments — additional payment records on the order
+beckn:paymentAdjustments:
+  type: array
+  items:
+    $ref: "#/components/schemas/Payment"
+
+# beckn:adjustmentReason — documents why the adjustment is needed
+beckn:adjustmentReason:
+  type: object
+  properties:
+    code:
+      type: string
+      enum: ["OVERCHARGE", "UNDERCHARGE", "ADDITIONAL_SERVICE", "PENALTY", "CORRECTION"]
+    description: { type: string }
+    originalAmount: { type: number }
+    actualAmount: { type: number }
+    difference: { type: number }
+
+# beckn:updateType — differentiates update purposes
+beckn:updateType:
+  type: string
+  enum: ["SESSION_START", "SESSION_STOP", "PAYMENT_ADJUSTMENT", "RESCHEDULE", "MODIFICATION"]
+```
+
+**Flow:** `update (SESSION_STOP)` → `on_update (COMPLETED, paymentAdjustments)` → `update (payment confirmation)` → `on_update (settled)`
+
+**Example: Overcharge `on_update` Response**
+```json
+{
+  "context": { "action": "on_update", "transaction_id": "original-txn-id" },
+  "message": {
+    "order": {
+      "beckn:id": "order-ev-charging-001",
+      "beckn:orderStatus": "COMPLETED",
+      "beckn:updateType": "PAYMENT_ADJUSTMENT",
+      "beckn:orderValue": {
+        "currency": "INR", "value": 180.0,
+        "components": [
+          { "type": "UNIT", "value": 150.0, "description": "Original prepaid amount" },
+          { "type": "SURCHARGE", "value": 30.0, "description": "Overcharge for additional 0.67 kWh" }
+        ]
+      },
+      "beckn:payment": { "beckn:paymentStatus": "COMPLETED", "beckn:amount": { "value": 150.0 } },
+      "beckn:paymentAdjustments": [
+        {
+          "beckn:id": "payment-adjustment-001",
+          "beckn:paymentType": "OVERCHARGE",
+          "beckn:paymentStatus": "PENDING",
+          "beckn:amount": { "currency": "INR", "value": 30.0 },
+          "beckn:paymentURL": "https://payments.example.com/pay?adj=ADJ001&amount=30",
+          "beckn:adjustmentReason": {
+            "code": "OVERCHARGE",
+            "description": "Actual consumption exceeded prepaid amount",
+            "originalAmount": 150.0, "actualAmount": 180.0, "difference": 30.0
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+- ✅ Same transaction context, fewer API calls, better UX, handles overcharge + refund symmetrically
+- ❌ Requires modification to core Payment and Order schemas
+
+### Comparison Matrix
+
+| Aspect | Method 1 (New Select) | Method 2 (Update) ⭐ |
+|--------|----------------------|---------------------|
+| Transaction ID | New | Same |
+| Order ID | New | Same |
+| API Flow | select → init → confirm | update → on_update |
+| Round Trips | 3+ | 1-2 |
+| UX Impact | New order notification | Seamless adjustment |
+| Refund Handling | Separate refund order | Same mechanism |
+
+### Implementation Steps
+1. Add `beckn:paymentType`, `beckn:adjustmentReason` to Payment schema
+2. Add `beckn:paymentAdjustments`, `beckn:updateType` to Order schema
+3. Update context.jsonld and vocab.jsonld
+4. Create overcharge `on_update` and payment `update` example files
+
+---
+
+# 3. Payment Object as Array
+
+## Problem Statement
+Currently `beckn:payment` is a **single object**. This cannot represent multiple payment events:
+- Original payment `COMPLETED` at ₹150
+- Refund `REFUNDED` of ₹30
+- Overcharge collection `COMPLETED` of ₹45
+
+## Design Options
+
+### Option 1: Change `beckn:payment` to `beckn:payments` Array ⭐ RECOMMENDED
+
+```yaml
+beckn:payments:
+  type: array
+  items:
+    $ref: "#/components/schemas/Payment"
+  description: Array of payment records — initial, refunds, adjustments, overcharge.
+
+# Add to Payment schema
+beckn:paymentType:
+  type: string
+  enum: ["INITIAL", "OVERCHARGE", "REFUND", "PARTIAL_REFUND", "ADJUSTMENT", "PENALTY", "SETTLEMENT"]
+```
+
+> [!WARNING]
+> **Breaking Change** — changes `beckn:payment` (object) → `beckn:payments` (array).
+
+**Migration Strategy:**
+- **Phase 1:** Support both fields. ONIX transforms single → array internally.
+- **Phase 2:** Deprecate `beckn:payment` after migration window.
+
+**Example:**
+```json
+"beckn:payments": [
+  {
+    "beckn:id": "payment-001", "beckn:paymentType": "INITIAL",
+    "beckn:paymentStatus": "COMPLETED", "beckn:amount": { "value": 150.0 }
+  },
+  {
+    "beckn:id": "payment-002", "beckn:paymentType": "OVERCHARGE",
+    "beckn:paymentStatus": "COMPLETED", "beckn:amount": { "value": 30.0 }
+  },
+  {
+    "beckn:id": "payment-003", "beckn:paymentType": "REFUND",
+    "beckn:paymentStatus": "COMPLETED", "beckn:amount": { "value": -20.0 }
+  }
+]
+```
+
+### Option 2: Keep Single Payment, Add `beckn:paymentHistory`
+
+```yaml
+beckn:payment: { $ref: "#/components/schemas/Payment" }    # Current/latest
+beckn:paymentHistory:
+  type: array
+  items: { $ref: "#/components/schemas/Payment" }           # All historical records
+```
+
+- ✅ No breaking change
+- ❌ Ambiguity about what "current" means with multiple active payments
+
+### Implementation Steps
+1. Add `beckn:payments` (array) and `beckn:paymentType` to [core/v2/attributes.yaml](file:///Users/akarsh/ubc-tsd/beckn-schemas/core/v2/attributes.yaml)
+2. Deprecate `beckn:payment` (single) with compatibility period
+3. Update context.jsonld, vocab.jsonld, and all examples
+
+---
+
+# 4. New Error Codes
+
+## Problem Statement
+The current error handling uses a generic `error` object with no standardized codes for EV charging-specific failure scenarios. The network needs defined error codes for common failures.
+
+## Proposed Error Codes
+
+```yaml
+# EV Charging Domain Error Codes
+ErrorCode:
+  type: string
+  enum:
+    # Discovery Errors (1xxx)
+    - "1001"  # CHARGER_NOT_FOUND — QR/item ID doesn't match any catalog entry
+    - "1002"  # STATION_OFFLINE — Charging station is not operational
+    - "1003"  # CONNECTOR_INCOMPATIBLE — Connector type mismatch with vehicle
+
+    # Selection/Init Errors (2xxx)
+    - "2001"  # CHARGER_UNAVAILABLE — Charger is occupied or reserved
+    - "2002"  # OFFER_EXPIRED — Selected offer is no longer valid
+    - "2003"  # QUANTITY_EXCEEDS_LIMIT — Requested kWh exceeds charger/session max
+    - "2004"  # TIME_SLOT_UNAVAILABLE — Requested time window is unavailable
+
+    # Payment Errors (3xxx)
+    - "3001"  # PAYMENT_FAILED — Payment transaction failed
+    - "3002"  # INSUFFICIENT_AMOUNT — Prepaid amount is below minimum threshold
+    - "3003"  # PAYMENT_TIMEOUT — Payment not completed within TTL
+    - "3004"  # REFUND_FAILED — Refund processing failed
+    - "3005"  # OVERCHARGE_COLLECTION_FAILED — Unable to collect overcharge
+
+    # Session Errors (4xxx)
+    - "4001"  # SESSION_START_FAILED — Charger failed to initiate
+    - "4002"  # SESSION_INTERRUPTED — Charging unexpectedly stopped
+    - "4003"  # VEHICLE_DISCONNECTED — Vehicle unplugged during session
+    - "4004"  # CHARGER_FAULT — Hardware/software fault
+    - "4005"  # POWER_SUPPLY_ISSUE — Grid-level power issue
+
+    # Cancellation Errors (5xxx)
+    - "5001"  # CANCELLATION_WINDOW_EXPIRED — Free cancellation period over
+    - "5002"  # SESSION_ALREADY_STARTED — Cannot cancel after session started
+    - "5003"  # CANCELLATION_FEE_REQUIRED — Cancellation requires fee payment
+
+    # Catalog/CDS Errors (6xxx)
+    - "6001"  # ITEM_NOT_IN_CATALOG — Referenced item doesn't exist
+    - "6002"  # CATALOG_SYNC_FAILED — Catalog publish/update failed
+    - "6003"  # DUPLICATE_ITEM — Item ID already exists
+```
+
+**Example in Error Response:**
+```json
+"error": {
+  "code": "2001",
+  "type": "DOMAIN-ERROR",
+  "message": "Charger CCS2-A at EcoPower BTM Hub is currently occupied",
+  "path": "message.order.beckn:orderItems[0].beckn:orderedItem"
+}
+```
+
+### Implementation Steps
+1. Define error code registry in `EvChargingErrors/v1/error_codes.yaml`
+2. Add domain-specific error code enum to the `error` object schema
+3. Document error codes with HTTP status code mapping
+4. Update examples to use specific error codes
+
+---
+
+# 5. Making Reservation Optional Within Catalog
+
+## Problem Statement
+`reservationSupported: true` exists in `itemAttributes` (ChargingService), but the reservation flow is tightly coupled with catalog structure. For scan-and-charge flows, reservation is irrelevant.
+
+## Proposed Change
+
+```yaml
+# In ChargingService itemAttributes — clarify semantics
+reservationSupported:
+  type: boolean
+  description: >
+    false = Scan-and-charge only (walk-in, immediate use).
+    true = Advance time-slot booking available.
+  default: false
+
+# Add new field for supported modes
+supportedModes:
+  type: array
+  items:
+    type: string
+    enum: ["WALK_IN", "RESERVATION", "SUBSCRIPTION"]
+  description: >
+    WALK_IN = Immediate use, no reservation.
+    RESERVATION = Advance time-slot booking.
+    SUBSCRIPTION = Membership-based access.
+  example: ["WALK_IN", "RESERVATION"]
+```
+
+When `supportedModes` includes only `WALK_IN`, the `select`/`on_select` step for time-slot selection can be skipped entirely.
+
+### Implementation Steps
+1. Add `supportedModes` to ChargingService attributes
+2. Document behavior differences per mode
+3. Update catalog examples with mode indicators
+
+---
+
+# 6. Reconciliation of Funds for Overcharge
+
+## Problem Statement
+When overcharge occurs, there needs to be a clear reconciliation trail: initial collection → actual consumption → difference → adjustment payment → final settlement.
+
+## Proposed Reconciliation Fields
+
+```yaml
+beckn:reconciliation:
+  type: object
+  description: Financial reconciliation summary for the order.
+  properties:
+    estimatedAmount: { type: number }
+    prepaidAmount: { type: number }
+    actualAmount: { type: number }
+    adjustmentAmount:
+      type: number
+      description: Positive = overcharge, negative = refund.
+    reconciliationStatus:
+      type: string
+      enum: ["PENDING", "ADJUSTMENT_REQUIRED", "SETTLED", "DISPUTED", "WRITTEN_OFF"]
+    settledAt:
+      type: string
+      format: date-time
+```
+
+**Example in completed `on_update`:**
+```json
+"beckn:reconciliation": {
+  "estimatedAmount": 150.0,
+  "prepaidAmount": 150.0,
+  "actualAmount": 180.0,
+  "adjustmentAmount": 30.0,
+  "reconciliationStatus": "SETTLED",
+  "settledAt": "2025-01-27T12:15:00Z"
+}
+```
+
+### Implementation Steps
+1. Add `beckn:reconciliation` to Order schema or orderAttributes
+2. Update context.jsonld and vocab.jsonld
+3. Add reconciliation fields to overcharge `on_update` examples
+
+---
+
+# 7. Charger Identification Fields for User Navigation
+
+## Problem Statement
+Users need easy-to-understand identifiers to locate the correct charger on the ground. Current identifiers (`beckn:id`, `evseId`) are machine-oriented composite strings.
+
+## Design Options
+
+### Option 1: Add Navigation Fields to `itemAttributes` (ChargingService) ⭐ RECOMMENDED
+
+**Rationale:** Charger identification is an inherent property of the physical asset, consistent with existing fields like `connectorType`, `evseId`.
+
+```yaml
+chargerLabel:
+  type: string
+  description: Human-readable label visible on physical signage.
+  example: "Charger 3 - Bay A"
+
+chargerNumber:
+  type: integer
+  description: Numeric identifier within the station.
+  example: 3
+
+floorLevel:
+  type: string
+  description: Floor/level for multi-story parking structures.
+  example: "B1"
+
+landmarks:
+  type: string
+  description: Nearby landmarks or directions.
+  example: "Next to elevator lobby, near Exit 2"
+
+stationDisplayName:
+  type: string
+  description: Human-friendly station name.
+  example: "EcoPower BTM Hub"
+```
+
+**Example:**
+```json
+"beckn:itemAttributes": {
+  "@type": "ChargingService",
+  "connectorType": "CCS2",
+  "evseId": "IN*ECO*BTM*01*CCS2*A",
+  "chargerLabel": "Charger 3 - Bay A",
+  "chargerNumber": 3,
+  "floorLevel": "Ground",
+  "landmarks": "Next to elevator lobby, near Exit 2",
+  "stationDisplayName": "EcoPower BTM Hub"
+}
+```
+
+### Option 2: Add to `beckn:descriptor`
+- ❌ Generic text, not structured — can't reliably parse charger number
+
+### Option 3: Add to `chargingStation` sub-object
+- ❌ `chargerLabel`/`chargerNumber` are per-connector, not per-station
+
+### Implementation Steps
+1. Add fields to ChargingService attribute schema
+2. Update context.jsonld and vocab.jsonld
+3. Update `on_discover` and `catalog_publish` examples
+
+---
+
+# 8. Fee Type Enum Classification in `orderValue.components`
+
+## Problem Statement
+`type` enum in `orderValue.components` (`UNIT`, `TAX`, `DISCOUNT`, `FEE`, `SURCHARGE`) is overloaded — `FEE` is used for service fee, overcharge estimation, AND buyer finder fee. Consumers must parse `description` strings.
+
+## Design Options
+
+### Option 1: Add `subType` Enum ⭐ RECOMMENDED
+
+```yaml
+subType:
+  type: string
+  enum:
+    - BASE_PRICE            # Core unit cost
+    - SERVICE_FEE           # Platform/processing fee
+    - OVERCHARGE_ESTIMATE   # Estimated overcharge buffer
+    - BUYER_FINDER_FEE      # BAP commission
+    - IDLE_FEE              # Idle time penalty
+    - CANCELLATION_FEE      # Cancellation penalty
+    - PARKING_FEE           # Parking charges
+    - CONVENIENCE_FEE       # Convenience/transaction fee
+    - ENERGY_TAX            # Energy-specific tax
+    - GST / CGST / SGST     # Goods & Services Tax
+    - SURGE_PRICE           # Dynamic surge pricing
+    - PROMOTIONAL_DISCOUNT  # Promo/coupon discount
+    - LOYALTY_DISCOUNT      # Loyalty program discount
+    - REFUND                # Refund adjustment
+    - PENALTY               # Late/violation penalty
+```
+
+**Example:**
+```json
+{ "type": "FEE", "subType": "SERVICE_FEE", "value": 10.0 },
+{ "type": "FEE", "subType": "OVERCHARGE_ESTIMATE", "value": 13.64 },
+{ "type": "FEE", "subType": "BUYER_FINDER_FEE", "value": 2.81 }
+```
+
+- ✅ Backward compatible, preserves category grouping, adds programmatic precision
+
+### Option 2: Expand `type` Enum Directly
+- ❌ **Breaking change** — existing consumers break
+- ❌ Loses category grouping
+
+### Implementation Steps
+1. Add `subType` enum to `PriceSpecification.components` in [core/v2/attributes.yaml](file:///Users/akarsh/ubc-tsd/beckn-schemas/core/v2/attributes.yaml)
+2. Update context.jsonld and vocab.jsonld
+3. Update all example files to include `subType`
+
+---
+
+# 9. Enums for `unitText` and `unitCode` in `orderItems.quantity`
+
+## Problem Statement
+`unitText` and `unitCode` are free-form strings. Providers can send `"Kwh"`, `"kilowatt_hour"`, `"kWH"` — making matching unreliable.
+
+## Recommended Approach: Domain-Level Enum Constraints
+
+| `unitCode` | `unitText` | Usage |
+|-----------|-----------|-------|
+| `KWH` | `Kilowatt Hour` | Energy consumed |
+| `KW` | `Kilowatt` | Power rating |
+| `MIN` | `Minute` | Time-based billing |
+| `H` | `Hour` | Hourly billing |
+| `MON` | `Month` | Subscription billing |
+| `PERCENTAGE` | `Percentage` | SoC, discounts |
+| `AMP` | `Ampere` | Current measurement |
+| `VLT` | `Volt` | Voltage measurement |
+| `INR` | `Indian Rupee` | Currency amount |
+| `COUNT` | `Count` | Generic count |
+
+### Implementation Steps
+1. Add enum constraints in the EV charging domain profile
+2. Document the `unitCode` ↔ `unitText` mapping
+3. Update all example files to use consistent values
+
+---
+
+# 10. UBC Extensions & Core Schema Relationship
+
+## Problem Statement
+UBC-specific extensions (`BuyerUPI`, `UBCPaymentAttributes`) live in separate `UBCExtensions/v1/`. Requires dual `@context` references and separate maintenance.
+
+## Design Options
+
+### Option 1: Keep Separate, Improve Documentation ⭐ RECOMMENDED
+
+**Rationale:**
+- Core Beckn **must** remain geography/payment-rail agnostic
+- UPI/VPA are India-specific payment constructs
+- The Attribute Pack pattern (`@context` + `@type`) is designed for exactly this
+- Other networks define their own `paymentAttributes` (Card, BNPL, etc.)
+
+**Improvements:** Better README, relationship diagrams, inline comments mapping to core attachment points.
+
+### Option 2: Merge into Core
+- ❌ Violates Beckn design philosophy
+- ❌ Non-UPI networks carry dead fields
+- ❌ Sets bad precedent for other network extensions
+
+### Implementation Steps
+1. Enhance `UBCExtensions/v1/README.md` with relationship diagrams
+2. Add inline comments mapping to core attachment points
+3. Create integration guide document
+
+---
+
+# 11. Merge Select/On_Select into Init/On_Init
+
+## Problem Statement
+Current flow: `discover → on_discover → select → on_select → init → on_init → confirm → on_confirm` (8 calls). For EV charging, `select`/`on_select` carry the same info as `init`/`on_init`.
+
+## Recommended Approach: Make Select Optional ⭐
+
+**Current Flow (8 calls):**
+```mermaid
+sequenceDiagram
+    BAP->>BPP: discover
+    BPP->>BAP: on_discover
+    BAP->>BPP: select (item + quantity + preferences)
+    BPP->>BAP: on_select (quote)
+    BAP->>BPP: init (same order + payment)
+    BPP->>BAP: on_init (same quote + payment info)
+    BAP->>BPP: confirm
+    BPP->>BAP: on_confirm
+```
+
+**Proposed Flow (6 calls):**
+```mermaid
+sequenceDiagram
+    BAP->>BPP: discover
+    BPP->>BAP: on_discover
+    BAP->>BPP: init (item + quantity + preferences + payment)
+    BPP->>BAP: on_init (full quote + payment URL)
+    BAP->>BPP: confirm
+    BPP->>BAP: on_confirm
+```
+
+**What Changes:**
+- `init` includes `acceptedOffer`, `preferences`, `buyerFinderFee` (currently only in `select`)
+- `on_init` returns calculated `orderValue` with components (currently in `on_select`)
+- **No new schema fields required** — `init` already supports all necessary fields
+- This is a **domain-profile level** decision, not a core schema change
+
+### Implementation Steps
+1. Update EV Charging domain profile to mark `select`/`on_select` as optional
+2. Ensure `init` examples include `acceptedOffer` and `preferences`
+3. Update `on_init` examples with calculated `orderValue.components`
+4. Update Technical Specification Document with both flows
+
+---
+
+# 12. QR String Field for Universal QR Code Support
+
+## Problem Statement
+QR-based discovery requires the BAP to parse, resolve short URLs, map to `beckn:id`, and handle multiple QR formats. If the CPO's item ID doesn't match the QR encoding, discovery fails.
+
+## Recommended Approach: Add `qrPayload` to Discover ⭐
+
+```yaml
+qrPayload:
+  type: object
+  description: Raw QR code content forwarded for server-side resolution.
+  properties:
+    rawValue:
+      type: string
+      description: Exact string scanned from QR, without client-side parsing.
+    format:
+      type: string
+      enum: ["URL", "UPI_INTENT", "BECKN_INTENT", "PLAIN_TEXT", "CUSTOM"]
+    source:
+      type: string
+      enum: ["QR_SCAN", "NFC_TAP", "DEEP_LINK", "MANUAL_ENTRY"]
+  required: [rawValue]
+```
+
+**Example:**
+```json
+{
+  "context": { "action": "discover" },
+  "message": {
+    "qrPayload": {
+      "rawValue": "https://jio-bp.com/charge/station123/evse01",
+      "format": "URL",
+      "source": "QR_SCAN"
+    }
+  }
+}
+```
+
+**Resolution (BPP/CDS Side):**
+```mermaid
+flowchart LR
+    A[Raw QR String] --> B{Format?}
+    B -->|URL| C[Resolve short URL → extract ID]
+    B -->|UPI_INTENT| D[Extract UPI params → map]
+    B -->|BECKN_INTENT| E[Parse beckn:// URI]
+    B -->|PLAIN_TEXT| F[Direct lookup]
+    C & D & E & F --> G[Map to beckn:id → Return on_discover]
+```
+
+- ✅ Decouples BAP from QR format knowledge
+- ✅ No need to decompose short URLs on client side
+
+### Implementation Steps
+1. Add `qrPayload` schema to discover message
+2. Update [discovery-by-QR.json](file:///Users/akarsh/ubc-tsd/Example-schemas/01_discover/discovery-by-QR.json) example
+3. Document BPP/CDS-side QR resolution responsibilities
+
+---
+
+# 13. CDS Catalog Update/Delete API Structure
+
+## Problem Statement
+`catalog_publish` sends the **entire** catalog. No way to express deletions or partial updates. Provider must re-send all items and all offers even for a single field change.
+
+## Recommended Approach: New Actions ⭐
+
+```yaml
+action:
+  enum:
+    - catalog_publish       # Full catalog upsert (existing)
+    - catalog_update        # Partial update
+    - catalog_delete        # Remove specific items/offers
+```
+
+**`catalog_update` — Partial Update:**
+```json
+{
+  "context": { "action": "catalog_update" },
+  "message": {
+    "updates": [
+      {
+        "targetType": "ITEM",
+        "targetId": "IND*ecopower-charging*...*CCS2-A",
+        "operation": "UPDATE",
+        "data": { "beckn:isActive": false, "beckn:itemAttributes": { "maxPowerKW": 75 } }
+      },
+      {
+        "targetType": "OFFER",
+        "targetId": "offer-ccs2-60kw-kwh",
+        "operation": "UPDATE",
+        "data": { "beckn:price": { "currency": "INR", "value": 48.0 } }
+      }
+    ]
+  }
+}
+```
+
+**`catalog_delete` — Delete Items/Offers:**
+```json
+{
+  "context": { "action": "catalog_delete" },
+  "message": {
+    "deletions": [
+      { "targetType": "ITEM", "targetId": "IND*powergrid*...*TYPE2-A" },
+      { "targetType": "OFFER", "targetId": "offer-type2-22kw-kwh" }
+    ]
+  }
+}
+```
+
+### Alternative: Add `operation` Field to Existing `catalog_publish`
+- ✅ Single API
+- ❌ Mixes create/update/delete semantics
+
+### Implementation Steps
+1. Define `catalog_update`, `catalog_delete` action schemas
+2. Define response schemas
+3. Create example files for partial updates and deletions
+
+---
+
+# 14. Network-Specific Mandatory Field Enforcement (ONIX Validation Profiles)
+
+## Problem Statement
+Beckn core keeps most fields optional. For UBC EV charging, spatial coordinates, `connectorType`, `maxPowerKW`, and other fields **must** be mandatory. ONIX cannot enforce these.
+
+## Recommended Approach: ONIX Validation Profiles ⭐
+
+```yaml
+profileId: "ubc-ev-charging-v1"
+networkId: "ubc-network"
+
+mandatoryOverrides:
+  - path: "*.beckn:itemAttributes.chargingStation.serviceLocation.geo"
+    required: true
+    errorCode: "UBC_MISSING_GEO"
+
+  - path: "*.beckn:itemAttributes.connectorType"
+    required: true
+    errorCode: "UBC_MISSING_CONNECTOR"
+
+  - path: "*.beckn:itemAttributes.maxPowerKW"
+    required: true
+    errorCode: "UBC_MISSING_POWER"
+
+  - path: "*.beckn:itemAttributes.evseId"
+    required: true
+    errorCode: "UBC_MISSING_EVSE"
+
+  - path: "*.beckn:payment.beckn:amount"
+    required: true
+    errorCode: "UBC_MISSING_PAYMENT_AMOUNT"
+
+  - path: "*.beckn:buyer.beckn:telephone"
+    required: true
+    errorCode: "UBC_MISSING_PHONE"
+```
+
+### Alternative: Fork Core Schema
+- ❌ Diverges from upstream; merge conflicts on every update
+
+### Implementation Steps
+1. Create `UBC-EV-Charging-ValidationProfile.yaml`
+2. Define custom error codes
+3. Document ONIX integration for loading/applying profiles
+4. Create test payloads
+
+---
+
+# 15. Availability Window Structure & Connector Status
+
+## Problem Statement
+- `beckn:availabilityWindow` updates require CPOs to **guess** session duration
+- `beckn:isActive = false` makes charger disappear from **ALL** discovery
+- `isActive` is too coarse — it's a global kill switch, not a real-time indicator
+
+## Recommended Approach: `connectorStatus` + Decouple ⭐
+
+**Three-Layer Availability Model:**
+
+| Layer | Field | Purpose |
+|-------|-------|---------|
+| Admin | `beckn:isActive` | Permanently decommission item |
+| Operational | `beckn:availabilityWindow` | Station operating hours |
+| Real-time | `connectorStatus` | Is connector free right now? |
+
+```yaml
+connectorStatus:
+  type: string
+  enum: [AVAILABLE, OCCUPIED, RESERVED, UNAVAILABLE, FAULTED, OUT_OF_SERVICE]
+  description: Real-time connector state (OCPP-aligned).
+
+connectorStatusUpdatedAt:
+  type: string
+  format: date-time
+
+estimatedAvailableAt:
+  type: string
+  format: date-time
+  description: When connector will be free (only when OCCUPIED/RESERVED).
+```
+
+**Discovery Filtering:**
+```mermaid
+flowchart TD
+    A[Catalog Item] --> B{isActive?}
+    B -->|false| C[❌ Not in catalog]
+    B -->|true| D{availabilityWindow<br/>contains now?}
+    D -->|No| E[❌ Station closed]
+    D -->|Yes| F{connectorStatus?}
+    F -->|AVAILABLE| G[✅ Show as available]
+    F -->|OCCUPIED| H[⚡ Show as busy + ETA]
+    F -->|FAULTED| I[❌ Show as offline]
+```
+
+**Example:**
+```json
+"beckn:itemAttributes": {
+  "@type": "ChargingService",
+  "connectorStatus": "OCCUPIED",
+  "connectorStatusUpdatedAt": "2026-01-04T10:05:00Z",
+  "estimatedAvailableAt": "2026-01-04T10:45:00Z"
+}
+```
+
+### Implementation Steps
+1. Add `connectorStatus`, `connectorStatusUpdatedAt`, `estimatedAvailableAt` to ChargingService
+2. Update context.jsonld and vocab.jsonld
+3. Document three-layer model
+4. Update catalog examples
+
+---
+
+# 16. Item & Offer Payload Structure Review
+
+## Current Structure
+
+```mermaid
+graph TD
+    C[Catalog] --> I["beckn:items[]"]
+    C --> O["beckn:offers[]"]
+    I --> I1["Item 1 — id, descriptor,<br/>availabilityWindow, isActive,<br/>itemAttributes"]
+    I --> I2[Item 2]
+    I --> I3[Item 3]
+    O --> O1["Offer A — id, price,<br/>validity, offerAttributes"]
+    O --> O2[Offer B]
+    O1 -->|"beckn:items: [id1, id2]"| I1
+    O1 -->|"beckn:items: [id1, id2]"| I2
+    O2 -->|"beckn:items: [id3]"| I3
+```
+
+### Key Observations
+
+| Aspect | Current Structure | Implication |
+|--------|------------------|-------------|
+| **Item–Offer Linkage** | Offer references Items by ID via `beckn:items[]` | Many-to-many relationship |
+| **Item Identity** | `beckn:id` = long composite string | Machine-readable, not human-friendly |
+| **Offer Scope** | `price`, `validity`, `offerAttributes` | Per-unit pricing, time range, tariff model |
+| **Provider** | Present in BOTH Item and Offer | Redundant — defined twice |
+| **Attributes Split** | `itemAttributes` (physical) / `offerAttributes` (commercial) | Clean separation ✅ |
+| **Selection** | `orderedItem` (item ID) + `acceptedOffer` (offer object) | Clear binding ✅ |
+
+### Issues Identified
+
+#### 1. Provider Redundancy
+```json
+// In Item
+"beckn:provider": { "beckn:id": "ecopower-charging", ... }
+// In Offer
+"beckn:provider": "ecopower-charging"
+```
+**Recommendation:** Define `provider` only at Item level. Offer inherits from linked items.
+
+#### 2. Offer-Item Linkage Direction
+Currently Offer → Items. Adding a new item to an existing offer requires **updating the offer**.
+In `catalog_publish` (upsert), entire offers array must be re-sent.
+
+**Recommendation:** Keep current direction but support partial updates via `catalog_update` ([Section 13](#13-cds-catalog-updatedelete-api-structure)).
+
+#### 3. `acceptedOffer` Verbosity
+In `select`/`on_select`, the **full offer object** is embedded inside `beckn:orderItems[].beckn:acceptedOffer`.
+
+**Recommendation:** Allow ID-only reference:
+```json
+"beckn:acceptedOffer": "offer-ccs2-60kw-kwh"
+```
+
+#### 4. Price Location Ambiguity
+Price appears in TWO locations:
+```json
+"beckn:acceptedOffer": { "beckn:price": { "value": 45.0 } },  // Offer price
+"beckn:price": { "value": 45.0 }                               // Item-level price
+```
+**Recommendation:** Clarify that item-level `beckn:price` reflects the **applied** unit price. May differ from catalog offer price if BPP applies dynamic pricing.
+
+### Summary of Recommendations
+
+| # | Issue | Recommendation |
+|---|-------|---------------|
+| 1 | Provider redundancy | Define only at Item level |
+| 2 | Offer-Item linkage | Keep Offer → Items; use `catalog_update` for partials |
+| 3 | `acceptedOffer` verbosity | Allow ID-only reference |
+| 4 | Price ambiguity | Clarify applied vs. catalog price semantics |
+
+---
+
+# Summary Matrix
+
+| # | Need | Recommended Approach | Breaking? |
+|---|------|---------------------|-----------|
+| 1 | Cancellation terms | Add to `offerAttributes` (ChargingOffer) | No |
+| 2 | Overcharge payment | Collect via `update` with `paymentAdjustments` | No |
+| 3 | Payment as array | `beckn:payment` → `beckn:payments[]` | **Yes** |
+| 4 | Error codes | Domain-specific error code registry | No |
+| 5 | Reservation optional | Add `supportedModes` to ChargingService | No |
+| 6 | Fund reconciliation | Add `beckn:reconciliation` to Order | No |
+| 7 | Charger navigation | `chargerLabel`, `chargerNumber` in `itemAttributes` | No |
+| 8 | Fee type enums | Add `subType` enum to components | No |
+| 9 | Unit enums | Domain-level `unitCode`/`unitText` constraints | No |
+| 10 | UBC in core | Keep separate, improve documentation | No |
+| 11 | Merge select/init | Make `select`/`on_select` optional for EV charging | No |
+| 12 | QR string field | Add `qrPayload` to discover message | No |
+| 13 | CDS catalog APIs | New `catalog_update` / `catalog_delete` actions | No |
+| 14 | Mandatory fields | ONIX Validation Profiles | No |
+| 15 | Availability window | `connectorStatus` + decouple from `availabilityWindow` | No |
+| 16 | Item/Offer structure | Clarify linkage, reduce redundancy | No |
+
+---
+
+## Open Questions
+
+1. **Cancellation (#1):** Should `cancellationTerms` be required or optional in offers?
+2. **Overcharge (#2):** What happens if the buyer fails to pay the overcharge?
+3. **Payments Array (#3):** What migration timeline for the breaking change?
+4. **Fee subType (#8):** Should `subType` be required or optional?
+5. **Select/Init (#11):** Remove `select`/`on_select` entirely or mark optional?
+6. **CDS API (#13):** Field-level patches or full-item replacement for updates?
+7. **ONIX (#14):** Should validation profiles be versioned independently?
+8. **Connector Status (#15):** Mandate status update frequency (e.g., every 60s)?
+9. **Offer Reference (#16):** Allow ID-only `acceptedOffer` or always embed full object?
