@@ -162,7 +162,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
   "message": {
     "catalogs": [
       {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
         "@type": "beckn:Catalog",
         "beckn:id": "catalog-ev-charging-001",
         "beckn:descriptor": {
@@ -174,7 +174,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
         "beckn:bppUri": "https://bpp.ev-network.example.com/bpp",
         "beckn:items": [
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
             "beckn:descriptor": {
@@ -250,7 +250,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             }
           },
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*greencharge-koramangala*cs-02*IN*GC*KOR*01*CCS2*A*CCS2-B",
             "beckn:descriptor": {
@@ -327,7 +327,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             }
           },
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*powergrid-indiranagar*cs-03*IN*PG*IND*01*TYPE2*A*TYPE2-A",
             "beckn:descriptor": {
