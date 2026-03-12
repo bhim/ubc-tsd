@@ -2,6 +2,8 @@
 
 Welcome to the UBC Technical Specification Document repository. This repository allows you to easily navigate the protocols, schemas, and technical standards defined for the project.
 
+<img width="816" height="422" alt="527687191-188b1aca-f22f-4cb8-9d54-67949118c74d" src="https://github.com/user-attachments/assets/e74edf44-0383-40a0-bec3-29073cd58d56" />
+
 ## 📂 Repository Structure
 
 The repository is organized into the following key directories:
