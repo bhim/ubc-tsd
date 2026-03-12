@@ -162,7 +162,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
   "message": {
     "catalogs": [
       {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Catalog",
         "beckn:id": "catalog-ev-charging-001",
         "beckn:descriptor": {
@@ -174,7 +174,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
         "beckn:bppUri": "https://bpp.ev-network.example.com/bpp",
         "beckn:items": [
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
             "beckn:descriptor": {
@@ -250,7 +250,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             }
           },
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*greencharge-koramangala*cs-02*IN*GC*KOR*01*CCS2*A*CCS2-B",
             "beckn:descriptor": {
@@ -327,7 +327,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
             }
           },
           {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
             "beckn:id": "IND*powergrid-indiranagar*cs-03*IN*PG*IND*01*TYPE2*A*TYPE2-A",
             "beckn:descriptor": {
@@ -2880,6 +2880,17 @@ The PaymentSettlement schema extends the Payment object with an array of settlem
         "PHONE",
         "WHATSAPP"
       ]
+    },
+    "feedback": {
+      "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+      "@type": "SupportFeedback",
+      "comments": "Charging session stopped unexpectedly at 40% battery but I was billed the full estimated amount. The charger displayed an error code E-204.",
+      "tags": [
+        "charging-interrupted",
+        "billing-dispute",
+        "charger-malfunction"
+      ],
+      "supportStatus": "OPEN"
     }
   },
   "error": {}
@@ -2923,6 +2934,11 @@ The PaymentSettlement schema extends the Payment object with an array of settlem
         "WEB",
         "CHAT"
       ]
+    },
+    "feedback": {
+      "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+      "@type": "SupportFeedback",
+      "supportStatus": "ACKNOWLEDGED"
     }
   },
   "error": {}
@@ -5277,42 +5293,53 @@ Satisfied, Aisha resumes her trip with time to spare.
 
 **11.2.2.18. action: support**
 * **Method:** POST
-* **Use Cases:** Aisha reaches out for support if needed.
+* **Use Cases:** Aisha reaches out for support and explains her issue with the connector.
 <details>
 <summary><a href="../Example-schemas/17_support/ev-charging-support.json">Example json :rocket:</a></summary>
 
 ```json
 {
-  "context": {
-    "version": "2.0.0",
-    "action": "support",
-    "domain": "beckn.one:deg:ev-charging",
-    "bpp_id": "example-bpp.com",
-    "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
-    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "dee432d9-36c9-4146-ad21-2f5bcac9b6a9",
-    "timestamp": "2025-01-27T12:15:00Z",
-    "ttl": "PT30S",
-    "bap_id": "example-bap.com",
-    "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2"
-  },
-  "message": {
-    "refId": "order-ev-charging-001",
-    "refType": "ORDER",
-    "support": {
-      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
-      "@type": "beckn:SupportInfo",
-      "name": "Ravi Kumar",
-      "phone": "+91-9876543210",
-      "email": "ravi.kumar@example.com",
-      "hours": "Mon\u2013Sun: 6:00 PM - 10:00 PM IST",
-      "channels": [
-        "PHONE",
-        "WHATSAPP"
-      ]
-    }
-  },
-  "error": {}
+    "context": {
+        "version": "2.0.0",
+        "action": "support",
+        "domain": "beckn.one:deg:ev-charging",
+        "bpp_id": "example-bpp.com",
+        "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
+        "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+        "message_id": "11223344-5566-7788-99aa-bbccddeeff00",
+        "timestamp": "2025-01-27T11:00:00Z",
+        "ttl": "PT30S",
+        "bap_id": "example-bap.com",
+        "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2"
+    },
+    "message": {
+        "refId": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+        "refType": "ITEM",
+        "support": {
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@type": "beckn:SupportInfo",
+            "name": "Ravi Kumar",
+            "phone": "+91-9876543210",
+            "email": "ravi.kumar@example.com",
+            "hours": "Mon\u2013Sun: 6:00 PM - 10:00 PM IST",
+            "channels": [
+                "PHONE",
+                "WHATSAPP"
+            ]
+        },
+        "feedback": {
+            "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+            "@type": "SupportFeedback",
+            "comments": "The CCS2 connector at this charging station is physically damaged. The latch mechanism is broken and the connector does not lock into the vehicle inlet properly.",
+            "tags": [
+                "connector-damaged",
+                "unable-to-charge",
+                "hardware-issue"
+            ],
+            "supportStatus": "OPEN"
+        }
+    },
+    "error": {}
 }
 ```
 </details>
@@ -5353,6 +5380,11 @@ Satisfied, Aisha resumes her trip with time to spare.
         "WEB",
         "CHAT"
       ]
+    },
+    "feedback": {
+      "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+      "@type": "SupportFeedback",
+      "supportStatus": "ACKNOWLEDGED"
     }
   },
   "error": {}
