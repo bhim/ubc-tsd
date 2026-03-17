@@ -32,6 +32,23 @@
             "smooth-payment"
           ]
         }
+      },
+      {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:RatingInput",
+        "id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+        "ratingValue": 3,
+        "bestRating": 5,
+        "worstRating": 1,
+        "category": "ITEM",
+        "feedback": {
+          "comments": "The CCS2 connector cable is too short and the screen display is hard to read in sunlight. Charging speed was slower than advertised.",
+          "tags": [
+            "short-cable",
+            "poor-display",
+            "slow-charging"
+          ]
+        }
       }
     ]
   },

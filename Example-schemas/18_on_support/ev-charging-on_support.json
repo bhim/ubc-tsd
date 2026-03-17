@@ -27,6 +27,11 @@
         "WEB",
         "CHAT"
       ]
+    },
+    "feedback": {
+      "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+      "@type": "SupportFeedback",
+      "supportStatus": "ACKNOWLEDGED"
     }
   },
   "error": {}

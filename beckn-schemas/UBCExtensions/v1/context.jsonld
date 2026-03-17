@@ -19,7 +19,22 @@
         "accountHolderName": "ubc:accountHolderName",
         "accountNumber": "ubc:accountNumber",
         "ifscCode": "ubc:ifscCode",
-        "bankName": "ubc:bankName"
+        "bankName": "ubc:bankName",
+        "SupportFeedback": "ubc:SupportFeedback",
+        "comments": "ubc:grievanceComments",
+        "tags": "ubc:grievanceTags",
+        "supportStatus": {
+            "@id": "ubc:supportStatus",
+            "@type": "@id",
+            "@context": {
+                "OPEN": "ubc:SupportStatusOpen",
+                "ACKNOWLEDGED": "ubc:SupportStatusAcknowledged",
+                "IN_PROGRESS": "ubc:SupportStatusInProgress",
+                "RESOLVED": "ubc:SupportStatusResolved",
+                "CLOSED": "ubc:SupportStatusClosed",
+                "ESCALATED": "ubc:SupportStatusEscalated"
+            }
+        }
     },
     "@graph": []
 }

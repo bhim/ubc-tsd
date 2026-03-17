@@ -1,0 +1,28 @@
+{
+    "context": {
+        "version": "2.0.0",
+        "action": "on_support",
+        "domain": "beckn.one:deg:ev-charging",
+        "bap_id": "example-bap.com",
+        "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+        "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+        "message_id": "f9e8d7c6-b5a4-3210-fedc-ba9876543210",
+        "timestamp": "2025-01-28T10:00:00Z",
+        "ttl": "PT30S",
+        "bpp_id": "example-bpp.com",
+        "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
+    },
+    "message": {
+        "support": {
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@type": "beckn:SupportInfo"
+        },
+        "feedback": {
+            "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+            "@type": "SupportFeedback",
+            "comments": "Billing discrepancy confirmed. A refund of INR 68.95 has been initiated to your UPI ID. Please allow 2-3 business days for the refund to reflect.",
+            "supportStatus": "RESOLVED"
+        }
+    },
+    "error": {}
+}

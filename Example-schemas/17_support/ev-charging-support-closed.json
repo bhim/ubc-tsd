@@ -6,8 +6,8 @@
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "dee432d9-36c9-4146-ad21-2f5bcac9b6a9",
-    "timestamp": "2025-01-27T12:15:00Z",
+    "message_id": "f8d23d9a-98c1-42a6-b3f0-9e5e0cfa1111",
+    "timestamp": "2025-01-27T12:20:00Z",
     "ttl": "PT30S",
     "bap_id": "example-bap.com",
     "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2"
@@ -30,13 +30,8 @@
     "feedback": {
       "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
       "@type": "SupportFeedback",
-      "comments": "Charging session stopped unexpectedly at 40% battery but I was billed the full estimated amount. The charger displayed an error code E-204.",
-      "tags": [
-        "charging-interrupted",
-        "billing-dispute",
-        "charger-malfunction"
-      ],
-      "supportStatus": "OPEN"
+      "comments": "Issue resolved",
+      "supportStatus": "CLOSED"
     }
   },
   "error": {}

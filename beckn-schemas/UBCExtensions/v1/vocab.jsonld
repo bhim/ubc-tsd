@@ -83,6 +83,111 @@
             "rdfs:comment": "Name of the bank for settlement.",
             "rdfs:domain": "ubc:UBCPaymentAttributes",
             "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:SupportFeedback",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Support Feedback",
+            "rdfs:comment": "UBC Network-specific support feedback and grievance tracking. Provides grievance details, observability tags, and ticket lifecycle status."
+        },
+        {
+            "@id": "ubc:grievanceComments",
+            "@type": "rdf:Property",
+            "rdfs:label": "Grievance comments",
+            "rdfs:comment": "Free-text description of the grievance or support request.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:grievanceTags",
+            "@type": "rdf:Property",
+            "rdfs:label": "Grievance tags",
+            "rdfs:comment": "Tags for observability and categorization of the grievance.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "schema:ItemList"
+        },
+        {
+            "@id": "ubc:supportStatus",
+            "@type": "rdf:Property",
+            "rdfs:label": "Support status",
+            "rdfs:comment": "Current lifecycle status of the support ticket.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "ubc:SupportStatus"
+        },
+        {
+            "@id": "ubc:SupportStatus",
+            "@type": "schema:Enumeration",
+            "schema:name": "Support Status",
+            "rdfs:comment": "Enumeration of support ticket lifecycle stages.",
+            "rdfs:seeAlso": "https://schema.org/ActionStatusType",
+            "schema:hasEnumerationMember": [
+                {
+                    "@id": "ubc:SupportStatusOpen"
+                },
+                {
+                    "@id": "ubc:SupportStatusAcknowledged"
+                },
+                {
+                    "@id": "ubc:SupportStatusInProgress"
+                },
+                {
+                    "@id": "ubc:SupportStatusResolved"
+                },
+                {
+                    "@id": "ubc:SupportStatusClosed"
+                },
+                {
+                    "@id": "ubc:SupportStatusEscalated"
+                }
+            ]
+        },
+        {
+            "@id": "ubc:SupportStatusOpen",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "OPEN",
+            "schema:identifier": "OPEN",
+            "rdfs:comment": "Support ticket raised, awaiting acknowledgment.",
+            "rdfs:seeAlso": "https://schema.org/PotentialActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusAcknowledged",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "ACKNOWLEDGED",
+            "schema:identifier": "ACKNOWLEDGED",
+            "rdfs:comment": "BPP has received and acknowledged the support ticket.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusInProgress",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "IN_PROGRESS",
+            "schema:identifier": "IN_PROGRESS",
+            "rdfs:comment": "Support ticket is actively being worked on.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusResolved",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "RESOLVED",
+            "schema:identifier": "RESOLVED",
+            "rdfs:comment": "Issue has been resolved by the support team.",
+            "rdfs:seeAlso": "https://schema.org/CompletedActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusClosed",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "CLOSED",
+            "schema:identifier": "CLOSED",
+            "rdfs:comment": "Support ticket has been closed.",
+            "rdfs:seeAlso": "https://schema.org/CompletedActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusEscalated",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "ESCALATED",
+            "schema:identifier": "ESCALATED",
+            "rdfs:comment": "Support ticket has been escalated to a higher support tier.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
         }
     ]
 }

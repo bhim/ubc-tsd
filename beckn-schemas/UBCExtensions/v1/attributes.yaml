@@ -98,3 +98,42 @@ components:
           type: string
           description: Virtual Payment Address (UPI ID) for settlement.
           example: "example-bap@paytm"
+
+    ########################################################################
+    # SUPPORT.FEEDBACK — SupportFeedback
+    ########################################################################
+    SupportFeedback:
+      type: object
+      additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": SupportFeedback
+      description: >
+        UBC Network-specific support feedback and grievance tracking.
+        Attached to the support message to provide grievance details,
+        observability tags, and ticket lifecycle status.
+      properties:
+        comments:
+          type: string
+          description: Free-text description of the grievance or support request.
+          example: "Charging session stopped at 40% but I was billed full amount"
+          x-jsonld: { "@id": comments }
+        tags:
+          type: array
+          description: Tags for observability and categorization of the grievance.
+          items:
+            type: string
+          example: ["charging-interrupted", "billing-dispute"]
+          x-jsonld: { "@id": tags }
+        supportStatus:
+          type: string
+          description: Current lifecycle status of the support ticket.
+          enum:
+            - OPEN
+            - ACKNOWLEDGED
+            - IN_PROGRESS
+            - RESOLVED
+            - CLOSED
+            - ESCALATED
+          example: "OPEN"
+          x-jsonld: { "@id": supportStatus }
