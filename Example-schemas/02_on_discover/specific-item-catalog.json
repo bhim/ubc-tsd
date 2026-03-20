@@ -95,6 +95,7 @@
                 "WI-FI"
               ],
               "evseId": "IN*ECO*BTM*01*CCS2*A",
+              "qrIdentifier": "https://charge.ecopower.in/cs01-ccs2",
               "parkingType": "Mall",
               "powerType": "DC",
               "connectorFormat": "CABLE",
