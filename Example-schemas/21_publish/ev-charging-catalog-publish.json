@@ -93,6 +93,7 @@
                 "WI-FI"
               ],
               "evseId": "IN*ECO*BTM*01*CCS2*A",
+              "qrIdentifier": "https://charge.ecopower.in/cs01-ccs2",
               "parkingType": "Mall",
               "powerType": "DC",
               "connectorFormat": "CABLE",
@@ -170,6 +171,7 @@
                 "PARKING"
               ],
               "evseId": "IN*GC*KOR*01*CCS2*A",
+              "qrIdentifier": "https://charge.greencharge.in/kor01-ccs2",
               "parkingType": "OffStreet",
               "powerType": "DC",
               "connectorFormat": "CABLE",
@@ -246,6 +248,7 @@
                 "PARKING"
               ],
               "evseId": "IN*PG*IND*01*TYPE2*A",
+              "qrIdentifier": "https://qr.powergrid.in/ind01-type2",
               "parkingType": "Office",
               "powerType": "AC_3_PHASE",
               "connectorFormat": "SOCKET",

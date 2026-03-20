@@ -16,7 +16,7 @@
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]"
+      "expression": "$[?(@.beckn:itemAttributes.qrIdentifier == 'https://charge.ecopower.in/cs01-ccs2')]"
     }
   },
   "error": {}
