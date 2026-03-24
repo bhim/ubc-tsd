@@ -242,6 +242,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
                 "WI-FI"
               ],
               "evseId": "IN*ECO*BTM*01*CCS2*A",
+              "qrIdentifier": "https://charge.ecopower.in/cs01-ccs2",
               "parkingType": "Mall",
               "powerType": "DC",
               "connectorFormat": "CABLE",
@@ -319,6 +320,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
                 "PARKING"
               ],
               "evseId": "IN*GC*KOR*01*CCS2*A",
+              "qrIdentifier": "https://charge.greencharge.in/kor01-ccs2",
               "parkingType": "OffStreet",
               "powerType": "DC",
               "connectorFormat": "CABLE",
@@ -395,6 +397,7 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
                 "PARKING"
               ],
               "evseId": "IN*PG*IND*01*TYPE2*A",
+              "qrIdentifier": "https://qr.powergrid.in/ind01-type2",
               "parkingType": "Office",
               "powerType": "AC_3_PHASE",
               "connectorFormat": "SOCKET",
@@ -796,7 +799,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]"
+      "expression": "$[?(@.beckn:itemAttributes.qrIdentifier == 'https://charge.ecopower.in/cs01-ccs2')]"
     }
   },
   "error": {}
@@ -908,6 +911,7 @@ The charging session will terminate when the ₹450.00 cost limit is reached, or
                 "WI-FI"
               ],
               "evseId": "IN*ECO*BTM*01*CCS2*A",
+              "qrIdentifier": "https://charge.ecopower.in/cs01-ccs2",
               "parkingType": "Mall",
               "powerType": "DC",
               "connectorFormat": "CABLE",
