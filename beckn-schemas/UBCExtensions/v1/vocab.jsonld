@@ -21,6 +21,20 @@
             "rdfs:comment": "UBC Network-specific payment attributes including UPI transaction ID and settlement accounts."
         },
         {
+            "@id": "ubc:UBCInvoiceAttributes",
+            "@type": "rdfs:Class",
+            "rdfs:label": "UBC Invoice Attributes",
+            "rdfs:comment": "UBC Network-specific invoice attributes including a link to the session fee or digital invoice."
+        },
+        {
+            "@id": "ubc:invoiceurl",
+            "@type": "rdf:Property",
+            "rdfs:label": "Invoice URL",
+            "rdfs:comment": "URL to the digital invoice or charging session fee breakdown for the completed order.",
+            "rdfs:domain": "ubc:UBCInvoiceAttributes",
+            "schema:rangeIncludes": "schema:URL"
+        },
+        {
             "@id": "ubc:vpa",
             "@type": "rdf:Property",
             "rdfs:label": "Virtual Payment Address",

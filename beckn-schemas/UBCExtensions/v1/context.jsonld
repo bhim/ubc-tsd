@@ -8,6 +8,8 @@
         "ubc": "./vocab.jsonld#",
         "BuyerUPI": "ubc:BuyerUPI",
         "UBCPaymentAttributes": "ubc:UBCPaymentAttributes",
+        "UBCInvoiceAttributes": "ubc:UBCInvoiceAttributes",
+        "invoiceurl": "ubc:invoiceurl",
         "name": "schema:name",
         "description": "schema:description",
         "price": "schema:price",

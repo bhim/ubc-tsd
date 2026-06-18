@@ -100,6 +100,28 @@ components:
           example: "example-bap@paytm"
 
     ########################################################################
+    # INVOICE.ATTRIBUTES — UBCInvoiceAttributes
+    ########################################################################
+    UBCInvoiceAttributes:
+      type: object
+      required: ["invoiceurl"]
+      additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": UBCInvoiceAttributes
+      description: >
+        UBC Network-specific invoice attributes. Attached to
+        Invoice.invoiceAttributes to provide a link to the digital
+        invoice or charging session fee breakdown.
+      properties:
+        invoiceurl:
+          type: string
+          format: uri
+          description: URL to the digital invoice or charging session fee breakdown.
+          example: "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
+          x-jsonld: { "@id": invoiceurl }
+
+    ########################################################################
     # SUPPORT.FEEDBACK — SupportFeedback
     ########################################################################
     SupportFeedback:
