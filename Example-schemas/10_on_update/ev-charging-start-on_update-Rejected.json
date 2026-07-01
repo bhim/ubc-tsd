@@ -1,13 +1,13 @@
 {
   "context": {
     "version": "2.0.0",
-    "action": "on_confirm",
+    "action": "on_update",
     "domain": "beckn.one:deg:ev-charging",
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "c69b4c1e-fb7e-469d-ae90-00f4d5e82b64",
-    "timestamp": "2025-01-27T10:05:00Z",
+    "message_id": "9fc3a12e-bf47-4d8b-a901-6ce8320418f3",
+    "timestamp": "2025-01-27T10:15:30Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
@@ -17,7 +17,7 @@
       "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
       "beckn:id": "order-ev-charging-001",
-      "beckn:orderStatus": "CONFIRMED",
+      "beckn:orderStatus": "REJECTED",
       "beckn:seller": "cpo1.com",
       "beckn:buyer": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
@@ -36,21 +36,7 @@
       },
       "beckn:orderItems": [
         {
-          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
-          "beckn:quantity": {
-            "unitText": "Kilowatt Hour",
-            "unitCode": "KWH",
-            "unitQuantity": 2.5
-          },
-          "beckn:price": {
-            "currency": "INR",
-            "value": 45.0,
-            "applicableQuantity": {
-              "unitText": "Kilowatt Hour",
-              "unitCode": "KWH",
-              "unitQuantity": 1
-            }
-          }
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
         }
       ],
       "beckn:orderValue": {
@@ -61,7 +47,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",
@@ -103,9 +89,9 @@
         "beckn:deliveryAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
+          "sessionStatus": "INTERRUPTED",
           "connectorType": "CCS2",
-          "maxPowerKW": 50,
-          "sessionStatus": "PENDING"
+          "maxPowerKW": 50
         }
       },
       "beckn:payment": {
@@ -129,5 +115,11 @@
       }
     }
   },
-  "error": {}
+  "error": {
+    "code": "40006",
+    "message": "Fulfilment agent unavailable",
+    "details": {
+      "description": "Charger rejects the current charging session"
+    }
+  }
 }

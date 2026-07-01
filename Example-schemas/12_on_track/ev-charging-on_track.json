@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "on_track",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
@@ -14,15 +14,20 @@
   },
   "message": {
     "order": {
-      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
       "beckn:id": "order-ev-charging-001",
       "beckn:orderStatus": "INPROGRESS",
       "beckn:seller": "cpo1.com",
       "beckn:buyer": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Buyer",
-        "beckn:id": "user-123"
+        "beckn:id": "user-123",
+        "beckn:buyerAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
+          "vpa": "ravikumar@upi"
+        }
       },
       "beckn:orderItems": [
         {
@@ -30,7 +35,7 @@
         }
       ],
       "beckn:fulfillment": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Fulfillment",
         "beckn:id": "fulfillment-001",
         "beckn:mode": "RESERVATION",
@@ -41,10 +46,10 @@
             "url": "https://track.bluechargenet-aggregator.io/session/SESSION-9876543210"
           }
         },
-        "sessionStatus": "ACTIVE",
         "beckn:deliveryAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld",
+          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
+          "sessionStatus": "ACTIVE",
           "chargingTelemetry": [
             {
               "eventTime": "2025-01-27T17:00:00Z",
@@ -110,5 +115,6 @@
         }
       }
     }
-  }
+  },
+  "error": {}
 }

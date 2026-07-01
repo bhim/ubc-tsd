@@ -1,0 +1,1717 @@
+openapi: 3.0.0
+info:
+  title: Beckn Protocol API - UBC TSD
+  description: OpenAPI specification for the Beckn Protocol APIs (Client and Provider reference implementation) with EV Charging specific attribute definitions.
+  version: 1.0.0
+  contact:
+    name: UBC TSD
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Discovery
+    description: APIs for searching and discovering services
+  - name: Order
+    description: APIs for order management
+  - name: Fulfillment
+    description: APIs for tracking and fulfillment
+  - name: Support
+    description: APIs for ratings and support
+  - name: Catalog
+    description: APIs for catalog management
+
+paths:
+  /discover:
+    post:
+      tags:
+        - Discovery
+      summary: Search for services
+      description: Search for services by intent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              search_by_qr:
+                summary: Discover (QR)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                  message:
+                    filters:
+                      type: "jsonpath"
+                      expression: "$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]"
+                  error: {}
+              search_by_cpo:
+                summary: Discover (Services by CPO)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                  message:
+                    filters:
+                      type: "jsonpath"
+                      expression: "$[?(@.beckn:provider.beckn:id == 'ecopower-charging')]"
+                    spatial:
+                      - op: "s_dwithin"
+                        targets: "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']"
+                        geometry:
+                          type: "Point"
+                          coordinates:
+                            - 77.59
+                            - 12.94
+                        distanceMeters: 10000
+                  error: {}
+              circular_boundary:
+                summary: Discover (Circular Boundary)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                  message:
+                    spatial:
+                      - op: "s_dwithin"
+                        targets: "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']"
+                        geometry:
+                          type: "Point"
+                          coordinates:
+                            - 77.59
+                            - 12.94
+                        distanceMeters: 10000
+                  error: {}
+              time_range:
+                summary: Discover (Time Range)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                  message:
+                    filters:
+                      type: "jsonpath"
+                      expression: "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00+05:30' && @.schema:endTime >= '2026-01-04T08:00:00+05:30')])]"
+                    spatial:
+                      - op: "s_dwithin"
+                        targets: "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']"
+                        geometry:
+                          type: "Point"
+                          coordinates:
+                            - 77.59
+                            - 12.94
+                        distanceMeters: 10000
+                  error: {}
+              boundary_with_connection:
+                summary: Discover (Boundary w/ Connection)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                  message:
+                    filters:
+                      type: "jsonpath"
+                      expression: "$[?(@.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:itemAttributes.maxPowerKW >= 50)]"
+                    spatial:
+                      - op: "s_dwithin"
+                        targets: "$['beckn:availableAt'][*]['geo']"
+                        geometry:
+                          type: "Point"
+                          coordinates:
+                            - 77.59
+                            - 12.94
+                        distanceMeters: 10000
+                  error: {}
+              boundary_with_vehicle:
+                summary: Discover (Boundary w/ Vehicle)
+                value:
+                   context:
+                    version: "2.0.0"
+                    action: "discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    timestamp: "2025-10-14T07:31:00Z"
+                    ttl: "PT30S"
+                    schema_context:
+                      - "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                   message:
+                    filters:
+                      type: "jsonpath"
+                      expression: "$[?(@.beckn:fulfillment.beckn:deliveryAttributes.vehicle.make == 'Tata' && @.beckn:fulfillment.beckn:deliveryAttributes.vehicle.model == 'Nexon-EV' )]"
+                    spatial:
+                      - op: "s_dwithin"
+                        targets: "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']"
+                        geometry:
+                          type: "Point"
+                          coordinates:
+                            - 77.6
+                            - 12.95
+                        distanceMeters: 8000
+                   error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_discover:
+    post:
+      tags:
+        - Discovery
+      summary: Callback for search
+      description: Returns catalog of services matching the search intent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_discover:
+                summary: On Discover
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    timestamp: "2024-01-15T10:30:05Z"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    ttl: "PT30S"
+                    bpp_id: "example-cds.com"
+                    bpp_uri: "https://example-cds.com/pilot/cds/energy/v2"
+                  message:
+                    catalogs:
+                      - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Catalog"
+                        "beckn:id": "catalog-ev-charging-001"
+                        "beckn:descriptor":
+                          "@type": "beckn:Descriptor"
+                          "schema:name": "EV Charging Services Network"
+                          "beckn:shortDesc": "Comprehensive network of fast charging stations"
+                        "beckn:bppId": "bpp.ev-network.example.com"
+                        "beckn:bppUri": "https://bpp.ev-network.example.com/bpp"
+                        "beckn:items":
+                          - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Item"
+                            "beckn:id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "DC Fast Charger - CCS2 (60kW)"
+                            "beckn:category":
+                              "@type": "schema:CategoryCode"
+                              "schema:codeValue": "ev-charging"
+                            "beckn:itemAttributes":
+                              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                              "@type": "ChargingService"
+                              connectorType: "CCS2"
+                              maxPowerKW: 60
+                  error: {}
+              on_discover_specific_item:
+                summary: On Discover (Specific Item)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_discover"
+                    domain: "beckn.one:deg:ev-charging"
+                    timestamp: "2024-01-15T10:30:05Z"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "a1eabf26-29f5-4a01-9d4e-4c5c9d1a3d02"
+                    bap_id: "app.example.com"
+                    bap_uri: "https://app.example.com/bap"
+                    ttl: "PT30S"
+                    bpp_id: "example-cds.com"
+                    bpp_uri: "https://example-cds.com/pilot/cds/energy/v2"
+                  message:
+                    catalogs:
+                      - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Catalog"
+                        "beckn:id": "catalog-ev-charging-001"
+                        "beckn:descriptor":
+                          "@type": "beckn:Descriptor"
+                          "schema:name": "EV Charging Services Network"
+                          "beckn:shortDesc": "Comprehensive network of fast charging stations across Bengaluru"
+                        "beckn:bppId": "bpp.ev-network.example.com"
+                        "beckn:bppUri": "https://bpp.ev-network.example.com/bpp"
+                        "beckn:items":
+                          - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Item"
+                            "beckn:id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "DC Fast Charger - CCS2 (60kW)"
+                              "beckn:shortDesc": "High-speed DC charging station with CCS2 connector"
+                              "beckn:longDesc": "Ultra-fast DC charging station supporting CCS2 connector type with 60kW maximum power output. Features advanced thermal management and smart charging capabilities."
+                            "beckn:category":
+                              "@type": "schema:CategoryCode"
+                              "schema:codeValue": "ev-charging"
+                              "schema:name": "EV Charging"
+                            "beckn:availabilityWindow":
+                              - "@type": "beckn:TimePeriod"
+                                "schema:startTime": "2026-01-04T08:00:00+05:30"
+                                "schema:endTime": "2026-01-04T20:00:00+05:30"
+                            "beckn:rateable": true
+                            "beckn:rating":
+                              "@type": "beckn:Rating"
+                              "beckn:ratingValue": 4.5
+                              "beckn:ratingCount": 128
+                            "beckn:isActive": true
+                            "beckn:provider":
+                              "beckn:id": "ecopower-charging"
+                              "beckn:descriptor":
+                                "@type": "beckn:Descriptor"
+                                "schema:name": "EcoPower Charging Pvt Ltd"
+                            "beckn:itemAttributes":
+                              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+                              "@type": "ChargingService"
+                              connectorType: "CCS2"
+                              maxPowerKW: 60
+                              minPowerKW: 5
+                              reservationSupported: true
+                              chargingStation:
+                                id: "IN-ECO-BTM-STATION-01"
+                                serviceLocation:
+                                  "@type": "beckn:Location"
+                                  geo:
+                                    type: "Point"
+                                    coordinates:
+                                      - 77.5946
+                                      - 12.9716
+                                  address:
+                                    streetAddress: "EcoPower BTM Hub, 100 Ft Rd"
+                                    addressLocality: "Bengaluru"
+                                    addressRegion: "Karnataka"
+                                    postalCode: "560076"
+                                    addressCountry: "IN"
+                              amenityFeature:
+                                - "RESTAURANT"
+                                - "RESTROOM"
+                                - "WI-FI"
+                              evseId: "IN*ECO*BTM*01*CCS2*A"
+                              parkingType: "Mall"
+                              powerType: "DC"
+                              connectorFormat: "CABLE"
+                              chargingSpeed: "FAST"
+                              vehicleType: "4-WHEELER"
+                        "beckn:offers":
+                          - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Offer"
+                            "beckn:id": "eco-charge-offer-ccs2-60kw-kwh"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "Per-kWh Tariff - CCS2 60kW"
+                            "beckn:items":
+                              - "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:price":
+                              currency: "INR"
+                              value: 45.0
+                              applicableQuantity:
+                                unitText: "Kilowatt Hour"
+                                unitCode: "KWH"
+                                unitQuantity: 1
+                            "beckn:validity":
+                              "@type": "beckn:TimePeriod"
+                              "schema:startDate": "2025-10-10T00:00:00Z"
+                              "schema:endDate": "2026-04-10T23:59:59Z"
+                            "beckn:acceptedPaymentMethod":
+                              - "UPI"
+                              - "CREDIT_CARD"
+                            "beckn:offerAttributes":
+                              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld"
+                              "@type": "ChargingOffer"
+                              tariffModel: "PER_KWH"
+                              idleFeePolicy:
+                                currency: "INR"
+                                value: 2
+                                applicableQuantity:
+                                  unitCode: "MIN"
+                                  unitText: "minutes"
+                                  unitQuantity: 10
+                            "beckn:provider": "GoGreen-charging"
+                          - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Offer"
+                            "beckn:id": "go-green-offer-ccs2-60kw-kwh"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "Per-kWh Tariff - CCS2 60kW"
+                            "beckn:items":
+                              - "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:price":
+                              currency: "INR"
+                              value: 18.5
+                              applicableQuantity:
+                                unitText: "Kilowatt Hour"
+                                unitCode: "KWH"
+                                unitQuantity: 1
+                            "beckn:validity":
+                              "@type": "beckn:TimePeriod"
+                                "schema:startDate": "2025-10-20T00:00:00Z"
+                                "schema:endDate": "2026-04-20T23:59:59Z"
+                            "beckn:acceptedPaymentMethod":
+                              - "UPI"
+                              - "CREDIT_CARD"
+                            "beckn:offerAttributes":
+                              "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingOffer/v1/context.jsonld"
+                              "@type": "ChargingOffer"
+                              tariffModel: "PER_KWH"
+                              idleFeePolicy:
+                                currency: "INR"
+                                value: 2
+                                applicableQuantity:
+                                  unitCode: "MIN"
+                                  unitText: "minutes"
+                                  unitQuantity: 10
+                            "beckn:provider": "GoGreen-charging"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /catalog_publish:
+    post:
+      tags:
+        - Catalog
+      summary: Publish catalog
+      description: Publish the catalog of services to a network registry or aggregation service (CDS).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              catalog_publish:
+                summary: Catalog Publish
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "catalog_publish"
+                    timestamp: "2025-12-19T10:05:00Z"
+                    message_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bap/energy/v2"
+                    ttl: "PT30S"
+                  message:
+                    catalogs:
+                      - "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Catalog"
+                        "beckn:id": "catalog-ev-charging-001"
+                        "beckn:descriptor":
+                          "@type": "beckn:Descriptor"
+                          "schema:name": "EV Charging Services Network"
+                          "beckn:shortDesc": "Comprehensive network of fast charging stations across Bengaluru"
+                        "beckn:bppId": "bpp.ev-network.example.com"
+                        "beckn:bppUri": "https://bpp.ev-network.example.com/bpp"
+                        "beckn:items": []
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_catalog_publish:
+    post:
+      tags:
+        - Catalog
+      summary: Callback for catalog publish
+      description: Returns the status of the catalog publication (Accepted/Rejected).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_catalog_publish:
+                summary: On Catalog Publish
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_catalog_publish"
+                    timestamp: "2025-10-14T07:32:05Z"
+                    message_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    bpp_id: "discovery-indexer.example.com"
+                    bpp_uri: "https://discovery-indexer.example.com"
+                    ttl: "PT30S"
+                  message:
+                    results:
+                      - catalog_id: "catalog-ev-charging-001"
+                        status: "ACCEPTED"
+                        item_count: 42
+                        warnings:
+                          - code: "NON_NORMALIZED_BRAND"
+                            message: "Some brand values were normalized"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /select:
+    post:
+      tags:
+        - Order
+      summary: Select items
+      description: Select items from the catalog.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              select:
+                summary: Select Item
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "select"
+                    domain: "beckn.one:deg:ev-charging"
+                    timestamp: "2024-01-15T10:30:00Z"
+                    message_id: "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://api.example-bap.com/pilot/bap/energy/v2"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bap/energy/v2"
+                    ttl: "PT30S"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "ecopower-charging"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:acceptedOffer":
+                            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Offer"
+                            "beckn:id": "offer-ccs2-60kw-kwh"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "Per-kWh Tariff - CCS2 60kW"
+                            "beckn:items":
+                              - "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:provider": "ecopower-charging"
+                            "beckn:price":
+                              currency: "INR"
+                              value: 45.0
+                              applicableQuantity:
+                                unitText: "Kilowatt Hour"
+                                unitCode: "KWH"
+                                unitQuantity: 1
+                      "beckn:orderAttributes":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld"
+                        "@type": "ChargingSession"
+                        buyerFinderFee:
+                          feeType: "PERCENTAGE"
+                          feeValue: 2.5
+                        preferences:
+                          startTime: "2026-01-04T08:00:00+05:30"
+                          endTime: "2026-01-04T20:00:00+05:30"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_select:
+    post:
+      tags:
+        - Order
+      summary: Callback for select
+      description: Returns quote for the selected items.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_select:
+                summary: On Select (Quote)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_select"
+                    domain: "beckn.one:deg:ev-charging"
+                    timestamp: "2024-01-15T10:30:05Z"
+                    message_id: "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://example-bap.com/pilot/bap/energy/v2"
+                    ttl: "PT30S"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bpp/energy/v2"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "ecopower-charging"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:acceptedOffer":
+                            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                            "@type": "beckn:Offer"
+                            "beckn:id": "offer-ccs2-60kw-kwh"
+                            "beckn:descriptor":
+                              "@type": "beckn:Descriptor"
+                              "schema:name": "Per-kWh Tariff - CCS2 60kW"
+                            "beckn:items":
+                              - "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                            "beckn:provider": "ecopower-charging"
+                            "beckn:price":
+                              currency: "INR"
+                              value: 45.0
+                              applicableQuantity:
+                                unitText: "Kilowatt Hour"
+                                unitCode: "KWH"
+                                unitQuantity: 1
+                          "beckn:price":
+                            currency: "INR"
+                            value: 45.0
+                            applicableQuantity:
+                              unitText: "Kilowatt Hour"
+                              unitCode: "KWH"
+                              unitQuantity: 1
+                      "beckn:orderValue":
+                        currency: "INR"
+                        value: 143.95
+                        components:
+                          - type: "UNIT"
+                            value: 112.5
+                            currency: "INR"
+                            description: "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+                          - type: "SURCHARGE"
+                            value: 20.0
+                            currency: "INR"
+                            description: "Surge price (20%)"
+                          - type: "DISCOUNT"
+                            value: -15.0
+                            currency: "INR"
+                            description: "Offer discount (15%)"
+                          - type: "FEE"
+                            value: 10.0
+                            currency: "INR"
+                            description: "Service fee"
+                          - type: "FEE"
+                            value: 13.64
+                            currency: "INR"
+                            description: "Overcharge estimation"
+                          - type: "FEE"
+                            value: 2.81
+                            currency: "INR"
+                            description: "Buyer finder fee (2.5%)"
+                      "beckn:orderAttributes":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld"
+                        "@type": "ChargingSession"
+                        buyerFinderFee:
+                          feeType: "PERCENTAGE"
+                          feeValue: 2.5
+                        preferences:
+                          startTime: "2026-01-04T08:00:00+05:30"
+                          endTime: "2026-01-04T20:00:00+05:30"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /init:
+    post:
+      tags:
+        - Order
+      summary: Initialize order
+      description: Initialize the order by providing billing/shipping details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              init_bap:
+                summary: Init (BAP)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "init"
+                    domain: "beckn.one:deg:ev-charging"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bap/energy/v2"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "6743e9e2-4fb5-487c-92b7-13ba8018f176"
+                    timestamp: "2025-01-27T10:00:00Z"
+                    ttl: "PT30S"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://api.example-bap.com/pilot/bap/energy/v2"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:id": "order-ev-charging-001"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "cpo1.com"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:price":
+                            currency: "INR"
+                            value: 45.0
+                            applicableQuantity:
+                              unitText: "Kilowatt Hour"
+                              unitCode: "KWH"
+                              unitQuantity: 1
+                      "beckn:orderValue":
+                        currency: "INR"
+                        value: 143.95
+                        components:
+                          - type: "UNIT"
+                            value: 112.5
+                            currency: "INR"
+                            description: "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+                          - type: "SURCHARGE"
+                            value: 20.0
+                            currency: "INR"
+                            description: "Surge price (20%)"
+                          - type: "DISCOUNT"
+                            value: -15.0
+                            currency: "INR"
+                            description: "Offer discount (15%)"
+                          - type: "FEE"
+                            value: 10.0
+                            currency: "INR"
+                            description: "Service fee"
+                          - type: "FEE"
+                            value: 13.64
+                            currency: "INR"
+                            description: "Overcharge estimation"
+                          - type: "FEE"
+                            value: 2.81
+                            currency: "INR"
+                            description: "Buyer finder fee (2.5%)"
+                      "beckn:payment":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Payment"
+                        "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000"
+                        "beckn:amount":
+                          currency: "INR"
+                          value: 143.95
+                        "beckn:beneficiary": "BAP"
+                        "beckn:paymentStatus": "INITIATED"
+                        "beckn:paymentAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "UBCPaymentAttributes"
+                          settlementAccounts:
+                            - beneficiaryId: "example-bap.com"
+                              accountHolderName: "Example BAP Solutions Pvt Ltd"
+                              accountNumber: "9876543210123"
+                              ifscCode: "HDFC0009876"
+                              bankName: "HDFC Bank"
+                              vpa: "example-bap@paytm"
+                  error: {}
+              init_bpp:
+                summary: Init (BPP)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "init"
+                    domain: "beckn.one:deg:ev-charging"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bap/energy/v2"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "6743e9e2-4fb5-487c-92b7-13ba8018f176"
+                    timestamp: "2025-01-27T10:00:00Z"
+                    ttl: "PT30S"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://api.example-bap.com/pilot/bap/energy/v2"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "cpo1.com"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                        "beckn:buyerAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "BuyerUPI"
+                          vpa: "ravikumar@upi"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:price":
+                            currency: "INR"
+                            value: 45.0
+                            applicableQuantity:
+                              unitText: "Kilowatt Hour"
+                              unitCode: "KWH"
+                              unitQuantity: 1
+                      "beckn:orderValue":
+                        currency: "INR"
+                        value: 143.95
+                        components:
+                          - type: "UNIT"
+                            value: 112.5
+                            currency: "INR"
+                            description: "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+                          - type: "SURCHARGE"
+                            value: 20.0
+                            currency: "INR"
+                            description: "Surge price (20%)"
+                          - type: "DISCOUNT"
+                            value: -15.0
+                            currency: "INR"
+                            description: "Offer discount (15%)"
+                          - type: "FEE"
+                            value: 10.0
+                            currency: "INR"
+                            description: "Service fee"
+                          - type: "FEE"
+                            value: 13.64
+                            currency: "INR"
+                            description: "Overcharge estimation"
+                          - type: "FEE"
+                            value: 2.81
+                            currency: "INR"
+                            description: "Buyer finder fee (2.5%)"
+                      "beckn:payment":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Payment"
+                        "beckn:amount":
+                          currency: "INR"
+                          value: 143.95
+                        "beckn:beneficiary": "BPP"
+                        "beckn:paymentStatus": "INITIATED"
+                        "beckn:paymentAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "UBCPaymentAttributes"
+                          upiTransactionId: "UPI123456789012"
+                          settlementAccounts:
+                            - beneficiaryId: "example-bap.com"
+                              accountHolderName: "Example BAP Solutions Pvt Ltd"
+                              accountNumber: "9876543210123"
+                              ifscCode: "HDFC0009876"
+                              bankName: "HDFC Bank"
+                              vpa: "example-bap@paytm"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_init:
+    post:
+      tags:
+        - Order
+      summary: Callback for init
+      description: Returns initialized order with payment details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_init_bap:
+                summary: On Init (BAP)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_init"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://example-bap.com/pilot/bap/energy/v2"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "6743e9e2-4fb5-487c-92b7-13ba8018f176"
+                    timestamp: "2025-01-27T10:00:00Z"
+                    ttl: "PT30S"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bpp/energy/v2"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:id": "order-ev-charging-001"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "cpo1.com"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:price":
+                            currency: "INR"
+                            value: 45.0
+                            applicableQuantity:
+                              unitText: "Kilowatt Hour"
+                              unitCode: "KWH"
+                              unitQuantity: 1
+                      "beckn:orderValue":
+                        currency: "INR"
+                        value: 143.95
+                        components:
+                          - type: "UNIT"
+                            value: 112.5
+                            currency: "INR"
+                            description: "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+                          - type: "SURCHARGE"
+                            value: 20.0
+                            currency: "INR"
+                            description: "Surge price (20%)"
+                          - type: "DISCOUNT"
+                            value: -15.0
+                            currency: "INR"
+                            description: "Offer discount (15%)"
+                          - type: "FEE"
+                            value: 10.0
+                            currency: "INR"
+                            description: "Service fee"
+                          - type: "FEE"
+                            value: 13.64
+                            currency: "INR"
+                            description: "Overcharge estimation"
+                          - type: "FEE"
+                            value: 2.81
+                            currency: "INR"
+                            description: "Buyer finder fee (2.5%)"
+                      "beckn:payment":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Payment"
+                        "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000"
+                        "beckn:amount":
+                          currency: "INR"
+                          value: 143.95
+                        "beckn:beneficiary": "BAP"
+                        "beckn:paymentStatus": "INITIATED"
+                        "beckn:paymentAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "UBCPaymentAttributes"
+                          settlementAccounts:
+                            - beneficiaryId: "example-bap.com"
+                              accountHolderName: "Example BAP Solutions Pvt Ltd"
+                              accountNumber: "9876543210123"
+                              ifscCode: "HDFC0009876"
+                              bankName: "HDFC Bank"
+                              vpa: "example-bap@paytm"
+                            - beneficiaryId: "example-bpp.com"
+                              accountHolderName: "EcoPower Charging Solutions Pvt Ltd"
+                              accountNumber: "1234567890123"
+                              ifscCode: "HDFC0001234"
+                              bankName: "HDFC Bank"
+                              vpa: "ecopower@paytm"
+                  error: {}
+              on_init_bpp:
+                summary: On Init (BPP)
+                value:
+                  context:
+                    version: "2.0.0"
+                    action: "on_init"
+                    domain: "beckn.one:deg:ev-charging"
+                    bap_id: "example-bap.com"
+                    bap_uri: "https://example-bap.com/pilot/bap/energy/v2"
+                    transaction_id: "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+                    message_id: "6743e9e2-4fb5-487c-92b7-13ba8018f176"
+                    timestamp: "2025-01-27T10:00:00Z"
+                    ttl: "PT30S"
+                    bpp_id: "example-bpp.com"
+                    bpp_uri: "https://example-bpp.com/pilot/bpp/energy/v2"
+                  message:
+                    order:
+                      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                      "@type": "beckn:Order"
+                      "beckn:id": "order-ev-charging-001"
+                      "beckn:orderStatus": "CREATED"
+                      "beckn:seller": "cpo1.com"
+                      "beckn:buyer":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Buyer"
+                        "beckn:id": "user-123"
+                        "beckn:role": "BUYER"
+                        "beckn:displayName": "Ravi Kumar"
+                        "beckn:telephone": "+91-9876543210"
+                        "beckn:email": "ravi.kumar@example.com"
+                        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+                        "beckn:buyerAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "BuyerUPI"
+                          vpa: "ravikumar@upi"
+                      "beckn:orderItems":
+                        - "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+                          "beckn:quantity":
+                            unitText: "Kilowatt Hour"
+                            unitCode: "KWH"
+                            unitQuantity: 2.5
+                          "beckn:price":
+                            currency: "INR"
+                            value: 45.0
+                            applicableQuantity:
+                              unitText: "Kilowatt Hour"
+                              unitCode: "KWH"
+                              unitQuantity: 1
+                      "beckn:orderValue":
+                        currency: "INR"
+                        value: 143.95
+                        components:
+                          - type: "UNIT"
+                            value: 112.5
+                            currency: "INR"
+                            description: "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+                          - type: "SURCHARGE"
+                            value: 20.0
+                            currency: "INR"
+                            description: "Surge price (20%)"
+                          - type: "DISCOUNT"
+                            value: -15.0
+                            currency: "INR"
+                            description: "Offer discount (15%)"
+                          - type: "FEE"
+                            value: 10.0
+                            currency: "INR"
+                            description: "Service fee"
+                          - type: "FEE"
+                            value: 13.64
+                            currency: "INR"
+                            description: "Overcharge estimation"
+                          - type: "FEE"
+                            value: 2.81
+                            currency: "INR"
+                            description: "Buyer finder fee (2.5%)"
+                      "beckn:payment":
+                        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld"
+                        "@type": "beckn:Payment"
+                        "beckn:amount":
+                          currency: "INR"
+                          value: 143.95
+                        "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount"
+                        "beckn:txnRef": "TXN-123456789"
+                        "beckn:beneficiary": "BPP"
+                        "beckn:acceptedPaymentMethod":
+                          - "BANK_TRANSFER"
+                          - "UPI"
+                          - "WALLET"
+                        "beckn:paymentStatus": "INITIATED"
+                        "beckn:paymentAttributes":
+                          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld"
+                          "@type": "UBCPaymentAttributes"
+                          upiTransactionId: "UPI123456789012"
+                          settlementAccounts:
+                            - beneficiaryId: "example-bap.com"
+                              accountHolderName: "Example BAP Solutions Pvt Ltd"
+                              accountNumber: "9876543210123"
+                              ifscCode: "HDFC0009876"
+                              bankName: "HDFC Bank"
+                              vpa: "example-bap@paytm"
+                            - beneficiaryId: "example-bpp.com"
+                              accountHolderName: "EcoPower Charging Solutions Pvt Ltd"
+                              accountNumber: "1234567890123"
+                              ifscCode: "HDFC0001234"
+                              bankName: "HDFC Bank"
+                              vpa: "ecopower@paytm"
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /confirm:
+    post:
+      tags:
+        - Order
+      summary: Confirm order
+      description: Confirm the order and proceed with payment/fulfillment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              confirm:
+                summary: Confirm
+                value:
+                  context:
+                    action: "confirm"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_confirm:
+    post:
+      tags:
+        - Order
+      summary: Callback for confirm
+      description: Returns confirmed order details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_confirm:
+                summary: On Confirm
+                value:
+                  context:
+                    action: "on_confirm"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /status:
+    post:
+      tags:
+        - Order
+      summary: Get order status
+      description: Fetch the current status of an order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              status:
+                summary: Status
+                value:
+                  context:
+                    action: "status"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_status:
+    post:
+      tags:
+        - Order
+      summary: Callback for status
+      description: Returns the current status of the order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_status:
+                summary: On Status
+                value:
+                  context:
+                    action: "on_status"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /track:
+    post:
+      tags:
+        - Fulfillment
+      summary: Track order
+      description: Track the active enrollment/delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              track:
+                summary: Track
+                value:
+                  context:
+                    action: "track"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_track:
+    post:
+      tags:
+        - Fulfillment
+      summary: Callback for track
+      description: Returns tracking details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_track:
+                summary: On Track
+                value:
+                  context:
+                    action: "on_track"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /cancel:
+    post:
+      tags:
+        - Order
+      summary: Cancel order
+      description: Cancel an active order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              cancel:
+                summary: Cancel
+                value:
+                  context:
+                    action: "cancel"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_cancel:
+    post:
+      tags:
+        - Order
+      summary: Callback for cancel
+      description: Returns cancellation result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_cancel:
+                summary: On Cancel
+                value:
+                  context:
+                    action: "on_cancel"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /update:
+    post:
+      tags:
+        - Order
+      summary: Update order
+      description: Update an active order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              update:
+                summary: Update
+                value:
+                  context:
+                    action: "update"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_update:
+    post:
+      tags:
+        - Order
+      summary: Callback for update
+      description: Returns update result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_update:
+                summary: On Update
+                value:
+                  context:
+                    action: "on_update"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /rating:
+    post:
+      tags:
+        - Support
+      summary: Rate service
+      description: Submit a rating for a service or provider.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              rating:
+                summary: Rating
+                value:
+                  context:
+                    action: "rating"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_rating:
+    post:
+      tags:
+        - Support
+      summary: Callback for rating
+      description: Acknowledgement for rating submission.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_rating:
+                summary: On Rating
+                value:
+                  context:
+                    action: "on_rating"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /support:
+    post:
+      tags:
+        - Support
+      summary: Get support
+      description: Request support for an order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              support:
+                summary: Support
+                value:
+                  context:
+                    action: "support"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+  /on_support:
+    post:
+      tags:
+        - Support
+      summary: Callback for support
+      description: Returns support contact details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecknRequest'
+            examples:
+              on_support:
+                summary: On Support
+                value:
+                  context:
+                    action: "on_support"
+                  message: {}
+                  error: {}
+      responses:
+        '200':
+          description: Acknowledgement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BecknAck'
+
+components:
+  schemas:
+    BecknRequest:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/Context'
+        message:
+          type: object
+          description: The payload containing the business object (Intent, Catalog, Order, etc.)
+          additionalProperties: true
+        error: {}
+      required:
+        - context
+        - message
+
+    BecknAck:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACK
+                    - NACK
+              required:
+                - status
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            error: {}
+      required:
+        - message
+
+    Context:
+      type: object
+      properties:
+        domain:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        action:
+          type: string
+        core_version:
+          type: string
+        bap_id:
+          type: string
+        bap_uri:
+          type: string
+        bpp_id:
+          type: string
+        bpp_uri:
+          type: string
+        transaction_id:
+          type: string
+        message_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        key:
+          type: string
+        ttl:
+          type: string
+      required:
+        - domain
+        - country
+        - city
+        - action
+        - core_version
+        - bap_id
+        - bap_uri
+        - transaction_id
+        - message_id
+        - timestamp
+
+    ChargingService:
+      type: object
+      additionalProperties: false
+      required:
+        - connectorType
+        - maxPowerKW
+        - socketCount
+      properties:
+        evseId:
+          type: string
+          example: "IN*ECO*01*CCS2*A"
+        connectorType:
+          type: string
+          enum: [CCS2, Type2, CHAdeMO, GB_T]
+          example: CCS2
+        maxPowerKW:
+          type: number
+          minimum: 1
+          maximum: 500
+          example: 60
+        minPowerKW:
+          type: number
+          minimum: 0
+          maximum: 500
+          example: 5
+        reservationSupported:
+          type: boolean
+          default: true
+        chargingStation:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "IN-ECO-MDY-STATION-01"
+            serviceLocation:
+              allOf:
+                - $ref: '#/components/schemas/Location'
+        amenityFeature:
+          type: array
+          items:
+            type: string
+            enum: ["RESTAURANT", "RESTROOM", "WI-FI", "PARKING"]
+        roamingNetwork:
+          type: string
+          example: "GreenRoam"
+        parkingType:
+          type: string
+          enum: [OnStreet, OffStreet, Basement, Mall, FuelStation, Office, Hotel]
+        powerType:
+          type: string
+          enum: [AC_SINGLE_PHASE, AC_3_PHASE, DC]
+        connectorFormat:
+          type: string
+          enum: [SOCKET, CABLE]
+        chargingSpeed:
+          type: string
+          enum: [SLOW, NORMAL, FAST, ULTRAFAST]
+        vehicleType:
+          type: string
+          enum: ["2-WHEELER", "3-WHEELER", "4-WHEELER"]
+
+    ChargingOffer:
+      type: object
+      additionalProperties: false
+      properties:
+        tariffModel:
+          type: string
+          enum: [PER_KWH, PER_MINUTE, SUBSCRIPTION, TIME_OF_DAY]
+        idleFeePolicy:
+          allOf:
+             - $ref: '#/components/schemas/PriceSpecification'
+
+    Location:
+      type: object
+      properties:
+        geo:
+          type: object
+        address:
+          type: object
+
+    PriceSpecification:
+      type: object
+      properties:
+        currency:
+          type: string
+        value:
+          type: number

@@ -2,8 +2,6 @@
 
 This document provides a comprehensive reference for all fields used in the Beckn V2 EV Charging API examples.
 
-There is a [google sheet version](https://docs.google.com/spreadsheets/d/1ilIob4B7aPoSrixPbEi0__4sL6GURDj8jux9GOnDy3c/edit?gid=0#gid=0) of this document for users who are comfortable with google sheets.
-
 ## Table of Contents
 - [Context Fields](#context-fields)
 - [Discovery & Search](#discovery--search)
@@ -11,15 +9,18 @@ There is a [google sheet version](https://docs.google.com/spreadsheets/d/1ilIob4
 - [ChargingService Attributes](#chargingservice-attributes)
 - [Offers & Pricing](#offers--pricing)
 - [Order Management](#order-management)
+- [Order Attributes](#order-attributes)
 - [Buyer Information](#buyer-information)
 - [Order Items](#order-items)
 - [Fulfillment](#fulfillment)
 - [ChargingSession Attributes](#chargingsession-attributes)
+- [Charging Telemetry](#charging-telemetry)
 - [Tracking](#tracking)
 - [Payment](#payment)
 - [Rating & Feedback](#rating--feedback)
 - [Support](#support)
 - [Cancellation](#cancellation)
+- [Catalog Publish](#catalog-publish)
 
 ---
 
@@ -170,12 +171,17 @@ EV-specific attributes in `beckn:itemAttributes` (ChargingService schema).
 | `beckn:itemAttributes.connectorFormat` | Connector Format | String | ✅ | Socket or cable | `SOCKET`, `CABLE` |
 | `beckn:itemAttributes.chargingSpeed` | Charging Speed | String | ✅ | Speed category | `SLOW`, `FAST`, `ULTRA_FAST` |
 | `beckn:itemAttributes.stationStatus` | Station Status | String | ✅ | Availability status | `Available`, `Charging`, `Offline` |
+| `beckn:itemAttributes.vehicleType` | Vehicle Type | String | ❌ | Supported vehicle type | `2-WHEELER`, `3-WHEELER`, `4-WHEELER` |
+| `beckn:itemAttributes.chargingStation` | Charging Station | Object | ❌ | Physical station details | `{id, serviceLocation}` |
+| `beckn:itemAttributes.chargingStation.id` | Station ID | String | ✅ | Unique station identifier | `IN-ECO-BTM-STATION-01` |
+| `beckn:itemAttributes.chargingStation.serviceLocation` | Service Location | Object | ✅ | Station location details | `{@type: "beckn:Location", geo, address}` |
 
 **Notes:**
 - `connectorType` follows ISO 15118 standards
 - `evseId` format: Country*Operator*Location*EVSE*Connector
 - `acceptedPaymentMethod` uses schema.org types
 - Status updates in real-time
+- `vehicleType` indicates compatible vehicle categories
 
 ---
 
@@ -202,10 +208,25 @@ Fields in `beckn:offers` array for pricing plans.
 | `beckn:price.schema:unitCode` | Unit Code | String | ✅ | Measurement unit | `KWH` |
 | `beckn:price.schema:valueAddedTaxIncluded` | VAT Included | Boolean | ✅ | Tax inclusion | `false` |
 
+| `beckn:offerAttributes.@context` | Context | URL | ✅ | ChargingOffer context | `https://raw.githubusercontent.com/.../EvChargingOffer/v1/context.jsonld` |
+| `beckn:offerAttributes.@type` | Type | String | ✅ | Type identifier | `ChargingOffer` |
+| `beckn:offerAttributes.tariffModel` | Tariff Model | String | ✅ | Pricing model | `PER_KWH`, `PER_MINUTE`, `SUBSCRIPTION`, `TIME_OF_DAY` |
+| `beckn:offerAttributes.idleFeePolicy` | Idle Fee Policy | Object | ❌ | Idle fee specification | `{currency: "INR", value: 2, applicableQuantity: {...}}` |
+| `beckn:offerAttributes.idleFeePolicy.currency` | Currency | String | ✅ | Idle fee currency | `INR` |
+| `beckn:offerAttributes.idleFeePolicy.value` | Value | Number | ✅ | Idle fee amount | `2` |
+| `beckn:offerAttributes.idleFeePolicy.applicableQuantity` | Applicable Quantity | Object | ✅ | Time unit for idle fee | `{unitCode: "MIN", unitQuantity: 10}` |
+
+**Tariff Models:**
+- `PER_KWH` - Pricing per kilowatt-hour of energy
+- `PER_MINUTE` - Pricing per minute of charging time
+- `SUBSCRIPTION` - Subscription-based pricing
+- `TIME_OF_DAY` - Variable pricing based on time of day
+
 **Notes:**
 - Currency codes follow ISO 4217
 - Unit codes follow UN/CEFACT standards
 - Multiple offers can exist per item (different pricing tiers)
+- `idleFeePolicy` charges users who remain connected after charging completes
 
 ---
 
@@ -230,6 +251,24 @@ Fields in `message.order` object for order handling.
 
 ---
 
+## Order Attributes
+
+Fields in `message.order.beckn:orderAttributes` for EV charging order specifics.
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `beckn:orderAttributes` | Order Attributes | Object | ❌ | Order-level domain attributes | `{@type: "EvChargingOrder", preferences: {...}}` |
+| `beckn:orderAttributes.preferences` | Preferences | Object | ❌ | User charging preferences | `{startTime, endTime}` |
+| `beckn:orderAttributes.preferences.startTime` | Preferred Start | DateTime | ❌ | Preferred session start | `2026-01-04T08:00:00+05:30` |
+| `beckn:orderAttributes.preferences.endTime` | Preferred End | DateTime | ❌ | Preferred session end | `2026-01-04T10:00:00+05:30` |
+| `beckn:orderAttributes.buyerFinderFee` | Buyer Finder Fee | Object | ❌ | BAP commission | `{currency: "INR", value: 2.5}` |
+
+**Notes:**
+- `preferences` allows buyers to specify desired charging time windows
+- `buyerFinderFee` represents the commission charged by the BAP
+
+---
+
 ## Buyer Information
 
 Fields in `message.order.beckn:buyer` (Party schema).
@@ -237,12 +276,25 @@ Fields in `message.order.beckn:buyer` (Party schema).
 | Field Path | Field Name | Type | Required | Description | Example |
 |------------|-----------|------|----------|-------------|---------|
 | `beckn:buyer.@context` | Context | URL | ✅ | Party context | `https://becknprotocol.io/.../Party/schema-context.jsonld` |
-| `beckn:buyer.@type` | Type | String | ✅ | Type identifier | `beckn:Party` |
-| `beckn:buyer.schema:name` | Name | String | ✅ | Buyer name | `Rajesh Kumar` |
-| `beckn:buyer.schema:email` | Email | String | ✅ | Email address | `rajesh.kumar@example.com` |
-| `beckn:buyer.schema:telephone` | Phone | String | ✅ | Phone number | `+91-9876543210` |
-| `beckn:buyer.schema:address` | Address | Object | ✅ | Billing address | `{streetAddress, addressLocality, ...}` |
-| `beckn:buyer.beckn:taxId` | Tax ID | String | ❌ | Tax number | `GSTIN29ABCDE1234F1Z5` |
+| `beckn:buyer.@type` | Type | String | ✅ | Type identifier | `beckn:Buyer` |
+| `beckn:buyer.beckn:id` | Buyer ID | String | ✅ | Unique buyer identifier | `user-123` |
+| `beckn:buyer.beckn:displayName` | Display Name | String | ❌ | Buyer name | `Ravi Kumar` |
+| `beckn:buyer.beckn:telephone` | Phone | String | ❌ | Phone number | `+91-9876543210` |
+| `beckn:buyer.beckn:email` | Email | String | ❌ | Email address | `ravi.kumar@example.com` |
+| `beckn:buyer.beckn:taxID` | Tax ID | String | ❌ | Tax number | `GSTIN29ABCDE1234F1Z5` |
+| `beckn:buyer.beckn:buyerAttributes` | Buyer Attributes | Object | ❌ | Buyer payment info | `{@type: "BuyerPaymentInfo", vpa: "user@upi"}` |
+
+### Buyer Attributes (BuyerPaymentInfo)
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `beckn:buyerAttributes.@context` | Context | URL | ✅ | BuyerPaymentInfo context | `https://raw.githubusercontent.com/.../PaymentSettlement/v1/context.jsonld` |
+| `beckn:buyerAttributes.@type` | Type | String | ✅ | Type identifier | `BuyerPaymentInfo` |
+| `beckn:buyerAttributes.vpa` | VPA | String | ✅ | Virtual Payment Address | `ravikumar@upi` |
+
+**Notes:**
+- `vpa` is the buyer's UPI Virtual Payment Address for refunds
+- `buyerAttributes` is used across init, confirm, track, and cancel flows
 
 ---
 
@@ -305,11 +357,56 @@ EV-specific fulfillment data in `beckn:fulfillmentAttributes` (ChargingSession s
 | `beckn:fulfillmentAttributes.chargingProgressPercent` | Charging Progress | Number | ❌ | Completion % | `65` |
 | `beckn:fulfillmentAttributes.estimatedCompletionTime` | Estimated Completion | DateTime | ❌ | Expected end time | `2024-01-15T12:45:00Z` |
 
+| `beckn:deliveryAttributes.connectorStatus` | Connector Status | String | ❌ | OCPP connector status | `AVAILABLE`, `PREPARING`, `UNAVAILABLE` |
+| `beckn:deliveryAttributes.meteredEnergyKWh` | Metered Energy | Number | ❌ | Total energy delivered (kWh) | `13.6` |
+| `beckn:deliveryAttributes.meteredDurationMinutes` | Metered Duration | Number | ❌ | Total session time (minutes) | `35` |
+| `beckn:deliveryAttributes.totalCost` | Total Cost | Object | ❌ | Session cost breakdown | `{exclVat: 245.0, inclVat: 289.1}` |
+| `beckn:deliveryAttributes.totalCost.exclVat` | Cost Excluding VAT | Number | ✅ | Cost before tax | `245.0` |
+| `beckn:deliveryAttributes.totalCost.inclVat` | Cost Including VAT | Number | ✅ | Cost after tax | `289.1` |
+| `beckn:deliveryAttributes.reservationId` | Reservation ID | String | ❌ | Server-assigned reservation ID | `RESV-984532` |
+| `beckn:deliveryAttributes.gracePeriodMinutes` | Grace Period | Number | ❌ | Minutes before releasing slot | `10` |
+| `beckn:deliveryAttributes.lastUpdated` | Last Updated | DateTime | ❌ | Last telemetry update | `2024-01-15T12:30:00Z` |
+| `beckn:deliveryAttributes.vehicleMake` | Vehicle Make | String | ❌ | Vehicle brand | `Tata` |
+| `beckn:deliveryAttributes.vehicleModel` | Vehicle Model | String | ❌ | Vehicle model | `Nexon EV` |
+
 **Session Status Values:**
 - `PENDING` - Session created, not started
 - `ACTIVE` - Charging in progress
+- `STOP` - Charging stopped by user/system
 - `COMPLETED` - Charging finished
 - `INTERRUPTED` - Charging stopped unexpectedly
+
+**Connector Status Values (OCPP):**
+- `AVAILABLE` - Connector ready for use
+- `PREPARING` - Connector getting ready (cable connected)
+- `UNAVAILABLE` - Connector not available
+
+---
+
+## Charging Telemetry
+
+Real-time charging session metrics in `beckn:deliveryAttributes.chargingTelemetry`.
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `chargingTelemetry` | Charging Telemetry | Array[Object] | ❌ | Time-series telemetry data | `[{eventTime, metrics: [...]}]` |
+| `chargingTelemetry[].eventTime` | Event Time | DateTime | ✅ | Timestamp of reading | `2025-01-27T17:00:00Z` |
+| `chargingTelemetry[].metrics` | Metrics | Array[Object] | ✅ | Array of measurements | `[{name, value, unitCode}]` |
+| `chargingTelemetry[].metrics[].name` | Metric Name | String | ✅ | Type of measurement | `STATE_OF_CHARGE`, `POWER`, `ENERGY`, `VOLTAGE`, `CURRENT` |
+| `chargingTelemetry[].metrics[].value` | Metric Value | Number | ✅ | Measured value | `62.5` |
+| `chargingTelemetry[].metrics[].unitCode` | Unit Code | String | ✅ | Unit of measurement | `PERCENTAGE`, `KWH`, `KW`, `VLT`, `AMP` |
+
+**Metric Types:**
+- `STATE_OF_CHARGE` - Battery percentage (unitCode: `PERCENTAGE`)
+- `POWER` - Current charging power in kW (unitCode: `KW`)
+- `ENERGY` - Total energy delivered in kWh (unitCode: `KWH`)
+- `VOLTAGE` - Voltage in volts (unitCode: `VLT`)
+- `CURRENT` - Current in amperes (unitCode: `AMP`)
+
+**Notes:**
+- Used in `on_track` and `on_status` APIs
+- Provides real-time charging session monitoring
+- Multiple telemetry events can be streamed for time-series data
 
 ---
 
@@ -333,19 +430,21 @@ Fields in `message.order.beckn:payment` for payment handling.
 | Field Path | Field Name | Type | Required | Description | Example |
 |------------|-----------|------|----------|-------------|---------|
 | `beckn:payment.@context` | Context | URL | ✅ | Payment context | `https://becknprotocol.io/.../Payment/schema-context.jsonld` |
-| `beckn:payment.@type` | Type | String | ✅ | Payment type | `schema:PayAction` |
-| `beckn:payment.schema:name` | Payment Name | String | ❌ | Description | `Charging Session Payment` |
-| `beckn:payment.beckn:status` | Payment Status | String | ✅ | Current status | `PENDING`, `PAID`, `FAILED`, `REFUNDED` |
+| `beckn:payment.@type` | Type | String | ✅ | Payment type | `beckn:Payment` |
+| `beckn:payment.beckn:id` | Payment ID | String | ✅ | Unique payment identifier | `payment-123e4567-e89b-12d3-a456-426614174000` |
+| `beckn:payment.beckn:amount` | Amount | Object | ✅ | Payment amount | `{currency: "INR", value: 143.95}` |
 | `beckn:payment.beckn:paymentURL` | Payment URL | URL | ❌ | Payment link | `https://pay.example.com?order=12345` |
-| `beckn:payment.beckn:method` | Payment Method | Object | ❌ | Selected method | `{beckn:type, beckn:details}` |
-| `beckn:payment.beckn:method.beckn:type` | Payment Type | String | ✅ | Method type | `schema:UPI`, `schema:CreditCard`, `schema:Wallet` |
-| `beckn:payment.beckn:method.beckn:details` | Payment Details | Array[Object] | ❌ | Method specifics | `[{beckn:key: "vpa", beckn:value: "user@upi"}]` |
-| `beckn:payment.beckn:acceptedPaymentMethod` | Accepted Methods | Array[String] | ❌ | Available methods | `["schema:UPI", "schema:CreditCard"]` |
-| `beckn:payment.schema:paymentDueDate` | Payment Due Date | DateTime | ❌ | Due date | `2024-01-15T12:00:00Z` |
+| `beckn:payment.beckn:txnRef` | Transaction Reference | String | ❌ | Transaction reference | `TXN-123456789` |
+| `beckn:payment.beckn:paidAt` | Paid At | DateTime | ❌ | Payment timestamp | `2025-12-19T10:05:00Z` |
+| `beckn:payment.beckn:beneficiary` | Beneficiary | String | ❌ | Payment recipient | `BAP`, `BPP`, `BUYER` |
+| `beckn:payment.beckn:paymentStatus` | Payment Status | String | ✅ | Current status | `PENDING`, `COMPLETED`, `REFUNDED` |
+| `beckn:payment.beckn:upiTransactionId` | UPI Transaction ID | String | ❌ | UPI payment reference | `UPI123456789012` |
 
 **Payment Status Values:**
-- `PENDING` - Payment not yet completed
-- `PAID` - Payment successful
+- `INITIATED` - Payment initiated
+- `PENDING` - Payment pending
+- `AUTHORIZED` - Payment authorized
+- `COMPLETED` - Payment successful
 - `FAILED` - Payment failed
 - `REFUNDED` - Payment refunded
 
@@ -360,16 +459,40 @@ Fields in `message.order.beckn:orderValue` for pricing breakdown.
 | `beckn:orderValue.@type` | Type | String | ✅ | Price type | `schema:PriceSpecification` |
 | `beckn:orderValue.schema:priceCurrency` | Currency | String | ✅ | Currency code | `INR` |
 | `beckn:orderValue.schema:price` | Total Price | Number | ✅ | Total amount | `55.00` |
-| `beckn:orderValue.beckn:components` | Price Components | Array[Object] | ❌ | Price breakdown | `[{beckn:item, beckn:title, schema:price}]` |
-| `beckn:components[].beckn:item` | Component Type | String | ✅ | Cost category | `UNIT`, `FEE`, `SURCHARGE`, `DISCOUNT` |
-| `beckn:components[].beckn:title` | Title | String | ✅ | Description | `Energy Charges (2.5 kWh)` |
-| `beckn:components[].schema:price` | Price | Number | ✅ | Component amount | `45.00` |
+| `beckn:orderValue.components` | Price Components | Array[Object] | ❌ | Price breakdown | `[{type, value, currency, description}]` |
+| `beckn:orderValue.components[].type` | Component Type | String | ✅ | Cost category | `UNIT`, `FEE`, `SURCHARGE`, `DISCOUNT` |
+| `beckn:orderValue.components[].value` | Value | Number | ✅ | Component amount | `112.5` |
+| `beckn:orderValue.components[].currency` | Currency | String | ✅ | Currency code | `INR` |
+| `beckn:orderValue.components[].description` | Description | String | ❌ | Component description | `Base charging session cost (45 INR/kWh × 2.5 kWh)` |
 
 **Component Types:**
 - `UNIT` - Base unit cost (energy charges)
-- `FEE` - Service/platform fees
-- `SURCHARGE` - Additional charges (idle fees, peak hour charges)
+- `FEE` - Service/platform fees (service fee, buyer finder fee, overcharge estimation)
+- `SURCHARGE` - Additional charges (surge pricing, peak hour charges)
 - `DISCOUNT` - Price reductions
+
+---
+
+## Payment Settlement
+
+Fields in `beckn:payment.beckn:paymentAttributes` for settlement accounts.
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `beckn:paymentAttributes.@context` | Context | URL | ✅ | PaymentSettlement context | `https://raw.githubusercontent.com/.../PaymentSettlements/v1/context.jsonld` |
+| `beckn:paymentAttributes.@type` | Type | String | ✅ | Type identifier | `PaymentSettlement` |
+| `beckn:paymentAttributes.settlementAccounts` | Settlement Accounts | Array[Object] | ✅ | List of settlement accounts | `[{beneficiaryId, accountNumber, ...}]` |
+| `settlementAccounts[].beneficiaryId` | Beneficiary ID | String | ✅ | Beneficiary identifier | `example-bap.com`, `example-bpp.com` |
+| `settlementAccounts[].accountHolderName` | Account Holder | String | ✅ | Account holder name | `Example BAP Solutions Pvt Ltd` |
+| `settlementAccounts[].accountNumber` | Account Number | String | ✅ | Bank account number | `9876543210123` |
+| `settlementAccounts[].ifscCode` | IFSC Code | String | ✅ | Bank IFSC code | `HDFC0009876` |
+| `settlementAccounts[].bankName` | Bank Name | String | ❌ | Name of the bank | `HDFC Bank` |
+| `settlementAccounts[].vpa` | VPA | String | ❌ | Virtual Payment Address | `example-bap@paytm` |
+
+**Notes:**
+- `beneficiaryId` identifies the entity (BAP or BPP domain)
+- Multiple settlement accounts can be provided for different beneficiaries
+- Used in `init`, `on_init`, `on_confirm` APIs
 
 ---
 
@@ -381,28 +504,33 @@ Fields for rating submission and response.
 
 | Field Path | Field Name | Type | Required | Description | Example |
 |------------|-----------|------|----------|-------------|---------|
-| `message.rating.@context` | Context | URL | ✅ | Rating context | `https://becknprotocol.io/.../Rating/schema-context.jsonld` |
-| `message.rating.@type` | Type | String | ✅ | Rating type | `beckn:RatingInput` |
-| `message.rating.beckn:id` | Reference ID | String | ✅ | What to rate | `fulfillment-001` |
-| `message.rating.beckn:category` | Category | String | ✅ | Rating category | `FULFILLMENT`, `PROVIDER`, `ITEM` |
-| `message.rating.beckn:value` | Rating Value | Number | ✅ | Rating score | `5` |
-| `message.rating.beckn:feedback` | Feedback | String | ❌ | User comments | `Great charging experience!` |
-| `message.rating.beckn:feedbackTags` | Feedback Tags | Array[String] | ❌ | Quick feedback | `["Fast", "Clean", "Well-maintained"]` |
+| `message.ratings` | Ratings | Array[Object] | ✅ | Array of rating inputs | `[{@type: "beckn:RatingInput", ...}]` |
+| `message.ratings[].@context` | Context | URL | ✅ | Rating context | `https://raw.githubusercontent.com/.../context.jsonld` |
+| `message.ratings[].@type` | Type | String | ✅ | Rating type | `beckn:RatingInput` |
+| `message.ratings[].id` | Reference ID | String | ✅ | What to rate | `fulfillment-001` |
+| `message.ratings[].ratingValue` | Rating Value | Number | ✅ | Rating score | `4` |
+| `message.ratings[].bestRating` | Best Rating | Number | ✅ | Maximum possible | `5` |
+| `message.ratings[].worstRating` | Worst Rating | Number | ✅ | Minimum possible | `1` |
+| `message.ratings[].category` | Category | String | ✅ | Rating category | `FULFILLMENT`, `PROVIDER`, `ITEM`, `ORDER` |
+| `message.ratings[].feedback` | Feedback | Object | ❌ | Structured feedback | `{comments, tags: [...]}` |
+| `message.ratings[].feedback.comments` | Comments | String | ❌ | User review text | `Excellent charging experience!` |
+| `message.ratings[].feedback.tags` | Tags | Array[String] | ❌ | Feedback tags | `["fast-charging", "clean-station"]` |
 
 **Rating Categories:**
 - `FULFILLMENT` - Rate the charging session experience
 - `PROVIDER` - Rate the charging station operator
 - `ITEM` - Rate the specific charging equipment
+- `ORDER` - Rate the overall order experience
 
 ### Rating Output (on_rating response)
 
 | Field Path | Field Name | Type | Required | Description | Example |
 |------------|-----------|------|----------|-------------|---------|
-| `message.ratingOutput.beckn:ratingValue` | Average Rating | Number | ✅ | Mean rating | `4.5` |
-| `message.ratingOutput.beckn:ratingCount` | Rating Count | Integer | ✅ | Total ratings | `129` |
-| `message.ratingOutput.beckn:bestRating` | Best Rating | Number | ✅ | Maximum possible | `5` |
-| `message.ratingOutput.beckn:worstRating` | Worst Rating | Number | ✅ | Minimum possible | `1` |
-| `message.ratingOutput.beckn:feedbackForm` | Feedback Form | Object | ❌ | Extended feedback | `{beckn:url, beckn:mimeType}` |
+| `message.received` | Received | Boolean | ✅ | Rating acknowledgement | `true` |
+| `message.feedbackForm` | Feedback Form | Object | ❌ | Additional feedback form | `{url, mime_type, submission_id}` |
+| `message.feedbackForm.url` | Form URL | URL | ✅ | Feedback form link | `https://example-bpp.com/feedback/portal` |
+| `message.feedbackForm.mime_type` | MIME Type | String | ❌ | Form content type | `application/xml` |
+| `message.feedbackForm.submission_id` | Submission ID | String | ❌ | Feedback submission reference | `feedback-123e4567-e89b...` |
 
 ---
 
@@ -538,6 +666,44 @@ Common unit codes used in EV charging:
 19. **cancel** → Cancel order/reservation
 20. **on_cancel** ← Receive cancellation terms and refund details
 
+### Catalog Publish Flow
+21. **catalog_publish** → BPP publishes catalog to discovery indexer
+22. **on_catalog_publish** ← Receive indexing results
+
+---
+
+## Catalog Publish
+
+Fields for catalog publishing to discovery indexers.
+
+### Catalog Publish Request
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `context.action` | Action | String | ✅ | API action | `catalog_publish` |
+| `message.catalogs` | Catalogs | Array[Object] | ✅ | Catalogs to publish | `[{@type: "beckn:Catalog", ...}]` |
+
+### Catalog Publish Response (on_catalog_publish)
+
+| Field Path | Field Name | Type | Required | Description | Example |
+|------------|-----------|------|----------|-------------|---------|
+| `context.action` | Action | String | ✅ | API action | `on_catalog_publish` |
+| `message.results` | Results | Array[Object] | ✅ | Indexing results | `[{catalog_id, status, ...}]` |
+| `message.results[].catalog_id` | Catalog ID | String | ✅ | Published catalog ID | `catalog-ev-charging-001` |
+| `message.results[].status` | Status | String | ✅ | Publish status | `ACCEPTED`, `REJECTED` |
+| `message.results[].item_count` | Item Count | Integer | ❌ | Items indexed | `42` |
+| `message.results[].warnings` | Warnings | Array[Object] | ❌ | Non-fatal issues | `[{code, message}]` |
+| `message.results[].warnings[].code` | Warning Code | String | ✅ | Warning type | `NON_NORMALIZED_BRAND` |
+| `message.results[].warnings[].message` | Warning Message | String | ✅ | Warning description | `Some brand values were normalized` |
+| `message.results[].error` | Error | Object | ❌ | Rejection details | `{code, message, paths}` |
+| `message.results[].error.code` | Error Code | String | ✅ | Error type | `INVALID_ITEM` |
+| `message.results[].error.message` | Error Message | String | ✅ | Error description | `Invalid item payload at index 3` |
+| `message.results[].error.paths` | Error Paths | String | ❌ | Path to invalid data | `catalogs[1].items[3]` |
+
+**Status Values:**
+- `ACCEPTED` - Catalog successfully indexed
+- `REJECTED` - Catalog rejected due to validation errors
+
 ---
 
 ## Additional Resources
@@ -556,6 +722,7 @@ Common unit codes used in EV charging:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2024-10-30 | Initial comprehensive field reference |
+| 1.1 | 2026-01-07 | Added buyerAttributes, chargingTelemetry, chargingStation, vehicleType, catalog_publish, orderAttributes, updated payment and rating fields |
 
 ---
 
@@ -566,6 +733,6 @@ If you find any errors or have suggestions for improvement, please submit an iss
 ---
 
 **Generated for**: Beckn V2 EV Charging API Examples  
-**Location**: `/Users/rajaneesh/beckn/specs/DEG/examples/v2/`  
-**Last Updated**: October 30, 2024
+**Location**: `/Users/akarsh/ubc-tsd/Example-schemas/`  
+**Last Updated**: January 7, 2026
 

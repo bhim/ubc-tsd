@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "discover",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "bap_id": "app.example.com",
     "bap_uri": "https://app.example.com/bap",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
@@ -10,7 +10,7 @@
     "timestamp": "2025-10-14T07:31:00Z",
     "ttl": "PT30S",
     "schema_context": [
-      "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingService/v1/context.jsonld"
     ]
   },
   "message": {
@@ -32,5 +32,6 @@
         "distanceMeters": 8000
       }
     ]
-  }
+  },
+  "error": {}
 }

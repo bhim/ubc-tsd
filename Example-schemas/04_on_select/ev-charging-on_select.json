@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "on_select",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "timestamp": "2024-01-15T10:30:05Z",
     "message_id": "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
@@ -14,12 +14,12 @@
   },
   "message": {
     "order": {
-      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
       "beckn:orderStatus": "CREATED",
       "beckn:seller": "ecopower-charging",
       "beckn:buyer": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/draft/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Buyer",
         "beckn:id": "user-123",
         "beckn:role": "BUYER",
@@ -37,7 +37,7 @@
             "unitQuantity": 2.5
           },
           "beckn:acceptedOffer": {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
             "@type": "beckn:Offer",
             "beckn:id": "offer-ccs2-60kw-kwh",
             "beckn:descriptor": {
@@ -77,7 +77,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",
@@ -112,17 +112,18 @@
         ]
       },
       "beckn:orderAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingSession/v1/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
         "@type": "ChargingSession",
         "buyerFinderFee": {
           "feeType": "PERCENTAGE",
           "feeValue": 2.5
         },
         "preferences": {
-          "startTime": "2025-12-20T10:00:00Z",
-          "endTime": "2025-12-20T11:30:00Z"
+          "startTime": "2026-01-04T08:00:00Z",
+          "endTime": "2026-01-04T20:00:00Z"
         }
       }
     }
-  }
+  },
+  "error": {}
 }

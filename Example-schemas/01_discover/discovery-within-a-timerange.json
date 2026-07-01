@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "discover",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "bap_id": "app.example.com",
     "bap_uri": "https://app.example.com/bap",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
@@ -10,13 +10,13 @@
     "timestamp": "2025-10-14T07:31:00Z",
     "ttl": "PT30S",
     "schema_context": [
-      "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/EvChargingService/v1/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingService/v1/context.jsonld"
     ]
   },
   "message": {
     "filters": {
       "type": "jsonpath",
-      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow.schema:startTime <= '11:30:00' && @.beckn:availabilityWindow.schema:endTime >= '14:30:00')]"
+      "expression": "$[?(@.beckn:itemAttributes.vehicleType == '4-WHEELER' && @.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:availabilityWindow[?(@.schema:startTime <= '2026-01-04T20:00:00Z' && @.schema:endTime >= '2026-01-04T08:00:00Z')])]"
     },
     "spatial": [
       {
@@ -32,5 +32,6 @@
         "distanceMeters": 10000
       }
     ]
-  }
+  },
+  "error": {}
 }

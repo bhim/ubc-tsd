@@ -1,0 +1,193 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "ubc": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/#",
+        "schema": "https://schema.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@graph": [
+        {
+            "@id": "ubc:BuyerUPI",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Buyer UPI",
+            "rdfs:comment": "India-specific buyer payment information containing UPI VPA for refunds."
+        },
+        {
+            "@id": "ubc:UBCPaymentAttributes",
+            "@type": "rdfs:Class",
+            "rdfs:label": "UBC Payment Attributes",
+            "rdfs:comment": "UBC Network-specific payment attributes including UPI transaction ID and settlement accounts."
+        },
+        {
+            "@id": "ubc:vpa",
+            "@type": "rdf:Property",
+            "rdfs:label": "Virtual Payment Address",
+            "rdfs:comment": "Virtual Payment Address (UPI ID) - a unique identifier for UPI payments in India.",
+            "rdfs:domain": "ubc:BuyerUPI",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:upiTransactionId",
+            "@type": "rdf:Property",
+            "rdfs:label": "UPI Transaction ID",
+            "rdfs:comment": "UPI transaction reference ID returned by the payment gateway after successful payment.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:settlementAccounts",
+            "@type": "rdf:Property",
+            "rdfs:label": "Settlement accounts",
+            "rdfs:comment": "List of bank/UPI accounts for settlement to different beneficiaries (BAP, BPP).",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:ItemList"
+        },
+        {
+            "@id": "ubc:beneficiaryId",
+            "@type": "rdf:Property",
+            "rdfs:label": "Beneficiary ID",
+            "rdfs:comment": "Identifier for the beneficiary, typically the domain name of BAP or BPP.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:accountHolderName",
+            "@type": "rdf:Property",
+            "rdfs:label": "Account holder name",
+            "rdfs:comment": "Name of the bank account holder.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:accountNumber",
+            "@type": "rdf:Property",
+            "rdfs:label": "Account number",
+            "rdfs:comment": "Bank account number for settlement.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:ifscCode",
+            "@type": "rdf:Property",
+            "rdfs:label": "IFSC code",
+            "rdfs:comment": "Indian Financial System Code (IFSC) for the bank branch.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:bankName",
+            "@type": "rdf:Property",
+            "rdfs:label": "Bank name",
+            "rdfs:comment": "Name of the bank for settlement.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:SupportFeedback",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Support Feedback",
+            "rdfs:comment": "UBC Network-specific support feedback and grievance tracking. Provides grievance details, observability tags, and ticket lifecycle status."
+        },
+        {
+            "@id": "ubc:grievanceComments",
+            "@type": "rdf:Property",
+            "rdfs:label": "Grievance comments",
+            "rdfs:comment": "Free-text description of the grievance or support request.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
+            "@id": "ubc:grievanceTags",
+            "@type": "rdf:Property",
+            "rdfs:label": "Grievance tags",
+            "rdfs:comment": "Tags for observability and categorization of the grievance.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "schema:ItemList"
+        },
+        {
+            "@id": "ubc:supportStatus",
+            "@type": "rdf:Property",
+            "rdfs:label": "Support status",
+            "rdfs:comment": "Current lifecycle status of the support ticket.",
+            "rdfs:domain": "ubc:SupportFeedback",
+            "schema:rangeIncludes": "ubc:SupportStatus"
+        },
+        {
+            "@id": "ubc:SupportStatus",
+            "@type": "schema:Enumeration",
+            "schema:name": "Support Status",
+            "rdfs:comment": "Enumeration of support ticket lifecycle stages.",
+            "rdfs:seeAlso": "https://schema.org/ActionStatusType",
+            "schema:hasEnumerationMember": [
+                {
+                    "@id": "ubc:SupportStatusOpen"
+                },
+                {
+                    "@id": "ubc:SupportStatusAcknowledged"
+                },
+                {
+                    "@id": "ubc:SupportStatusInProgress"
+                },
+                {
+                    "@id": "ubc:SupportStatusResolved"
+                },
+                {
+                    "@id": "ubc:SupportStatusClosed"
+                },
+                {
+                    "@id": "ubc:SupportStatusEscalated"
+                }
+            ]
+        },
+        {
+            "@id": "ubc:SupportStatusOpen",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "OPEN",
+            "schema:identifier": "OPEN",
+            "rdfs:comment": "Support ticket raised, awaiting acknowledgment.",
+            "rdfs:seeAlso": "https://schema.org/PotentialActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusAcknowledged",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "ACKNOWLEDGED",
+            "schema:identifier": "ACKNOWLEDGED",
+            "rdfs:comment": "BPP has received and acknowledged the support ticket.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusInProgress",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "IN_PROGRESS",
+            "schema:identifier": "IN_PROGRESS",
+            "rdfs:comment": "Support ticket is actively being worked on.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusResolved",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "RESOLVED",
+            "schema:identifier": "RESOLVED",
+            "rdfs:comment": "Issue has been resolved by the support team.",
+            "rdfs:seeAlso": "https://schema.org/CompletedActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusClosed",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "CLOSED",
+            "schema:identifier": "CLOSED",
+            "rdfs:comment": "Support ticket has been closed.",
+            "rdfs:seeAlso": "https://schema.org/CompletedActionStatus"
+        },
+        {
+            "@id": "ubc:SupportStatusEscalated",
+            "@type": "ubc:SupportStatus",
+            "schema:name": "ESCALATED",
+            "schema:identifier": "ESCALATED",
+            "rdfs:comment": "Support ticket has been escalated to a higher support tier.",
+            "rdfs:seeAlso": "https://schema.org/ActiveActionStatus"
+        }
+    ]
+}

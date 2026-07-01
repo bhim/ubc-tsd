@@ -2,7 +2,7 @@
   "context": {
     "version": "2.0.0",
     "action": "rating",
-    "domain": "beckn.one:deg:ev-charging:*",
+    "domain": "beckn.one:deg:ev-charging",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
@@ -15,14 +15,14 @@
   "message": {
     "ratings": [
       {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:RatingInput",
-        "beckn:id": "fulfillment-001",
-        "beckn:ratingValue": 4,
-        "beckn:bestRating": 5,
-        "beckn:worstRating": 1,
-        "beckn:category": "FULFILLMENT",
-        "beckn:feedback": {
+        "id": "fulfillment-001",
+        "ratingValue": 4,
+        "bestRating": 5,
+        "worstRating": 1,
+        "category": "FULFILLMENT",
+        "feedback": {
           "comments": "Excellent charging experience! The station was clean, easy to find, and the charging was fast and reliable. The staff was helpful and the payment process was smooth.",
           "tags": [
             "fast-charging",
@@ -32,7 +32,25 @@
             "smooth-payment"
           ]
         }
+      },
+      {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:RatingInput",
+        "id": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+        "ratingValue": 3,
+        "bestRating": 5,
+        "worstRating": 1,
+        "category": "ITEM",
+        "feedback": {
+          "comments": "The CCS2 connector cable is too short and the screen display is hard to read in sunlight. Charging speed was slower than advertised.",
+          "tags": [
+            "short-cable",
+            "poor-display",
+            "slow-charging"
+          ]
+        }
       }
     ]
-  }
+  },
+  "error": {}
 }

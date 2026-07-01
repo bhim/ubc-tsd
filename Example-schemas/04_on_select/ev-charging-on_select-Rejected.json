@@ -1,22 +1,22 @@
 {
   "context": {
     "version": "2.0.0",
-    "action": "select",
+    "action": "on_select",
     "domain": "beckn.one:deg:ev-charging",
-    "timestamp": "2024-01-15T10:30:00Z",
+    "timestamp": "2024-01-15T10:30:05Z",
     "message_id": "bb9f86db-9a3d-4e9c-8c11-81c8f1a7b901",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "bap_id": "example-bap.com",
-    "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+    "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
-    "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
-    "ttl": "PT30S"
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
   },
   "message": {
     "order": {
       "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
-      "beckn:orderStatus": "CREATED",
+      "beckn:orderStatus": "REJECTED",
       "beckn:seller": "ecopower-charging",
       "beckn:buyer": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
@@ -50,12 +50,21 @@
             "beckn:provider": "ecopower-charging",
             "beckn:price": {
               "currency": "INR",
-              "value": 45.0,
+              "value": 45,
               "applicableQuantity": {
                 "unitText": "Kilowatt Hour",
                 "unitCode": "KWH",
                 "unitQuantity": 1
               }
+            }
+          },
+          "beckn:price": {
+            "currency": "INR",
+            "value": 45,
+            "applicableQuantity": {
+              "unitText": "Kilowatt Hour",
+              "unitCode": "KWH",
+              "unitQuantity": 1
             }
           }
         }
@@ -74,5 +83,11 @@
       }
     }
   },
-  "error": {}
+  "error": {
+    "code": "40000",
+    "message": "Generic business error",
+    "details": {
+      "description": "Requested slot overlaps with an existing booking"
+    }
+  }
 }
