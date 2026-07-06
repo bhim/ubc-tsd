@@ -18,6 +18,7 @@
 * [Implementing EV Charging Semantics on Beckn Protocol](#10-implementing-ev-charging-semantics-on-beckn-protocol)
 * [User Stories](#11-user-stories)
 * [Special Corner Cases](#12-special-corner-cases)
+  * [Undercharge & Overcharge Settlement](#125-undercharge--overcharge-settlement-scenarios)
 * [Error Codes](#13-error-codes)
 * [Conclusion](#14-conclusion)
 
@@ -6234,6 +6235,723 @@ To Handle Duplicate/Overlapping booking at the on_select stage, the Provider (BP
 }
 ```
 </details>
+
+
+### 12.5 Undercharge & Overcharge Settlement Scenarios:
+
+This section describes the payload flow for two edge-case settlement scenarios in the UBC EV charging ecosystem: **Undercharge** (user paid more than actual consumption) and **Overcharge** (actual consumption exceeded the pre-authorized payment). All payloads use only the four valid beckn component types: `UNIT`, `FEE`, `SURCHARGE`, `DISCOUNT` — as defined in the beckn core v2 specification.
+
+#### Baseline Context
+
+In the standard EV charging flow, the user pre-authorizes a payment based on an estimated consumption. The actual consumption may differ from this estimate once the charging session completes. The baseline parameters for the examples in this section are:
+
+| Parameter | Value |
+| :--- | :--- |
+| Pre-authorized Payment | ₹143.95 |
+| Estimated Consumption | 2.5 kWh |
+| Per-kWh Rate | ₹45.00/kWh |
+| User | Ravi Kumar (`user-123`) |
+| Charger | CCS2-A at EcoPower Charging Station `cs-01` |
+| Original Order ID | `order-ev-charging-001` |
+| Transaction ID | `2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002` |
+
+---
+
+#### 12.5.1. Scenario 1 — Undercharge (Refund Flow)
+
+The user pre-authorized ₹143.95 but the charger stopped early — the vehicle's battery reached full charge sooner than expected. Actual consumption was only **2.0 kWh** resulting in an actual order value of **₹90.00**. The excess **₹53.95** needs to be refunded.
+
+##### 12.5.1.1. Step 1 — on_update (Charging Completed with Undercharge)
+
+The BPP sends this after the charging session completes with actual consumption lower than the pre-authorized estimate. The `orderValue` reflects the actual consumption amount (₹90.00), and a `DISCOUNT` component signals the refund adjustment.
+
+**Order Value Breakdown:**
+
+| Component Type | Value (₹) | Description |
+| :--- | ---: | :--- |
+| `UNIT` | 90.00 | Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption |
+| `SURCHARGE` | 0.00 | Surge price (not applicable — undercharge session) |
+| `DISCOUNT` | 0.00 | No discount applied |
+| `FEE` | 0.00 | Service fee waived |
+| `DISCOUNT` | −53.95 | Refund adjustment — excess amount to be refunded (₹143.95 paid − ₹90.00 actual) |
+| **Total orderValue** | **90.00** | |
+
+**Key Fields:**
+
+| Field | Value | Why |
+| :--- | :--- | :--- |
+| `beckn:orderStatus` | `COMPLETED` | Session finished normally |
+| `beckn:orderValue.value` | `90.00` | Reflects actual consumption, not pre-authorized amount |
+| `beckn:payment.beckn:amount.value` | `143.95` | Original pre-authorized payment (unchanged) |
+| `beckn:payment.beckn:paymentStatus` | `COMPLETED` | Payment was collected — refund hasn't happened yet |
+| `beckn:invoice.beckn:totals.value` | `90.00` | Invoice matches actual order value |
+| `sessionStatus` | `COMPLETED` | Charging session completed |
+
+> **Important:** The `DISCOUNT` component with value −53.95 is the signal to the BAP that a refund is due. The BAP SHOULD compare `beckn:payment.beckn:amount` (₹143.95 paid) against `beckn:orderValue.value` (₹90.00 actual) to determine the refund amount. The `description` field on the `DISCOUNT` component explicitly states the refund calculation.
+
+> **Note:** At this stage, the `paymentStatus` is still `COMPLETED` because the refund has not yet been processed. The refund tracking happens in the subsequent `on_status` call.
+
+**12.5.1.1.1. action: on_update**
+* **Method:** POST
+<details>
+<summary><a href="../Example-schemas/14_02_on_update/ev-charging-undercharge-on_update.json">Example json :rocket:</a></summary>
+
+```json
+{
+  "context": {
+    "version": "2.0.0",
+    "action": "on_update",
+    "domain": "beckn.one:deg:ev-charging",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "message_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "timestamp": "2025-01-27T11:45:00Z",
+    "ttl": "PT30S",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
+  },
+  "message": {
+    "order": {
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+      "@type": "beckn:Order",
+      "beckn:id": "order-ev-charging-001",
+      "beckn:orderStatus": "COMPLETED",
+      "beckn:seller": "cpo1.com",
+      "beckn:buyer": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123",
+        "beckn:role": "BUYER",
+        "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
+        "beckn:taxID": "GSTIN29ABCDE1234F1Z5",
+        "beckn:buyerAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
+          "vpa": "ravikumar@upi"
+        }
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+        }
+      ],
+      "beckn:orderValue": {
+        "currency": "INR",
+        "value": 90.0,
+        "components": [
+          {
+            "type": "UNIT",
+            "value": 90.0,
+            "currency": "INR",
+            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
+          },
+          {
+            "type": "SURCHARGE",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "Surge price (not applicable — undercharge session)"
+          },
+          {
+            "type": "DISCOUNT",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "No discount applied"
+          },
+          {
+            "type": "FEE",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "Service fee waived"
+          },
+          {
+            "type": "DISCOUNT",
+            "value": -53.95,
+            "currency": "INR",
+            "description": "Refund adjustment — excess amount to be refunded (₹143.95 paid − ₹90.00 actual = ₹53.95 refund)"
+          }
+        ]
+      },
+      "beckn:fulfillment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Fulfillment",
+        "beckn:id": "fulfillment-001",
+        "beckn:mode": "RESERVATION",
+        "beckn:deliveryAttributes": {
+          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
+          "@type": "ChargingSession",
+          "sessionStatus": "COMPLETED"
+        }
+      },
+      "beckn:invoice": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Invoice",
+        "beckn:id": "invoice-ev-charging-001",
+        "beckn:totals": {
+          "currency": "INR",
+          "value": 90.0
+        },
+        "beckn:invoiceAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
+        }
+      },
+      "beckn:payment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Payment",
+        "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000",
+        "beckn:amount": {
+          "currency": "INR",
+          "value": 143.95
+        },
+        "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
+        "beckn:txnRef": "TXN-123456789",
+        "beckn:paidAt": "2025-12-19T10:05:00Z",
+        "beckn:beneficiary": "BPP",
+        "beckn:paymentStatus": "COMPLETED",
+        "beckn:paymentAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
+          "upiTransactionId": "UPI123456789012"
+        }
+      }
+    }
+  },
+  "error": {}
+}
+```
+</details>
+
+##### 12.5.1.2. Step 2 — on_status (Refund Confirmed by Payment Gateway)
+
+The `on_status` is sent only when there is a status change to be communicated — similar to how a BPP sends `on_status` when payment has been completed. In the refund case, the BPP initiates `on_status` once the Payment Gateway (PG) confirms that the payment refund process has been initiated. Based on SLAs with the corresponding PG, it is known that the refund would be completed within 7 business days.
+
+The BPP responds with the payment now in `REFUNDED` status, including all refund tracking details populated by the Payment Gateway. The order value remains **₹90.00** with only `UNIT` component reflecting actual consumption. The refund `DISCOUNT` component is not repeated here since the refund is now tracked entirely via the payment object.
+
+**Payment Object — Key Changes from Standard Flow:**
+
+| Field | Standard Value | Undercharge Value | Purpose |
+| :--- | :--- | :--- | :--- |
+| `beckn:paymentStatus` | `COMPLETED` | `REFUNDED` | Payment lifecycle moved to refund state |
+| `beckn:amount.value` | `143.95` | `53.95` | Amount is updated to reflect the exact amount being refunded |
+
+> **Note:** The `on_status` is called after the `on_update` has been received. The BPP queries the status to confirm that the refund has been initiated/completed by the Payment Gateway. The `paymentStatus` transitions: `COMPLETED` → `REFUNDED` and the amount reflects the refunded value.
+
+**12.5.1.2.1. action: on_status**
+* **Method:** POST
+<details>
+<summary><a href="../Example-schemas/13_on_status/ev-charging-undercharge-refund-on_status.json">Example json :rocket:</a></summary>
+
+```json
+{
+  "context": {
+    "version": "2.0.0",
+    "action": "on_status",
+    "domain": "beckn.one:deg:ev-charging",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "message_id": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
+    "timestamp": "2025-01-27T12:00:00Z",
+    "ttl": "PT30S",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
+  },
+  "message": {
+    "order": {
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+      "@type": "beckn:Order",
+      "beckn:id": "order-ev-charging-001",
+      "beckn:orderStatus": "COMPLETED",
+      "beckn:seller": "cpo1.com",
+      "beckn:buyer": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123",
+        "beckn:role": "BUYER",
+        "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
+        "beckn:taxID": "GSTIN29ABCDE1234F1Z5",
+        "beckn:buyerAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
+          "vpa": "ravikumar@upi"
+        }
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+        }
+      ],
+      "beckn:orderValue": {
+        "currency": "INR",
+        "value": 90.0,
+        "components": [
+          {
+            "type": "UNIT",
+            "value": 90.0,
+            "currency": "INR",
+            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
+          },
+          {
+            "type": "SURCHARGE",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "Surge price (not applicable)"
+          },
+          {
+            "type": "DISCOUNT",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "No discount applied"
+          },
+          {
+            "type": "FEE",
+            "value": 0.0,
+            "currency": "INR",
+            "description": "Service fee waived"
+          }
+        ]
+      },
+      "beckn:fulfillment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Fulfillment",
+        "beckn:id": "fulfillment-001",
+        "beckn:mode": "RESERVATION",
+        "beckn:deliveryAttributes": {
+          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
+          "@type": "ChargingSession",
+          "sessionStatus": "COMPLETED"
+        }
+      },
+      "beckn:payment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Payment",
+        "beckn:id": "payment-123e4567-e89b-12d3-a456-26663721",
+        "beckn:amount": {
+          "currency": "INR",
+          "value": 53.95
+        },
+        "beckn:txnRef": "TXN-123456789",
+        "beckn:paidAt": "2025-12-19T10:05:00Z",
+        "beckn:beneficiary": "BPP",
+        "beckn:paymentStatus": "REFUNDED"
+      }
+    }
+  },
+  "error": {}
+}
+```
+</details>
+
+---
+
+#### 12.5.2. Scenario 2 — Overcharge (Outstanding Balance Carried Forward)
+
+The user pre-authorized ₹143.95 for an estimated 2.5 kWh session. However, the charger failed to stop and actual consumption was **5.0 kWh** — resulting in an actual order value of **₹287.90**. The additional **₹143.95** that couldn't be collected from the original pre-authorization is recorded as an outstanding balance by the CPO (BPP) against the specific user (`user-123`).
+
+This outstanding balance is then collected when the user initiates their next charging session with that specific CPO, where an additional `FEE` component is added to the `on_select` response quote.
+
+##### 12.5.2.1. Step 1 — on_update (Charging Completed with Overcharge)
+
+The BPP sends this after the charging session completes with actual consumption higher than the pre-authorized estimate. The `orderValue` reflects the full actual consumption (₹287.90). The component breakdown separates the base estimated cost (`UNIT`) from the excess consumption (`FEE`).
+
+**Order Value Breakdown:**
+
+| Component Type | Value (₹) | Description |
+| :--- | ---: | :--- |
+| `UNIT` | 112.50 | Base charging cost (45 INR/kWh × 2.5 kWh) — pre-authorized estimated consumption |
+| `FEE` | 112.50 | Additional units consumed beyond estimate (45 INR/kWh × 2.5 kWh excess) — charger failed to stop |
+| `SURCHARGE` | 40.00 | Surge price (20% on total consumption of 5.0 kWh) |
+| `DISCOUNT` | −15.00 | Offer discount |
+| `FEE` | 10.00 | Service fee |
+| `FEE` | 22.28 | Overcharge estimation |
+| `FEE` | 5.62 | Buyer finder fee (2.5%) |
+| **Total orderValue** | **287.90** | |
+
+**Key Fields:**
+
+| Field | Value | Why |
+| :--- | :--- | :--- |
+| `beckn:orderStatus` | `COMPLETED` | Session finished (despite overcharge) |
+| `beckn:orderValue.value` | `287.90` | Full actual consumption value |
+| `beckn:payment.beckn:amount.value` | `143.95` | Original pre-authorized payment (only this much was collected) |
+| `beckn:payment.beckn:paymentStatus` | `COMPLETED` | Original payment was collected successfully |
+| `beckn:invoice.beckn:totals.value` | `287.90` | Invoice reflects full actual consumption |
+| `sessionStatus` | `COMPLETED` | Charging session completed |
+
+> **Warning:** The missing payment amount of ₹143.95 represents money the BPP is owed but could not collect because it exceeds the pre-authorized payment. This amount is implicitly recorded against `user-123` on the BPP side and will surface in their next charging session's `on_select` quote.
+
+> **Important:** The `FEE` component at ₹112.50 specifically represents the excess units consumed beyond the original estimate. This is distinct from the regular surge pricing `SURCHARGE` at ₹40.00. The `description` field differentiates them — implementers SHOULD parse descriptions to distinguish between surge pricing and excess consumption charges.
+
+**12.5.2.1.1. action: on_update**
+* **Method:** POST
+<details>
+<summary><a href="../Example-schemas/14_02_on_update/ev-charging-overcharge-on_update.json">Example json :rocket:</a></summary>
+
+```json
+{
+  "context": {
+    "version": "2.0.0",
+    "action": "on_update",
+    "domain": "beckn.one:deg:ev-charging",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "message_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
+    "timestamp": "2025-01-27T11:45:00Z",
+    "ttl": "PT30S",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
+  },
+  "message": {
+    "order": {
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+      "@type": "beckn:Order",
+      "beckn:id": "order-ev-charging-001",
+      "beckn:orderStatus": "COMPLETED",
+      "beckn:seller": "cpo1.com",
+      "beckn:buyer": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123",
+        "beckn:role": "BUYER",
+        "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
+        "beckn:taxID": "GSTIN29ABCDE1234F1Z5",
+        "beckn:buyerAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "BuyerUPI",
+          "vpa": "ravikumar@upi"
+        }
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+        }
+      ],
+      "beckn:orderValue": {
+        "currency": "INR",
+        "value": 287.90,
+        "components": [
+          {
+            "type": "UNIT",
+            "value": 112.5,
+            "currency": "INR",
+            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh) — pre-authorized estimated consumption"
+          },
+          {
+            "type": "FEE",
+            "value": 112.5,
+            "currency": "INR",
+            "description": "Additional units consumed beyond estimate (45 INR/kWh × 2.5 kWh excess) — charger failed to stop"
+          },
+          {
+            "type": "SURCHARGE",
+            "value": 40.0,
+            "currency": "INR",
+            "description": "Surge price (20% on total consumption of 5.0 kWh)"
+          },
+          {
+            "type": "DISCOUNT",
+            "value": -15.0,
+            "currency": "INR",
+            "description": "Offer discount"
+          },
+          {
+            "type": "FEE",
+            "value": 10.0,
+            "currency": "INR",
+            "description": "Service fee"
+          },
+          {
+            "type": "FEE",
+            "value": 22.28,
+            "currency": "INR",
+            "description": "Overcharge estimation"
+          },
+          {
+            "type": "FEE",
+            "value": 5.62,
+            "currency": "INR",
+            "description": "Buyer finder fee (2.5%)"
+          }
+        ]
+      },
+      "beckn:fulfillment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Fulfillment",
+        "beckn:id": "fulfillment-001",
+        "beckn:mode": "RESERVATION",
+        "beckn:deliveryAttributes": {
+          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
+          "@type": "ChargingSession",
+          "sessionStatus": "COMPLETED"
+        }
+      },
+      "beckn:invoice": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Invoice",
+        "beckn:id": "invoice-ev-charging-001",
+        "beckn:totals": {
+          "currency": "INR",
+          "value": 287.90
+        },
+        "beckn:invoiceAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
+        }
+      },
+      "beckn:payment": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Payment",
+        "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000",
+        "beckn:amount": {
+          "currency": "INR",
+          "value": 143.95
+        },
+        "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
+        "beckn:txnRef": "TXN-123456789",
+        "beckn:paidAt": "2025-12-19T10:05:00Z",
+        "beckn:beneficiary": "BPP",
+        "beckn:paymentStatus": "COMPLETED",
+        "beckn:paymentAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
+          "upiTransactionId": "UPI123456789012"
+        }
+      }
+    }
+  },
+  "error": {}
+}
+```
+</details>
+
+##### 12.5.2.2. Step 2 — on_select (Next Session with Outstanding Balance)
+
+When the specific user (`user-123`) starts a **new charging session** (days/weeks later) with that specific CPO, the BPP recognizes the user's outstanding balance from the previous overcharged session. The BPP includes the outstanding ₹143.95 as a `FEE` component in the `on_select` order value quote. This ensures the user sees the total amount they'll be charged upfront for both the new session and the past debt.
+
+This is a **new transaction** with a different `transaction_id` (`8f6e12bb-33c5-4d89-a167-6b8c9d3e4f05`).
+
+**Order Value Breakdown:**
+
+| Component Type | Value (₹) | Description |
+| :--- | ---: | :--- |
+| `UNIT` | 135.00 | Base charging cost for new session (45 INR/kWh × 3.0 kWh) |
+| `SURCHARGE` | 24.00 | Surge price (20%) |
+| `DISCOUNT` | −10.00 | Offer discount |
+| `FEE` | 10.00 | Service fee |
+| `FEE` | 15.90 | Overcharge estimation |
+| `FEE` | 3.00 | Buyer finder fee (2.5%) |
+| `FEE` | 143.95 | Outstanding balance carried forward from previous overcharge session |
+| **Total orderValue** | **321.85** | |
+
+**Key Fields:**
+
+| Field | Value | Why |
+| :--- | :--- | :--- |
+| `beckn:orderStatus` | `CREATED` | New order being quoted |
+| `beckn:orderValue.value` | `321.85` | New session (₹177.90) + outstanding (₹143.95) |
+| `transaction_id` | `8f6e12bb-...` | New transaction — this is a separate session |
+
+> **Important:** The outstanding balance `FEE` component (₹143.95) includes the full reference to the previous order in its `description` field — both the order ID and transaction ID. This is how the client understands where this fee originated.
+
+> **Note:** The BAP SHOULD display the outstanding balance clearly to the user so they understand why their new session quote is higher than expected. The `description` field provides the context needed for user-facing messaging.
+
+**12.5.2.2.1. action: on_select**
+* **Method:** POST
+<details>
+<summary><a href="../Example-schemas/04_on_select/ev-charging-overcharge-outstanding-on_select.json">Example json :rocket:</a></summary>
+
+```json
+{
+  "context": {
+    "version": "2.0.0",
+    "action": "on_select",
+    "domain": "beckn.one:deg:ev-charging",
+    "timestamp": "2025-02-03T10:30:05Z",
+    "message_id": "cc7d88ea-4a3b-5e9d-9d22-92c9f2c3d401",
+    "transaction_id": "8f6e12bb-33c5-4d89-a167-6b8c9d3e4f05",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
+    "ttl": "PT30S",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
+  },
+  "message": {
+    "order": {
+      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+      "@type": "beckn:Order",
+      "beckn:orderStatus": "CREATED",
+      "beckn:seller": "ecopower-charging",
+      "beckn:buyer": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123",
+        "beckn:role": "BUYER",
+        "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
+        "beckn:taxID": "GSTIN29ABCDE1234F1Z5"
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+          "beckn:quantity": {
+            "unitText": "Kilowatt Hour",
+            "unitCode": "KWH",
+            "unitQuantity": 3.0
+          },
+          "beckn:acceptedOffer": {
+            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+            "@type": "beckn:Offer",
+            "beckn:id": "offer-ccs2-60kw-kwh",
+            "beckn:descriptor": {
+              "@type": "beckn:Descriptor",
+              "schema:name": "Per-kWh Tariff - CCS2 60kW"
+            },
+            "beckn:items": [
+              "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
+            ],
+            "beckn:provider": "ecopower-charging",
+            "beckn:price": {
+              "currency": "INR",
+              "value": 45.0,
+              "applicableQuantity": {
+                "unitText": "Kilowatt Hour",
+                "unitCode": "KWH",
+                "unitQuantity": 1
+              }
+            }
+          },
+          "beckn:price": {
+            "currency": "INR",
+            "value": 45.0,
+            "applicableQuantity": {
+              "unitText": "Kilowatt Hour",
+              "unitCode": "KWH",
+              "unitQuantity": 1
+            }
+          }
+        }
+      ],
+      "beckn:orderValue": {
+        "currency": "INR",
+        "value": 321.85,
+        "components": [
+          {
+            "type": "UNIT",
+            "value": 135.0,
+            "currency": "INR",
+            "description": "Base charging session cost (45 INR/kWh × 3.0 kWh) — new session estimate"
+          },
+          {
+            "type": "SURCHARGE",
+            "value": 24.0,
+            "currency": "INR",
+            "description": "Surge price (20%)"
+          },
+          {
+            "type": "DISCOUNT",
+            "value": -10.0,
+            "currency": "INR",
+            "description": "Offer discount"
+          },
+          {
+            "type": "FEE",
+            "value": 10.0,
+            "currency": "INR",
+            "description": "Service fee"
+          },
+          {
+            "type": "FEE",
+            "value": 15.9,
+            "currency": "INR",
+            "description": "Overcharge estimation"
+          },
+          {
+            "type": "FEE",
+            "value": 3.0,
+            "currency": "INR",
+            "description": "Buyer finder fee (2.5%)"
+          },
+          {
+            "type": "FEE",
+            "value": 143.95,
+            "currency": "INR",
+            "description": "Outstanding balance carried forward from previous overcharge session (Order: order-ev-charging-001, Txn: 2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002)"
+          }
+        ]
+      },
+      "beckn:orderAttributes": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
+        "@type": "ChargingSession",
+        "buyerFinderFee": {
+          "feeType": "PERCENTAGE",
+          "feeValue": 2.5
+        },
+        "preferences": {
+          "startTime": "2026-02-03T08:00:00Z",
+          "endTime": "2026-02-03T20:00:00Z"
+        }
+      }
+    }
+  },
+  "error": {}
+}
+```
+</details>
+
+---
+
+#### 12.5.3. Payload Summary
+
+| # | Scenario | Action | File | Order Value | Key Signal |
+| :--- | :--- | :--- | :--- | ---: | :--- |
+| 1 | Undercharge | `on_update` | `ev-charging-undercharge-on_update.json` | ₹90.00 | `DISCOUNT` component = −₹53.95 (refund adjustment) |
+| 2 | Undercharge | `on_status` | `ev-charging-undercharge-refund-on_status.json` | ₹90.00 | `paymentStatus` = `REFUNDED`, refundAmount = ₹53.95 |
+| 3 | Overcharge | `on_update` | `ev-charging-overcharge-on_update.json` | ₹287.90 | `FEE` = ₹112.50 (excess units), uncollected amount = ₹143.95 |
+| 4 | Overcharge | `on_select` | `ev-charging-overcharge-outstanding-on_select.json` | ₹321.85 | `FEE` = ₹143.95 (outstanding balance from previous session) |
+
+#### 12.5.4. How Component Types Are Used Across Scenarios
+
+All components use only the four valid beckn types. The `description` field differentiates the business meaning:
+
+| Type | Standard Usage | Undercharge Usage | Overcharge Usage |
+| :--- | :--- | :--- | :--- |
+| `UNIT` | Base energy cost | Actual consumption (lower) | Pre-authorized estimated consumption |
+| `SURCHARGE` | Surge pricing | ₹0 (not applicable) | Surge pricing |
+| `DISCOUNT` | Offer discounts | ₹0 + Refund adjustment (negative value) | Standard offer discount |
+| `FEE` | Service fee, buyer finder fee, overcharge estimation | ₹0 (waived) | Service fee, buyer finder fee, overcharge estimation + Excess units consumed + Outstanding balance from previous session |
+
+#### 12.5.5. Implementation Notes for BAP/BPP Developers
+
+**Detecting an Undercharge:**
+1. Compare `beckn:payment.beckn:amount.value` (paid) vs `beckn:orderValue.value` (actual).
+2. If paid > actual → undercharge detected.
+3. Look for `DISCOUNT` component with a negative value and description containing "refund".
+4. The BPP will initiate `on_status` once the PG confirms the refund process has been initiated. Based on SLAs with the corresponding PG, the refund is typically completed within 7 business days.
+
+**Detecting an Overcharge:**
+1. Compare `beckn:payment.beckn:amount.value` (paid) vs `beckn:orderValue.value` (actual).
+2. If paid < actual → overcharge detected.
+3. In the user's next `on_select`, look for a `FEE` component with description containing "Outstanding balance" and parse the order/transaction IDs from the description.
+
+**Payment Status Lifecycle:**
+
+| Scenario | Lifecycle |
+| :--- | :--- |
+| Undercharge | `COMPLETED` → `REFUNDED` (triggered via `on_status` once PG confirms refund initiation) |
+| Overcharge | `COMPLETED` (original payment remains completed — outstanding balance tracked separately via `FEE` in next `on_select`) |
+
+> **Note:** The `on_status` is only sent when there is a status change to be communicated. Just as a BPP sends `on_status` when payment has been completed (where the BPP gets a confirmation from the PG on payment completion), in the refund case the `on_status` MUST be initiated once the PG confirms that the payment refund process has been initiated. The refund would be processed within 7 business days based on SLAs with the corresponding PG.
 
 
 ## 13. Error Codes

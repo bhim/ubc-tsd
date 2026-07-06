@@ -27,7 +27,7 @@
             "rdfs:comment": "UBC Network-specific invoice attributes including a link to the session fee or digital invoice."
         },
         {
-            "@id": "ubc:invoiceurl",
+            "@id": "ubc:invoiceUrl",
             "@type": "rdf:Property",
             "rdfs:label": "Invoice URL",
             "rdfs:comment": "URL to the digital invoice or charging session fee breakdown for the completed order.",
