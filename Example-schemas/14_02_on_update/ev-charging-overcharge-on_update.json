@@ -109,7 +109,7 @@
         "beckn:invoiceAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
           "@type": "UBCInvoiceAttributes",
-          "invoiceurl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
         }
       },
       "beckn:payment": {

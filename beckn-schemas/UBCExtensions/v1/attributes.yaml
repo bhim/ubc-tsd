@@ -104,7 +104,7 @@ components:
     ########################################################################
     UBCInvoiceAttributes:
       type: object
-      required: ["invoiceurl"]
+      required: ["invoiceUrl"]
       additionalProperties: false
       x-jsonld:
         "@context": ./context.jsonld
@@ -114,12 +114,12 @@ components:
         Invoice.invoiceAttributes to provide a link to the digital
         invoice or charging session fee breakdown.
       properties:
-        invoiceurl:
+        invoiceUrl:
           type: string
           format: uri
           description: URL to the digital invoice or charging session fee breakdown.
           example: "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
-          x-jsonld: { "@id": invoiceurl }
+          x-jsonld: { "@id": invoiceUrl }
 
     ########################################################################
     # SUPPORT.FEEDBACK — SupportFeedback

@@ -9,7 +9,7 @@
         "BuyerUPI": "ubc:BuyerUPI",
         "UBCPaymentAttributes": "ubc:UBCPaymentAttributes",
         "UBCInvoiceAttributes": "ubc:UBCInvoiceAttributes",
-        "invoiceurl": "ubc:invoiceurl",
+        "invoiceUrl": "ubc:invoiceUrl",
         "name": "schema:name",
         "description": "schema:description",
         "price": "schema:price",
