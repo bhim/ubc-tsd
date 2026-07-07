@@ -6,7 +6,7 @@
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "32f67afe-3d8c-4faa-bc2e-93b0791dcb02",
+    "message_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "timestamp": "2025-01-27T11:45:00Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
@@ -41,43 +41,37 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 143.95,
+        "value": 90.0,
         "components": [
           {
             "type": "UNIT",
-            "value": 112.5,
+            "value": 90.0,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
           },
           {
             "type": "SURCHARGE",
-            "value": 20.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Surge price (20%)"
+            "description": "Surge price (not applicable — undercharge session)"
           },
           {
             "type": "DISCOUNT",
-            "value": -15.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Offer discount (15%)"
+            "description": "No discount applied"
           },
           {
             "type": "FEE",
-            "value": 10.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Service fee"
+            "description": "Service fee waived"
           },
           {
-            "type": "FEE",
-            "value": 13.64,
+            "type": "DISCOUNT",
+            "value": -53.95,
             "currency": "INR",
-            "description": "Overcharge estimation"
-          },
-          {
-            "type": "FEE",
-            "value": 2.81,
-            "currency": "INR",
-            "description": "Buyer finder fee (2.5%)"
+            "description": "Refund adjustment — excess amount to be refunded (₹143.95 paid − ₹90.00 actual = ₹53.95 refund)"
           }
         ]
       },
@@ -98,7 +92,7 @@
         "beckn:id": "invoice-ev-charging-001",
         "beckn:totals": {
           "currency": "INR",
-          "value": 143.95
+          "value": 90.0
         },
         "beckn:invoiceAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",

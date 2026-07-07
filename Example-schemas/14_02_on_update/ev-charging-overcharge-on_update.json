@@ -6,7 +6,7 @@
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "32f67afe-3d8c-4faa-bc2e-93b0791dcb02",
+    "message_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
     "timestamp": "2025-01-27T11:45:00Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
@@ -41,25 +41,31 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 143.95,
+        "value": 287.90,
         "components": [
           {
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh) — pre-authorized estimated consumption"
+          },
+          {
+            "type": "FEE",
+            "value": 112.5,
+            "currency": "INR",
+            "description": "Additional units consumed beyond estimate (45 INR/kWh × 2.5 kWh excess) — charger failed to stop"
           },
           {
             "type": "SURCHARGE",
-            "value": 20.0,
+            "value": 40.0,
             "currency": "INR",
-            "description": "Surge price (20%)"
+            "description": "Surge price (20% on total consumption of 5.0 kWh)"
           },
           {
             "type": "DISCOUNT",
             "value": -15.0,
             "currency": "INR",
-            "description": "Offer discount (15%)"
+            "description": "Offer discount"
           },
           {
             "type": "FEE",
@@ -69,13 +75,13 @@
           },
           {
             "type": "FEE",
-            "value": 13.64,
+            "value": 22.28,
             "currency": "INR",
             "description": "Overcharge estimation"
           },
           {
             "type": "FEE",
-            "value": 2.81,
+            "value": 5.62,
             "currency": "INR",
             "description": "Buyer finder fee (2.5%)"
           }
@@ -98,7 +104,7 @@
         "beckn:id": "invoice-ev-charging-001",
         "beckn:totals": {
           "currency": "INR",
-          "value": 143.95
+          "value": 287.90
         },
         "beckn:invoiceAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",

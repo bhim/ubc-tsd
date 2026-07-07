@@ -1,13 +1,13 @@
 {
   "context": {
     "version": "2.0.0",
-    "action": "on_update",
+    "action": "on_status",
     "domain": "beckn.one:deg:ev-charging",
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "32f67afe-3d8c-4faa-bc2e-93b0791dcb02",
-    "timestamp": "2025-01-27T11:45:00Z",
+    "message_id": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
+    "timestamp": "2025-01-27T12:00:00Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
@@ -41,43 +41,31 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 143.95,
+        "value": 90.0,
         "components": [
           {
             "type": "UNIT",
-            "value": 112.5,
+            "value": 90.0,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
           },
           {
             "type": "SURCHARGE",
-            "value": 20.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Surge price (20%)"
+            "description": "Surge price (not applicable)"
           },
           {
             "type": "DISCOUNT",
-            "value": -15.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Offer discount (15%)"
+            "description": "No discount applied"
           },
           {
             "type": "FEE",
-            "value": 10.0,
+            "value": 0.0,
             "currency": "INR",
-            "description": "Service fee"
-          },
-          {
-            "type": "FEE",
-            "value": 13.64,
-            "currency": "INR",
-            "description": "Overcharge estimation"
-          },
-          {
-            "type": "FEE",
-            "value": 2.81,
-            "currency": "INR",
-            "description": "Buyer finder fee (2.5%)"
+            "description": "Service fee waived"
           }
         ]
       },
@@ -92,38 +80,18 @@
           "sessionStatus": "COMPLETED"
         }
       },
-      "beckn:invoice": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
-        "@type": "beckn:Invoice",
-        "beckn:id": "invoice-ev-charging-001",
-        "beckn:totals": {
-          "currency": "INR",
-          "value": 143.95
-        },
-        "beckn:invoiceAttributes": {
-          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
-          "@type": "UBCInvoiceAttributes",
-          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
-        }
-      },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Payment",
-        "beckn:id": "payment-123e4567-e89b-12d3-a456-426614174000",
+        "beckn:id": "payment-123e4567-e89b-12d3-a456-26663721",
         "beckn:amount": {
           "currency": "INR",
-          "value": 143.95
+          "value": 53.95
         },
-        "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
         "beckn:txnRef": "TXN-123456789",
         "beckn:paidAt": "2025-12-19T10:05:00Z",
         "beckn:beneficiary": "BPP",
-        "beckn:paymentStatus": "COMPLETED",
-        "beckn:paymentAttributes": {
-          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
-          "@type": "UBCPaymentAttributes",
-          "upiTransactionId": "UPI123456789012"
-        }
+        "beckn:paymentStatus": "REFUNDED"
       }
     }
   },
