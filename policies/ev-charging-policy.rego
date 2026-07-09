@@ -38,27 +38,26 @@ result := {
 # on_discover
 # ----------------------------------------------------------------------------
 # CDS/BPP must return a catalogs array with at least one entry.
-# Three structural checks — no hardcoded error codes or messages.
-# Any error shape from CDS (404, 500, domain error, custom) is caught by case 3.
+#
+# A Beckn error block (any shape) is a VALID response from CDS — e.g. when no
+# charger is found. We do NOT treat it as a violation so the message passes
+# through checkPolicy → addRoute → published to bap.on_discover Kafka topic
+# → BAP app receives and handles it.
+#
+# Two structural checks only — no hardcoded error codes or messages.
 
-# Case 1: catalogs key is completely absent.
+# Case 1: response is truly malformed — no catalogs AND no error block.
 violations contains "on_discover: missing catalogs in response" if {
     input.context.action == "on_discover"
     not input.message.catalogs
+    not input.error
 }
 
-# Case 2: catalogs key is present but empty — no charger found in the area.
+# Case 2: catalogs present but empty — no charger found via catalog path.
 violations contains "on_discover: no chargers found in response" if {
     input.context.action == "on_discover"
     input.message.catalogs
     count(input.message.catalogs) == 0
-}
-
-# Case 3: CDS returned any error block — detected by structure alone.
-# Catches every possible error shape regardless of code, message, or type.
-violations contains "on_discover: error received from CDS" if {
-    input.context.action == "on_discover"
-    input.error
 }
 
 # ----------------------------------------------------------------------------
