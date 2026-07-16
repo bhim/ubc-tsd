@@ -89,7 +89,13 @@
         "beckn:deliveryAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
-          "sessionStatus": "COMPLETED"
+          "sessionStatus": "COMPLETED",
+          "finalBilling":{
+            "currency": "INR",
+            "value": 143.9594,
+            "energyConsumedKWH": 2.512,
+            "sessionDuration": "0.2197"
+          }
         }
       },
       "beckn:invoice": {
