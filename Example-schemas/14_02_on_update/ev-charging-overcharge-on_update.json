@@ -41,7 +41,7 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 287.9,
+        "value": 287.90,
         "components": [
           {
             "type": "UNIT",
@@ -96,6 +96,20 @@
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
           "sessionStatus": "COMPLETED"
+        }
+      },
+      "beckn:invoice": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Invoice",
+        "beckn:id": "invoice-ev-charging-001",
+        "beckn:totals": {
+          "currency": "INR",
+          "value": 287.90
+        },
+        "beckn:invoiceAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
         }
       },
       "beckn:payment": {

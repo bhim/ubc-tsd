@@ -47,13 +47,13 @@
             "type": "UNIT",
             "value": 90.0,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.0 kWh) \u2014 actual consumption"
+            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
           },
           {
             "type": "SURCHARGE",
             "value": 0.0,
             "currency": "INR",
-            "description": "Surge price (not applicable \u2014 undercharge session)"
+            "description": "Surge price (not applicable — undercharge session)"
           },
           {
             "type": "DISCOUNT",
@@ -71,7 +71,7 @@
             "type": "DISCOUNT",
             "value": -53.95,
             "currency": "INR",
-            "description": "Refund adjustment \u2014 excess amount to be refunded (\u20b9143.95 paid \u2212 \u20b990.00 actual = \u20b953.95 refund)"
+            "description": "Refund adjustment — excess amount to be refunded (₹143.95 paid − ₹90.00 actual = ₹53.95 refund)"
           }
         ]
       },
@@ -84,6 +84,20 @@
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
           "sessionStatus": "COMPLETED"
+        }
+      },
+      "beckn:invoice": {
+        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
+        "@type": "beckn:Invoice",
+        "beckn:id": "invoice-ev-charging-001",
+        "beckn:totals": {
+          "currency": "INR",
+          "value": 90.0
+        },
+        "beckn:invoiceAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
         }
       },
       "beckn:payment": {
