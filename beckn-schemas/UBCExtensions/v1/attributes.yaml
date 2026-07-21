@@ -110,10 +110,10 @@ components:
         "@context": ./context.jsonld
         "@type": UBCInvoice
       description: >
-        UBC Network-specific invoice object. Used as the value of
-        beckn:invoice When the order needs to carry full invoice details
-        (totals, invoice URL, etc.) rather than just a plain invoice ID
-        string. The @context should reference the UBC extension context.
+        UBC Network-specific invoice object. Carried as the value of
+        beckn:orderAttributes on the Order when the network needs to
+        attach full invoice details (totals, invoice URL, etc.) alongside
+        the order.
       properties:
         invoiceId:
           type: string
@@ -152,10 +152,6 @@ components:
         Invoice.invoiceAttributes to provide a link to the digital
         invoice or charging session fee breakdown.
       properties:
-        "@type":
-          type: string
-          description: JSON-LD type discriminator (e.g. "UBCInvoiceAttributes").
-          example: "UBCInvoiceAttributes"
         invoiceUrl:
           type: string
           format: uri
