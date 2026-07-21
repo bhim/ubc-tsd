@@ -41,25 +41,25 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 287.90,
+        "value": 287.9,
         "components": [
           {
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh) — pre-authorized estimated consumption"
+            "description": "Base charging session"
           },
           {
             "type": "FEE",
             "value": 112.5,
             "currency": "INR",
-            "description": "Additional units consumed beyond estimate (45 INR/kWh × 2.5 kWh excess) — charger failed to stop"
+            "description": "Additional units consumed beyond estimate"
           },
           {
             "type": "SURCHARGE",
             "value": 40.0,
             "currency": "INR",
-            "description": "Surge price (20% on total consumption of 5.0 kWh)"
+            "description": "Surge price"
           },
           {
             "type": "DISCOUNT",
@@ -104,7 +104,7 @@
         "invoiceId": "invoice-ev-charging-001",
         "totals": {
           "currency": "INR",
-          "value": 287.90
+          "value": 287.9
         },
         "invoiceAttributes": {
           "@type": "UBCInvoiceAttributes",

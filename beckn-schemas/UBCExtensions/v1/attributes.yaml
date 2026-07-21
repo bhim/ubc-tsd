@@ -111,7 +111,7 @@ components:
         "@type": UBCInvoice
       description: >
         UBC Network-specific invoice object. Used as the value of
-        beckn:invoice when the order needs to carry full invoice details
+        beckn:invoice When the order needs to carry full invoice details
         (totals, invoice URL, etc.) rather than just a plain invoice ID
         string. The @context should reference the UBC extension context.
       properties:
