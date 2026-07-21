@@ -1,6 +1,6 @@
 {
     "@context": {
-        "@version": 1.1,
+        "@version": 1.2,
         "schema": "https://schema.org/",
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -9,6 +9,10 @@
         "BuyerUPI": "ubc:BuyerUPI",
         "UBCPaymentAttributes": "ubc:UBCPaymentAttributes",
         "UBCInvoiceAttributes": "ubc:UBCInvoiceAttributes",
+        "UBCInvoice": "ubc:UBCInvoice",
+        "invoiceId": "schema:identifier",
+        "totals": "schema:totalPrice",
+        "invoiceAttributes": "ubc:invoiceAttributes",
         "invoiceUrl": "ubc:invoiceUrl",
         "name": "schema:name",
         "description": "schema:description",
