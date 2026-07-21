@@ -152,6 +152,10 @@ components:
         Invoice.invoiceAttributes to provide a link to the digital
         invoice or charging session fee breakdown.
       properties:
+        "@type":
+          type: string
+          description: JSON-LD type discriminator (e.g. "UBCInvoiceAttributes").
+          example: "UBCInvoiceAttributes"
         invoiceUrl:
           type: string
           format: uri
