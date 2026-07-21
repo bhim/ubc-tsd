@@ -100,6 +100,44 @@ components:
           example: "example-bap@paytm"
 
     ########################################################################
+    # INVOICE — UBCInvoice
+    ########################################################################
+    UBCInvoice:
+      type: object
+      required: ["invoiceId"]
+      additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": UBCInvoice
+      description: >
+        UBC Network-specific invoice object. Carried as the value of
+        beckn:orderAttributes on the Order when the network needs to
+        attach full invoice details (totals, invoice URL, etc.) alongside
+        the order.
+      properties:
+        invoiceId:
+          type: string
+          description: Stable invoice identifier (system ID).
+          example: "invoice-ev-charging-001"
+          x-jsonld: { "@id": "schema:identifier" }
+        totals:
+          type: object
+          description: Invoice total amount.
+          properties:
+            currency:
+              type: string
+              description: ISO 4217 currency code.
+              example: "INR"
+            value:
+              type: number
+              description: Total invoice amount.
+              example: 143.95
+          x-jsonld: { "@id": "schema:totalPrice" }
+        invoiceAttributes:
+          $ref: '#/components/schemas/UBCInvoiceAttributes'
+          x-jsonld: { "@id": "ubc:invoiceAttributes" }
+
+    ########################################################################
     # INVOICE.ATTRIBUTES — UBCInvoiceAttributes
     ########################################################################
     UBCInvoiceAttributes:
@@ -114,6 +152,10 @@ components:
         Invoice.invoiceAttributes to provide a link to the digital
         invoice or charging session fee breakdown.
       properties:
+        "@type":
+          type: string
+          description: JSON-LD type discriminator (e.g. "UBCInvoiceAttributes").
+          example: "UBCInvoiceAttributes"
         invoiceUrl:
           type: string
           format: uri

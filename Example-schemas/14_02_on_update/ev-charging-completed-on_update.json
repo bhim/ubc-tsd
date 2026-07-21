@@ -19,6 +19,19 @@
       "beckn:id": "order-ev-charging-001",
       "beckn:orderStatus": "COMPLETED",
       "beckn:seller": "cpo1.com",
+      "beckn:orderAttributes": {
+        "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+        "@type": "UBCInvoice",
+        "invoiceId": "invoice-ev-charging-001",
+        "totals": {
+          "currency": "INR",
+          "value": 143.95
+        },
+        "invoiceAttributes": {
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
+        }
+      },
       "beckn:buyer": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Buyer",
@@ -47,7 +60,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost"
           },
           {
             "type": "SURCHARGE",
@@ -90,20 +103,6 @@
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
           "@type": "ChargingSession",
           "sessionStatus": "COMPLETED"
-        }
-      },
-      "beckn:invoice": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
-        "@type": "beckn:Invoice",
-        "beckn:id": "invoice-ev-charging-001",
-        "beckn:totals": {
-          "currency": "INR",
-          "value": 143.95
-        },
-        "beckn:invoiceAttributes": {
-          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
-          "@type": "UBCInvoiceAttributes",
-          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
         }
       },
       "beckn:payment": {
