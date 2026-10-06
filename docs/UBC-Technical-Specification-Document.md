@@ -5750,13 +5750,18 @@ The network architecture empowers all Network Participants (NPs) to function as 
 
 Cancellation scenarios represent critical edge cases within the fulfillment lifecycle that require robust handling to ensure state consistency across the network. A cancellation event may originate from either the User, who opts to discontinue the service, or the Charging Point Operator (CPO), who may be unable to facilitate or fulfill the order due to operational constraints or unforeseen circumstances.
 
+In the UBC ecosystem every cancellation results in a refund of the amount that is due back to the User. The full end-to-end refund handling — including the intermediate `REFUND_INITIATED` state, the terminal `REFUNDED` confirmation, and the refund invoice delivery — is described in **§12.1.2. Cancellation & Refund Lifecycle**. The sub-sections below (§12.1.1) describe the two ways a cancellation is triggered; the refund messages that follow are common to all cancellation paths and are documented once in §12.1.2.
 
+> **Payment amount convention:** `beckn:payment.beckn:amount` carries different meanings depending on `beckn:paymentStatus`. When `paymentStatus` is `COMPLETED`, `amount` is the actual amount paid by the User. When `paymentStatus` is `REFUND_INITIATED` or `REFUNDED`, `amount` is the amount being refunded to the User (net of any applicable cancellation handling fee).
 
 #### 12.1.1. User-Initiated Cancellation
 
-In instances where the User initiates the cancellation of an existing reservation or confirmed order, the BAP initiates the workflow by transmitting the `cancel` API request. This signals to the BPP that the User no longer requires the service, allowing the CPO to release the reserved inventory. To this call an `on_cancel` response is sent to the BAP. 
+A User-initiated cancellation is triggered by the BAP sending a `cancel` API request to the BPP (except for the payment-timeout trigger below, which follows the `on_status` track). This signals that the User no longer requires the service, allowing the CPO to release the reserved inventory. The BPP responds with an `on_cancel` callback (followed by `on_status` with REFUNDED stage) that moves the order to `CANCELLED` and starts the refund lifecycle (§12.1.2). There are two triggers for a User-initiated cancellation:
 
-**12.1.1.1. action: cancel**
+* **Explicit user cancellation** — the User actively cancels a confirmed reservation. This is only permitted while the fulfilment status is `PENDING` (see the note at the end of this section). Because the User initiated the cancellation, the CPO MAY levy a **cancellation handling fee as per its own cancellation policy** (policies vary from CPO to CPO). When applied, the fee appears as a `FEE` component in `beckn:orderValue.components`, and `beckn:payment.beckn:amount` reflects the exact net amount refunded to the User (amount paid minus the handling fee). The full arithmetic is explained in the fee note under the `on_cancel` example (§12.1.1.3). See example [`19_cancel/cancel-a-reserved-slot.json`](../Example-schemas/19_cancel/cancel-a-reserved-slot.json).
+* **Payment confirmation timeout** — a special path where, after `on_init` and payment initiation, the BAP waits 30 seconds for an `on_status` callback carrying `beckn:paymentStatus: COMPLETED`. If it is not received within the window, the BAP transmits a `status` request with `beckn:orderStatus: CANCELLED` carrying an `error` object with a timeout code and requests a full refund. For this path, CPOs should follow the `status`/`on_status` track. The BPP replies with an `on_status` confirming `CANCELLED` and starts the refund lifecycle (§12.1.2). The refund is a full refund (no handling fee). See examples [`22_status/payment-timeout-status.json`](../Example-schemas/22_status/payment-timeout-status.json) and [`23_on_status/payment-timeout-on_status.json`](../Example-schemas/23_on_status/payment-timeout-on_status.json).
+
+**12.1.1.1. action: cancel (explicit user cancellation)**
 * **Method:** POST
 
 <details>
@@ -5811,11 +5816,66 @@ In instances where the User initiates the cancellation of an existing reservatio
 ```
 </details>
 
+**12.1.1.2. action: status (payment confirmation timeout)**
+* **Method:** POST
+* **Use Case:** After `on_init` and payment initiation, the BAP starts a 30-second timer awaiting an `on_status` with `beckn:paymentStatus: COMPLETED`. If the timer elapses without that confirmation, the BAP sends this `status` request with `beckn:orderStatus: CANCELLED` and an `error` object identifying the timeout (`code: 40010`, placeholder pending standardisation), requesting a full refund. For this path, CPOs should follow the `status`/`on_status` track. The BPP replies with an `on_status` carrying `orderStatus: CANCELLED`, `paymentStatus: REFUND_INITIATED` and `invoiceStatus: PENDING` ([`23_on_status/payment-timeout-on_status.json`](../Example-schemas/23_on_status/payment-timeout-on_status.json)); that reply is the refund trigger for case 1 in §12.1.2.
+
+<details>
+<summary><a href="../Example-schemas/22_status/payment-timeout-status.json">Example json :rocket:</a></summary>
+
+```json
+{
+  "context": {
+    "version": "2.0.0",
+    "domain": "beckn.one:deg:ev-charging",
+    "action": "status",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2",
+    "bpp_id": "example-bpp.com",
+    "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2",
+    "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
+    "message_id": "7c1e93aa-55f1-4a02-8b3d-9e2b1c4d5e60",
+    "timestamp": "2025-01-27T12:16:00Z",
+    "ttl": "PT30S"
+  },
+  "message": {
+    "order": {
+      "@type": "beckn:Order",
+      "beckn:id": "order-ev-charging-001",
+      "beckn:orderStatus": "CANCELLED",
+      "beckn:seller": "cpo1.com",
+      "beckn:buyer": {
+        "@type": "beckn:Buyer",
+        "beckn:id": "user-123"
+      },
+      "beckn:orderItems": [
+        {
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A",
+          "beckn:quantity": {
+            "unitText": "Kilowatt Hour",
+            "unitCode": "KWH",
+            "unitQuantity": 2.5
+          }
+        }
+      ]
+    }
+  },
+  "error": {
+    "code": "40010",
+    "message": "Payment confirmation timeout",
+    "details": {
+      "description": "BAP did not receive an on_status callback with paymentStatus COMPLETED within the 30 second window after payment initiation. Marking the order CANCELLED and requesting a full refund of any amount captured for the user."
+    }
+  }
+}
+```
+</details>
+
 #### Provider-Initiated Cancellation
 
-Conversely, in scenarios where the Provider is unable to fulfill the obligation, the BPP communicates the cancellation by transmitting an unsolicited `on_cancel` callback. This notifies the BAP that the order status has been updated to `CANCELLED`, often accompanied by the processing of a refund where applicable.
+Conversely, in scenarios where the Provider is unable to fulfill the obligation, the BPP communicates the cancellation by transmitting an unsolicited `on_cancel` callback. This notifies the BAP that the order status has been updated to `CANCELLED`, and the refund lifecycle (§12.1.2) begins. For a Provider-initiated cancellation the refund is a **full refund** (no cancellation handling fee is applied, since the User is not at fault). The same rule applies to the payment-timeout path.
 
-**12.1.1.1. action: on_cancel**
+**12.1.1.3. action: on_cancel**
 * **Method:** POST
 
 <details>
@@ -5877,7 +5937,7 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 143.95,
+        "value": 163.95,
         "components": [
           {
             "type": "UNIT",
@@ -5914,8 +5974,24 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
             "value": 2.81,
             "currency": "INR",
             "description": "Buyer finder fee (2.5%)"
+          },
+          {
+            "type": "FEE",
+            "value": 20.0,
+            "currency": "INR",
+            "description": "Cancellation handling fee (as per CPO cancellation policy) — deducted from refund"
           }
         ]
+      },
+      "beckn:orderAttributes": {
+        "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+        "@type": "UBCInvoice",
+        "invoiceId": "invoice-ev-charging-001",
+        "invoiceStatus": "PENDING",
+        "totals": {
+          "currency": "INR",
+          "value": 123.95
+        }
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
@@ -5923,13 +5999,13 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
         "beckn:id": "payment-987e6543-e21b-34c5-b567-537725285111",
         "beckn:amount": {
           "currency": "INR",
-          "value": 143.95
+          "value": 123.95
         },
         "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
         "beckn:txnRef": "TXN-987654321",
         "beckn:paidAt": "2025-12-19T17:35:00Z",
         "beckn:beneficiary": "BUYER",
-        "beckn:paymentStatus": "REFUNDED",
+        "beckn:paymentStatus": "REFUND_INITIATED",
         "beckn:paymentAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
           "@type": "UBCPaymentAttributes",
@@ -5943,7 +6019,54 @@ Conversely, in scenarios where the Provider is unable to fulfill the obligation,
 ```
 </details>
 
-> **Note:** The cancellation of an order is only possible until the fulfilment status is in "PENDING" state. Once the fulfilment status turns to "ACTIVE" cancellation wouldnt be plausible.
+> **Cancellation handling fee (User-initiated cancellations only):** When the **User** cancels, the CPO MAY levy a **cancellation handling fee** in accordance with its own cancellation policy. Cancellation policies vary from CPO to CPO — the fee amount, slabs, and whether a fee applies at all are entirely at the CPO's discretion (the ₹20.00 shown here is illustrative). The fee is represented as a dedicated `FEE` component inside `beckn:orderValue.components` with a `description` identifying it as a cancellation handling fee.
+>
+> **How the fee affects the numbers:**
+> - `beckn:orderValue.value` is the sum of all components **including** the handling fee — here ₹163.95 (₹143.95 session value + ₹20.00 handling fee).
+> - The amount originally paid by the User was ₹143.95.
+> - The refund is the amount paid minus the handling fee retained by the CPO: ₹143.95 − ₹20.00 = **₹123.95**. This net refund is carried in both `beckn:orderAttributes.totals.value` and `beckn:payment.beckn:amount`.
+
+> **Note:** The `on_cancel` above is the shared trigger message for both the **User-initiated** (§12.1.1) and **Provider-initiated** cancellations. The differences are policy-driven, not structural:
+> - **User-initiated (explicit):** a cancellation handling `FEE` MAY be present in `beckn:orderValue.components` (see the fee note above); `beckn:payment.beckn:amount` is the net refund after the fee.
+> - **Provider-initiated:** full refund, **no** handling `FEE` is applied (the User is not at fault); `beckn:payment.beckn:amount` equals the full amount paid (₹143.95). The **payment-timeout** path (§12.1.1.2) follows the same rule, but its trigger arrives as an `on_status` reply instead of an `on_cancel` — see [`23_on_status/payment-timeout-on_status.json`](../Example-schemas/23_on_status/payment-timeout-on_status.json).
+>
+> In all cases `beckn:paymentStatus` is `REFUND_INITIATED` and `invoiceStatus` is `PENDING` at this stage. The refund then progresses through the common lifecycle described in §12.1.2.
+
+> **Note:** The cancellation of an order is only possible until the fulfilment status is in "PENDING" state. Once the fulfilment status turns to "ACTIVE" cancellation wouldnt be plausible. (The payment-timeout path in §12.1.1.2 is the one exception — it follows the `status`/`on_status` track instead.)
+
+#### 12.1.2. Cancellation & Refund Lifecycle
+
+Every cancellation and every settlement refund in the UBC ecosystem follows the same three-message lifecycle once the refund has been triggered. The trigger differs per scenario (see the table below), but the refund tracking that follows is identical, so it is documented once here. For the **cancellation cases (1–3)** the CPO MAY collapse the last two messages into one when the refund invoice is already generated by the time the refund is confirmed — see step 3 below.
+
+**Refund lifecycle (common to all scenarios):**
+
+1. **Trigger message** — sets `beckn:paymentStatus: REFUND_INITIATED` and `invoiceStatus: PENDING`. `beckn:payment.beckn:amount` carries the amount that will be refunded.
+   - Payment timeout (case 1): the trigger is the `on_status` reply to the BAP's timeout `status` request; both the request and the reply carry `orderStatus: CANCELLED`.
+   - User- and Provider-initiated cancellations (cases 2–3): the trigger is `on_cancel` with `orderStatus: CANCELLED`.
+   - Undercharge (case 4): the trigger is the Step 1 `on_update` with `orderStatus: COMPLETED` (see §12.5.1).
+2. **Refund confirmation** — the BPP sends an `on_status` once the Payment Gateway confirms the refund is complete: `beckn:paymentStatus: REFUNDED`, with `beckn:payment.beckn:amount` equal to the refunded value. `orderStatus` is unchanged from the trigger message (`CANCELLED` for cancellations, `COMPLETED` for undercharge). See [`13_on_status/ev-charging-cancel-refund-on_status.json`](../Example-schemas/13_on_status/ev-charging-cancel-refund-on_status.json) (cancellation track) and [`13_on_status/ev-charging-undercharge-refund-on_status.json`](../Example-schemas/13_on_status/ev-charging-undercharge-refund-on_status.json) (undercharge track).
+
+   > **RRN:** The CPO (BPP) should include the optional `rrnNumber` (Retrieval Reference Number, a `string` inside `beckn:paymentAttributes`) whenever it sends a message with `beckn:paymentStatus: REFUNDED`. The RRN is returned by the Payment Gateway for the refund transaction and lets the User trace the refund with the PG. It is optional — no `RRN` is required for the trigger (`REFUND_INITIATED`) or invoice messages.
+
+   > **Invoice optional in this message (cancellation cases 1–3 only):** If the refund invoice is already available when the PG confirms the refund, the CPO MAY include it directly in this same `on_status` — carry `beckn:orderAttributes` with `invoiceStatus: AVAILABLE` and the `invoiceUrl`, exactly as in the invoice-ready `on_update`. See [`13_on_status/ev-charging-cancel-refund-with-invoice-on_status.json`](../Example-schemas/13_on_status/ev-charging-cancel-refund-with-invoice-on_status.json). This saves the separate message-3 `on_update` call. Case 4 (undercharge) does **not** get this flexibility — it always sends step 3 separately (§12.5.1).
+3. **Refund invoice** — if the invoice was **not** included in the step-2 `on_status` (or was not yet generated at that point), the BPP sends an unsolicited `on_update` with `invoiceStatus: AVAILABLE` and the refund `invoiceUrl` once the invoice document is generated. See [`14_03_on_update/ev-charging-invoice-ready-on_update.json`](../Example-schemas/14_03_on_update/ev-charging-invoice-ready-on_update.json). This step is **mandatory for case 4** and is the fallback for cases 1–3 whenever the invoice was not ready at step 2.
+
+> **Refund SLA:** Refunds are processed by the Payment Gateway and, per PG SLAs, are expected to complete within 7 business days. This is a common statement across all refund states and MAY be refined per implementation.
+
+> **Refund failure:** If the Payment Gateway fails to process the refund after `REFUND_INITIATED`, this is out of scope for the BAP. The CPO/BPP is responsible for detecting the failure and ensuring the User is ultimately refunded. No `REFUND_FAILED` status is defined in this version.
+
+**Scenario summary:**
+
+| # | Scenario | Trigger message | Handling fee | `orderStatus` (throughout) | Refund amount example |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | Payment confirmation timeout (§12.1.1.2) | BAP `status` (`orderStatus: CANCELLED`, timeout `error`) → `on_status` | No (full refund) | `CANCELLED` | ₹143.95 |
+| 2 | User cancels (explicit, §12.1.1) | BAP `cancel` (`19_cancel`) → `on_cancel` | Yes (per CPO policy) | `CANCELLED` | ₹123.95 (net of ₹20 fee) |
+| 3 | Provider-initiated cancellation | unsolicited `on_cancel` | No (full refund) | `CANCELLED` | ₹143.95 |
+| 4 | Undercharge settlement (§12.5.1) | Step 1 `on_update` | No | `COMPLETED` | ₹53.95 |
+
+> **Invoice delivery flexibility (cases 1–3 only):** The cancellation flows MAY deliver the refund invoice in the `REFUNDED` `on_status` itself ([`ev-charging-cancel-refund-with-invoice-on_status.json`](../Example-schemas/13_on_status/ev-charging-cancel-refund-with-invoice-on_status.json)) when it is already generated, in which case the separate invoice `on_update` is skipped. If the invoice is not yet available at that stage, the CPO sends `14_03_on_update/ev-charging-invoice-ready-on_update.json` later, as before. Case 4 (undercharge, a partial-charge settlement rather than a cancellation) always follows the current flow with the separate invoice `on_update`.
+
+> **Note (Interruption, §12.2):** A mid-session interruption that delivers partial energy is treated as a **partial refund** and follows the undercharge track (case 4) — Step 1 `on_update` reflecting actual consumption with the refund amount, then `on_status: REFUNDED`, then the invoice `on_update`. Its `orderStatus` remains `COMPLETED` throughout.
 
 ### 12.2 Interruption in Charging Process:
 
@@ -6336,7 +6459,7 @@ The user pre-authorized ₹143.95 but the charger stopped early — the vehicle'
 
 The BPP sends two `on_update` callbacks for the same `transaction_id`: an immediate one with `invoiceStatus: PENDING` (no URL), and a deferred unsolicited push with `invoiceStatus: AVAILABLE` (with URL).
 
-The immediate `orderValue` reflects the actual consumption amount (₹90.00), and a `DISCOUNT` component signals the refund adjustment.
+The immediate `orderValue` reflects the actual consumption amount (₹90.00), and a `DISCOUNT` component signals the refund adjustment. This Step 1 `on_update` also acts as the **refund trigger** for the undercharge track: it sets `beckn:paymentStatus: REFUND_INITIATED` with `beckn:payment.beckn:amount` carrying the refund amount (₹53.95). The refund then follows the common lifecycle in **§12.1.2** (→ `on_status: REFUNDED` → invoice `on_update`).
 
 **Order Value Breakdown:**
 
@@ -6353,17 +6476,17 @@ The immediate `orderValue` reflects the actual consumption amount (₹90.00), an
 
 | Field | Value | Why |
 | :--- | :--- | :--- |
-| `beckn:orderStatus` | `COMPLETED` | Session finished normally |
+| `beckn:orderStatus` | `COMPLETED` | Session finished normally (stays `COMPLETED` throughout the refund lifecycle) |
 | `beckn:orderValue.value` | `90.00` | Reflects actual consumption, not pre-authorized amount |
-| `beckn:payment.beckn:amount.value` | `143.95` | Original pre-authorized payment (unchanged) |
-| `beckn:payment.beckn:paymentStatus` | `COMPLETED` | Payment was collected — refund hasn't happened yet |
+| `beckn:payment.beckn:amount.value` | `53.95` | Refund amount (per the §12.1 payment amount convention, `amount` is the refund value once `paymentStatus` is `REFUND_INITIATED`/`REFUNDED`) |
+| `beckn:payment.beckn:paymentStatus` | `REFUND_INITIATED` | Refund has been triggered; PG confirmation follows in the `on_status` |
 | `beckn:orderAttributes.totals.value` | `90.00` | Invoice matches actual order value |
 | `beckn:orderAttributes.invoiceStatus` | `PENDING` | Invoice document being generated (no URL yet) |
 | `sessionStatus` | `COMPLETED` | Charging session completed |
 
-> **Important:** The `DISCOUNT` component with value −53.95 is the signal to the BAP that a refund is due. The BAP SHOULD compare `beckn:payment.beckn:amount` (₹143.95 paid) against `beckn:orderValue.value` (₹90.00 actual) to determine the refund amount. The `description` field on the `DISCOUNT` component explicitly states the refund calculation.
+> **Important:** The `DISCOUNT` component with value −53.95 is the signal to the BAP that a refund is due. The BAP SHOULD compare the original amount paid (₹143.95) against `beckn:orderValue.value` (₹90.00 actual) to determine the refund amount (₹53.95), which is also carried directly in `beckn:payment.beckn:amount` on this message. The `description` field on the `DISCOUNT` component explicitly states the refund calculation.
 
-> **Note:** At this stage, the `paymentStatus` is still `COMPLETED` because the refund has not yet been processed. The refund tracking happens in the subsequent `on_status` call.
+> **Note:** At this stage, `paymentStatus` is `REFUND_INITIATED` — the refund has been triggered but not yet confirmed complete by the Payment Gateway. Terminal confirmation (`REFUNDED`) is tracked in the subsequent `on_status` call, per the common refund lifecycle in §12.1.2.
 
 **12.5.1.1.1. action: on_update**
 * **Method:** POST
@@ -6514,12 +6637,13 @@ The BPP responds with the payment now in `REFUNDED` status, including all refund
 
 **Payment Object — Key Changes from Standard Flow:**
 
-| Field | Standard Value | Undercharge Value | Purpose |
+| Field | Step 1 (`on_update`) Value | Step 2 (`on_status`) Value | Purpose |
 | :--- | :--- | :--- | :--- |
-| `beckn:paymentStatus` | `COMPLETED` | `REFUNDED` | Payment lifecycle moved to refund state |
-| `beckn:amount.value` | `143.95` | `53.95` | Amount is updated to reflect the exact amount being refunded |
+| `beckn:paymentStatus` | `REFUND_INITIATED` | `REFUNDED` | Refund lifecycle moves from initiated to terminal confirmed state |
+| `beckn:amount.value` | `53.95` | `53.95` | Refund amount (unchanged between the two messages) |
+| `beckn:paymentAttributes.rrnNumber` | *(absent)* | `451234567890123` | Optional Retrieval Reference Number (RRN) from the PG — the CPO should include it whenever `paymentStatus` is `REFUNDED` so the refund can be traced |
 
-> **Note:** The `on_status` is called after the `on_update` has been received. The BPP queries the status to confirm that the refund has been initiated/completed by the Payment Gateway. The `paymentStatus` transitions: `COMPLETED` → `REFUNDED` and the amount reflects the refunded value.
+> **Note:** The `on_status` is sent after the Step 1 `on_update`. The BPP emits it once the Payment Gateway confirms the refund is complete. The `paymentStatus` transitions `REFUND_INITIATED` → `REFUNDED` and the amount reflects the refunded value. After this, the invoice-ready `on_update` (§12.1.2, step 3) delivers the refund invoice URL. Unlike the cancellation cases (1–3), the undercharge flow does **not** use the invoice-in-`on_status` flexibility — it always sends the invoice-ready `on_update` as a separate message, because it is a partial-charge settlement rather than a cancellation.
 
 **12.5.1.2.1. action: on_status**
 * **Method:** POST
@@ -6620,7 +6744,13 @@ The BPP responds with the payment now in `REFUNDED` status, including all refund
         "beckn:txnRef": "TXN-123456789",
         "beckn:paidAt": "2025-12-19T10:05:00Z",
         "beckn:beneficiary": "BPP",
-        "beckn:paymentStatus": "REFUNDED"
+        "beckn:paymentStatus": "REFUNDED",
+        "beckn:paymentAttributes": {
+          "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
+          "@type": "UBCPaymentAttributes",
+          "upiTransactionId": "UPI123456789012",
+          "rrnNumber": "451234567890123"
+        }
       }
     }
   },
@@ -7039,7 +7169,8 @@ All components use only the four valid beckn types. The `description` field diff
 
 | Scenario | Lifecycle |
 | :--- | :--- |
-| Undercharge | `COMPLETED` → `REFUNDED` (triggered via `on_status` once PG confirms refund initiation) |
+| Undercharge | `REFUND_INITIATED` (Step 1 `on_update`) → `REFUNDED` (`on_status` once PG confirms) → refund invoice `on_update` |
+| Cancellation (timeout / user / CPO) | `REFUND_INITIATED` (`on_cancel`, or the `on_status` reply for the timeout path) → `REFUNDED` (`on_status`, optionally carrying `invoiceStatus: AVAILABLE` + `invoiceUrl`) → refund invoice `on_update` only if the invoice was not already delivered in the `on_status` (see §12.1.2) |
 | Overcharge | `COMPLETED` (original payment remains completed — outstanding balance tracked separately via `FEE` in next `on_select`) |
 
 > **Note:** The `on_status` is only sent when there is a status change to be communicated. Just as a BPP sends `on_status` when payment has been completed (where the BPP gets a confirmation from the PG on payment completion), in the refund case the `on_status` MUST be initiated once the PG confirms that the payment refund process has been initiated. The refund would be processed within 7 business days based on SLAs with the corresponding PG.

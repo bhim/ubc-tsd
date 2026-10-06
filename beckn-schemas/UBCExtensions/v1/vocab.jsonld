@@ -113,6 +113,14 @@
             "schema:rangeIncludes": "schema:Text"
         },
         {
+            "@id": "ubc:rrnNumber",
+            "@type": "rdf:Property",
+            "rdfs:label": "Retrieval Reference Number (RRN)",
+            "rdfs:comment": "Retrieval Reference Number (RRN) returned by the payment gateway for the refund transaction. Optional; CPOs (BPPs) should send it whenever beckn:paymentStatus is REFUNDED so the refund can be traced with the payment gateway.",
+            "rdfs:domain": "ubc:UBCPaymentAttributes",
+            "schema:rangeIncludes": "schema:Text"
+        },
+        {
             "@id": "ubc:settlementAccounts",
             "@type": "rdf:Property",
             "rdfs:label": "Settlement accounts",

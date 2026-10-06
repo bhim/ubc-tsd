@@ -262,7 +262,7 @@ Fields in `message.order.beckn:orderAttributes` for EV charging order specifics.
 | `beckn:orderAttributes.preferences.startTime` | Preferred Start | DateTime | ❌ | Preferred session start | `2026-01-04T08:00:00+05:30` |
 | `beckn:orderAttributes.preferences.endTime` | Preferred End | DateTime | ❌ | Preferred session end | `2026-01-04T10:00:00+05:30` |
 | `beckn:orderAttributes.buyerFinderFee` | Buyer Finder Fee | Object | ❌ | BAP commission | `{currency: "INR", value: 2.5}` |
-| `beckn:orderAttributes` | UBCInvoice | Object | ❌ | Invoice object (on_update callbacks) | `{@type: "UBCInvoice", invoiceId: "...", invoiceStatus: "PENDING"}` |
+| `beckn:orderAttributes` | UBCInvoice | Object | ❌ | Invoice object (on_update callbacks; in cancellation cases 1–3 MAY also ride in the REFUNDED on_status) | `{@type: "UBCInvoice", invoiceId: "...", invoiceStatus: "PENDING"}` |
 | `beckn:orderAttributes.invoiceId` | Invoice ID | String | ✅ | Stable invoice identifier | `invoice-ev-charging-001` |
 | `beckn:orderAttributes.invoiceStatus` | Invoice Status | Enum | ✅ | Lifecycle status: PENDING, AVAILABLE | `PENDING` |
 | `beckn:orderAttributes.totals` | Totals | Object | ❌ | Invoice total amount | `{currency: "INR", value: 143.95}` |
@@ -273,6 +273,7 @@ Fields in `message.order.beckn:orderAttributes` for EV charging order specifics.
 - `preferences` allows buyers to specify desired charging time windows
 - `buyerFinderFee` represents the commission charged by the BAP
 - `UBCInvoice` is used in on_update callbacks. The BPP sends two on_update per transaction: first with `invoiceStatus: PENDING` (no URL), then deferred with `invoiceStatus: AVAILABLE` (with URL)
+- Exception (cancellation cases 1–3 only): when the refund invoice is already generated at `REFUNDED` time, the CPO MAY send `invoiceStatus: AVAILABLE` + `invoiceUrl` inside the `on_status` itself (see `13_on_status/ev-charging-cancel-refund-with-invoice-on_status.json`) and skip the second on_update. Case 4 (undercharge) always uses the separate on_update
 
 ---
 
@@ -446,6 +447,7 @@ Fields in `message.order.beckn:payment` for payment handling.
 | `beckn:payment.beckn:beneficiary` | Beneficiary | String | ❌ | Payment recipient | `BAP`, `BPP`, `BUYER` |
 | `beckn:payment.beckn:paymentStatus` | Payment Status | String | ✅ | Current status | `PENDING`, `COMPLETED`, `REFUNDED` |
 | `beckn:payment.beckn:upiTransactionId` | UPI Transaction ID | String | ❌ | UPI payment reference | `UPI123456789012` |
+| `beckn:payment.beckn:paymentAttributes.rrnNumber` | RRN Number | String | ❌ | Retrieval Reference Number (RRN) from PG for the refund; CPO should send it whenever `paymentStatus` is `REFUNDED` | `451234567890123` |
 
 **Payment Status Values:**
 - `INITIATED` - Payment initiated

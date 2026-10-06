@@ -35,6 +35,7 @@ Payment attributes including UPI transaction details and settlement accounts.
   "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
   "@type": "UBCPaymentAttributes",
   "upiTransactionId": "UPI123456789012",
+  "rrnNumber": "451234567890123",
   "settlementAccounts": [
     {
       "beneficiaryId": "example-bap.com",
@@ -51,6 +52,7 @@ Payment attributes including UPI transaction details and settlement accounts.
 | Property | Type | Description |
 |----------|------|-------------|
 | `upiTransactionId` | String \| null | UPI transaction reference ID from payment gateway |
+| `rrnNumber` | String \| null | Retrieval Reference Number (RRN) for the refund transaction from the payment gateway. **Optional — CPOs (BPPs) should send it whenever `paymentStatus` is `REFUNDED`** so the refund can be traced with the payment gateway |
 | `settlementAccounts` | Array | List of settlement account details |
 | `settlementAccounts[].beneficiaryId` | String | Beneficiary identifier (BAP/BPP domain) |
 | `settlementAccounts[].accountHolderName` | String | Account holder name |
@@ -64,5 +66,5 @@ Payment attributes including UPI transaction details and settlement accounts.
 - `init` - Buyer VPA for refunds
 - `on_init` - Payment settlement accounts, UPI transaction ID
 - `on_confirm` - UPI transaction confirmation
-- `on_status` - Payment status with UPI details
+- `on_status` - Payment status with UPI details; `rrnNumber` (RRN) whenever `paymentStatus` is `REFUNDED`
 - `on_cancel` - Refund VPA reference

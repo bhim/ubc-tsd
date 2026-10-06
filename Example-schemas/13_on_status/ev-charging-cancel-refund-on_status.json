@@ -6,8 +6,8 @@
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
-    "timestamp": "2025-01-27T12:00:00Z",
+    "message_id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+    "timestamp": "2025-01-27T12:20:00Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
@@ -17,7 +17,7 @@
       "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
       "@type": "beckn:Order",
       "beckn:id": "order-ev-charging-001",
-      "beckn:orderStatus": "COMPLETED",
+      "beckn:orderStatus": "CANCELLED",
       "beckn:seller": "cpo1.com",
       "beckn:buyer": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
@@ -39,58 +39,17 @@
           "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
         }
       ],
-      "beckn:orderValue": {
-        "currency": "INR",
-        "value": 90.0,
-        "components": [
-          {
-            "type": "UNIT",
-            "value": 90.0,
-            "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.0 kWh) — actual consumption"
-          },
-          {
-            "type": "SURCHARGE",
-            "value": 0.0,
-            "currency": "INR",
-            "description": "Surge price (not applicable)"
-          },
-          {
-            "type": "DISCOUNT",
-            "value": 0.0,
-            "currency": "INR",
-            "description": "No discount applied"
-          },
-          {
-            "type": "FEE",
-            "value": 0.0,
-            "currency": "INR",
-            "description": "Service fee waived"
-          }
-        ]
-      },
-      "beckn:fulfillment": {
-        "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
-        "@type": "beckn:Fulfillment",
-        "beckn:id": "fulfillment-001",
-        "beckn:mode": "RESERVATION",
-        "beckn:deliveryAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld",
-          "@type": "ChargingSession",
-          "sessionStatus": "COMPLETED"
-        }
-      },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld",
         "@type": "beckn:Payment",
-        "beckn:id": "payment-123e4567-e89b-12d3-a456-26663721",
+        "beckn:id": "payment-987e6543-e21b-34c5-b567-537725285111",
         "beckn:amount": {
           "currency": "INR",
-          "value": 53.95
+          "value": 123.95
         },
-        "beckn:txnRef": "TXN-123456789",
-        "beckn:paidAt": "2025-12-19T10:05:00Z",
-        "beckn:beneficiary": "BPP",
+        "beckn:txnRef": "TXN-987654321",
+        "beckn:paidAt": "2025-12-19T17:35:00Z",
+        "beckn:beneficiary": "BUYER",
         "beckn:paymentStatus": "REFUNDED",
         "beckn:paymentAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",

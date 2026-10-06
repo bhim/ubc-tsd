@@ -59,6 +59,15 @@ components:
           description: UPI transaction reference ID returned by the payment gateway.
           example: "UPI123456789012"
           x-jsonld: { "@id": upiTransactionId }
+        rrnNumber:
+          type: [string, "null"]
+          description: >-
+            Retrieval Reference Number (RRN) returned by the payment gateway for
+            the refund transaction. Optional. CPOs (BPPs) should send it whenever
+            beckn:paymentStatus is REFUNDED so the refund can be traced with the
+            payment gateway.
+          example: "451234567890123"
+          x-jsonld: { "@id": rrnNumber }
         settlementAccounts:
           type: array
           description: List of settlement details (Bank, VPA, etc.) for beneficiaries.
@@ -116,6 +125,12 @@ components:
         with invoiceStatus PENDING and no invoiceUrl; the second
         (unsolicited, deferred) carries invoiceStatus AVAILABLE with
         the invoiceUrl once the CPO has generated the invoice document.
+        For cancellation refunds (payment-timeout, user and CPO
+        cancellations), the CPO MAY instead deliver invoiceStatus
+        AVAILABLE with the invoiceUrl inside the REFUNDED on_status
+        when the invoice is already generated, skipping the deferred
+        on_update; undercharge settlements always use the two
+        on_update callbacks.
       properties:
         invoiceId:
           type: string

@@ -2,12 +2,12 @@
   "context": {
     "version": "2.0.0",
     "domain": "beckn.one:deg:ev-charging",
-    "action": "on_cancel",
+    "action": "on_status",
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "4a736341-8897-4e5a-9873-53533691f42d",
-    "timestamp": "2025-01-27T10:05:00Z",
+    "message_id": "9d2f04bb-66a2-4b13-9c4e-af3c2d5e6f71",
+    "timestamp": "2025-01-27T12:16:10Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
@@ -53,7 +53,7 @@
       ],
       "beckn:orderValue": {
         "currency": "INR",
-        "value": 163.95,
+        "value": 143.95,
         "components": [
           {
             "type": "UNIT",
@@ -90,12 +90,6 @@
             "value": 2.81,
             "currency": "INR",
             "description": "Buyer finder fee (2.5%)"
-          },
-          {
-            "type": "FEE",
-            "value": 20.0,
-            "currency": "INR",
-            "description": "Cancellation handling fee (as per CPO cancellation policy) — deducted from refund"
           }
         ]
       },
@@ -106,7 +100,7 @@
         "invoiceStatus": "PENDING",
         "totals": {
           "currency": "INR",
-          "value": 123.95
+          "value": 143.95
         }
       },
       "beckn:payment": {
@@ -115,7 +109,7 @@
         "beckn:id": "payment-987e6543-e21b-34c5-b567-537725285111",
         "beckn:amount": {
           "currency": "INR",
-          "value": 123.95
+          "value": 143.95
         },
         "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
         "beckn:txnRef": "TXN-987654321",

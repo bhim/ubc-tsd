@@ -30,6 +30,7 @@
         "priceCurrency": "schema:priceCurrency",
         "vpa": "ubc:vpa",
         "upiTransactionId": "ubc:upiTransactionId",
+        "rrnNumber": "ubc:rrnNumber",
         "settlementAccounts": "ubc:settlementAccounts",
         "beneficiaryId": "ubc:beneficiaryId",
         "accountHolderName": "ubc:accountHolderName",

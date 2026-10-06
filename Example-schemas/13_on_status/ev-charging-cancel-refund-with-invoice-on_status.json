@@ -1,13 +1,13 @@
 {
   "context": {
     "version": "2.0.0",
+    "action": "on_status",
     "domain": "beckn.one:deg:ev-charging",
-    "action": "on_cancel",
     "bap_id": "example-bap.com",
     "bap_uri": "https://example-bap.com/pilot/bap/energy/v2",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
-    "message_id": "4a736341-8897-4e5a-9873-53533691f42d",
-    "timestamp": "2025-01-27T10:05:00Z",
+    "message_id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+    "timestamp": "2025-01-27T12:20:00Z",
     "ttl": "PT30S",
     "bpp_id": "example-bpp.com",
     "bpp_uri": "https://example-bpp.com/pilot/bpp/energy/v2"
@@ -25,6 +25,8 @@
         "beckn:id": "user-123",
         "beckn:role": "BUYER",
         "beckn:displayName": "Ravi Kumar",
+        "beckn:telephone": "+91-9876543210",
+        "beckn:email": "ravi.kumar@example.com",
         "beckn:taxID": "GSTIN29ABCDE1234F1Z5",
         "beckn:buyerAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
@@ -34,79 +36,17 @@
       },
       "beckn:orderItems": [
         {
-          "beckn:orderedItem": "pe-charging-01",
-          "beckn:quantity": {
-            "unitText": "Kilowatt Hour",
-            "unitCode": "KWH",
-            "unitQuantity": 2.5
-          },
-          "beckn:price": {
-            "currency": "INR",
-            "value": 45.0,
-            "applicableQuantity": {
-              "unitText": "Kilowatt Hour",
-              "unitCode": "KWH",
-              "unitQuantity": 1
-            }
-          }
+          "beckn:orderedItem": "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
         }
       ],
-      "beckn:orderValue": {
-        "currency": "INR",
-        "value": 163.95,
-        "components": [
-          {
-            "type": "UNIT",
-            "value": 112.5,
-            "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
-          },
-          {
-            "type": "SURCHARGE",
-            "value": 20.0,
-            "currency": "INR",
-            "description": "Surge price (20%)"
-          },
-          {
-            "type": "DISCOUNT",
-            "value": -15.0,
-            "currency": "INR",
-            "description": "Offer discount (15%)"
-          },
-          {
-            "type": "FEE",
-            "value": 10.0,
-            "currency": "INR",
-            "description": "Service fee"
-          },
-          {
-            "type": "FEE",
-            "value": 13.64,
-            "currency": "INR",
-            "description": "Overcharge estimation"
-          },
-          {
-            "type": "FEE",
-            "value": 2.81,
-            "currency": "INR",
-            "description": "Buyer finder fee (2.5%)"
-          },
-          {
-            "type": "FEE",
-            "value": 20.0,
-            "currency": "INR",
-            "description": "Cancellation handling fee (as per CPO cancellation policy) — deducted from refund"
-          }
-        ]
-      },
       "beckn:orderAttributes": {
         "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
         "@type": "UBCInvoice",
         "invoiceId": "invoice-ev-charging-001",
-        "invoiceStatus": "PENDING",
-        "totals": {
-          "currency": "INR",
-          "value": 123.95
+        "invoiceStatus": "AVAILABLE",
+        "invoiceAttributes": {
+          "@type": "UBCInvoiceAttributes",
+          "invoiceUrl": "https://example-bpp.com/charging/session/order-ev-charging-001/fee"
         }
       },
       "beckn:payment": {
@@ -117,15 +57,15 @@
           "currency": "INR",
           "value": 123.95
         },
-        "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
         "beckn:txnRef": "TXN-987654321",
         "beckn:paidAt": "2025-12-19T17:35:00Z",
         "beckn:beneficiary": "BUYER",
-        "beckn:paymentStatus": "REFUND_INITIATED",
+        "beckn:paymentStatus": "REFUNDED",
         "beckn:paymentAttributes": {
           "@context": "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld",
           "@type": "UBCPaymentAttributes",
-          "upiTransactionId": "UPI123456789012"
+          "upiTransactionId": "UPI123456789012",
+          "rrnNumber": "451234567890123"
         }
       }
     }

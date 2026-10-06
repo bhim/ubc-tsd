@@ -236,6 +236,7 @@ message.results[].error.code,Error Code,String,Yes,Error code,INVALID_ITEM,on_ca
 message.results[].error.message,Error Message,String,Yes,Error description,Invalid item payload at index 3,on_catalog_publish,Human-readable error
 message.results[].error.paths,Error Paths,String,No,Path to invalid data,catalogs[1].items[3],on_catalog_publish,JSONPath to error location
 beckn:payment.beckn:upiTransactionId,UPI Transaction ID,String,No,UPI payment transaction reference,UPI123456789012,"on_confirm, on_status, on_cancel",UPI payment identifier
+beckn:payment.beckn:paymentAttributes.rrnNumber,RRN Number,String,No,Retrieval Reference Number (RRN) from PG for the refund,451234567890123,"on_status",CPO sends whenever paymentStatus is REFUNDED
 beckn:payment.beckn:beneficiary,Beneficiary,String,No,Payment recipient type,"BAP, BPP, BUYER","on_init, on_confirm, on_cancel",Who receives the payment
 beckn:payment.beckn:paidAt,Paid At,DateTime,No,Payment timestamp,2025-12-19T10:05:00Z,on_confirm,When payment was made
 beckn:orderAttributes,Order Attributes,Object,No,Order-level domain attributes,{@type: EvChargingOrder preferences: {...}},"select, on_select",EV charging order specifics
@@ -244,10 +245,10 @@ beckn:orderAttributes.preferences.startTime,Preferred Start Time,DateTime,No,Pre
 beckn:orderAttributes.preferences.endTime,Preferred End Time,DateTime,No,Preferred session end,2026-01-04T10:00:00+05:30,"select, on_select",ISO 8601 format
 beckn:orderAttributes.buyerFinderFee,Buyer Finder Fee,Object,No,BAP commission,{currency: INR value: 2.5},"select, on_select",Fee for BAP services
 beckn:orderAttributes.invoiceId,Invoice ID,String,Yes,Stable invoice identifier,invoice-ev-charging-001,"on_update",UBC invoice object
-beckn:orderAttributes.invoiceStatus,Invoice Status,Enum,Yes,"Lifecycle status: PENDING, AVAILABLE",PENDING,"on_update",Two-phase invoice flow
+beckn:orderAttributes.invoiceStatus,Invoice Status,Enum,Yes,"Lifecycle status: PENDING, AVAILABLE",PENDING,"on_update, on_status","Two-phase invoice flow; AVAILABLE may ride in REFUNDED on_status for cancellation cases 1-3"
 beckn:orderAttributes.totals,Totals,Object,No,Invoice total amount,{currency: INR value: 143.95},"on_update",Invoice total
-beckn:orderAttributes.invoiceAttributes,Invoice Attributes,Object,No,Present when invoiceStatus=AVAILABLE,{@type: UBCInvoiceAttributes invoiceUrl: ...},"on_update",Only in AVAILABLE phase
-beckn:orderAttributes.invoiceAttributes.invoiceUrl,Invoice URL,URI,No,URL to digital invoice,https://example-bpp.com/invoice.pdf,"on_update",Only when AVAILABLE
+beckn:orderAttributes.invoiceAttributes,Invoice Attributes,Object,No,Present when invoiceStatus=AVAILABLE,{@type: UBCInvoiceAttributes invoiceUrl: ...},"on_update, on_status","Only in AVAILABLE phase; on_status only for cancellation cases 1-3"
+beckn:orderAttributes.invoiceAttributes.invoiceUrl,Invoice URL,URI,No,URL to digital invoice,https://example-bpp.com/invoice.pdf,"on_update, on_status","Only when AVAILABLE; on_status only for cancellation cases 1-3"
 message.feedback,Feedback,Object,Yes,Support feedback object,{comments tags supportStatus},"support, on_support",Grievance tracking
 message.feedback.comments,Comments,String,No,Free-text grievance description,"Charging session stopped at 40% but billed full amount","support, on_support",User's issue description
 message.feedback.tags,Tags,Array[String],No,Categorization tags,"[charging-interrupted, billing-dispute]","support, on_support",Observability tags
