@@ -611,6 +611,47 @@ The Catalog Discovery Service (CDS) provides a centralized mechanism for Buyer P
 * **Recommendation:**
 To maintain the operational integrity and synchronization of the network, it is strongly recommended that the `availabilityWindow` of an item cached within the Catalog Discovery Service (CDS) be updated during the `init` stage. At this juncture, as the provider designates the specific item (connector) as 'reserved' or 'in-use' within their internal inventory management systems, a corresponding update must be executed within the CDS. This ensures that the availability status of the connector is accurately reflected across the network, thereby mitigating the risk of double-booking and ensuring catalog currency.
 
+### 8.6. Catalog Publish
+
+This section provides guidelines for publishing chargers to the Catalog Discovery Service (CDS), updating published data, and managing charger availability after publication. The request and response payload structures for `catalog_publish` and `on_catalog_publish` are defined in section 8.5.2 above.
+
+#### 8.6.1. How to publish chargers to CDS
+
+* Publish chargers using the Publish action defined in the example schemas (see [Example json :rocket:](../Example-schemas/21_publish/ev-charging-catalog-publish.json)).
+* Publish in batches, either station-wise or charger-wise.
+* Use a simple catalog hierarchy: **Catalog → Charger → Connector**, where a single catalog is dedicated to a specific charger and its connectors are represented as items (as defined in the example schemas).
+
+#### 8.6.2. How data is saved and updated in CDS DB
+
+The CDS upserts records using the following fields as a composite unique key:
+
+* **Catalog ID**
+* **Item ID**
+* **BPP ID**
+
+A unique constraint/index exists on `UNIQUE (catalog_id, item_id, bpp_id)`:
+
+* All three values match an existing record → **UPDATE** that record.
+* Any one of the three values differs (or no record exists) → **INSERT** a new record.
+
+| Catalog ID | Item ID | BPP ID | Action |
+| :--- | :--- | :--- | :--- |
+| CAT001 | ITEM100 | BPP01 | Update existing |
+| CAT001 | ITEM100 | BPP02 | Insert new |
+| CAT001 | ITEM101 | BPP01 | Insert new |
+| CAT002 | ITEM100 | BPP01 | Insert new |
+
+#### 8.6.3. Charger availability management
+
+Two fields control discoverability of a charger in the CDS:
+
+| Field | What it controls | When to change it |
+| :--- | :--- | :--- |
+| `beckn:availabilityWindow` | When the charger is bookable (time slots) | Bookings, cancellations, daily schedule reset |
+| `beckn:isActive` | Whether the charger works at all (on/off) | Hardware fault, maintenance |
+
+For a more detailed explanation refer: https://gist.github.com/anandakshay23-work/adb679b0fbc658ed522e7ad1e09265f7
+
 ## 9. Creating an Open Network for EV Charging
 The open network for EV charging requires all the EV charging BAPs, BPPs, to be able to discover each other and become part of a common network. This network is manifested in the form of a Distributed Registry maintained by NBSL (the Network Operator).
 
